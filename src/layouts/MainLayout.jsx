@@ -1,9 +1,18 @@
 import React from 'react';
+import Navbar from '../components/Navbar';
 
 const MainLayout = () => {
     return (
         <div>
-            <h1 className='text-6xl'> welcome to thegfsdf sdfcfgggggggg roshoibondhu </h1>
+            <header>
+                <Navbar></Navbar>
+            </header>
+            <main>
+
+            </main>
+            <footer>
+
+            </footer>
         </div>
     );
 };
