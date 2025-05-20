@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
+import Hero from '../components/Hero';
 
 const MainLayout = () => {
     return (
@@ -7,8 +8,8 @@ const MainLayout = () => {
             <header>
                 <Navbar></Navbar>
             </header>
-            <main>
-
+            <main className='mt-6'>
+                <Hero></Hero>
             </main>
             <footer>
 
