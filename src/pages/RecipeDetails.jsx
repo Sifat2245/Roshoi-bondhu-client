@@ -11,22 +11,22 @@ const RecipeDetails = () => {
     console.log(recipe._id);
     const [likeCount, setLikeCount] = useState(recipe.likeCount || 0)
 
-    // const handleLikeCount = () =>{
-    //     const newLike = likeCount +1;
-    //     setLikeCount(newLike)
+    const handleLikeCount = () =>{
+        const newLike = likeCount +1;
+        setLikeCount(newLike)
 
-    //     fetch(`http://localhost:3000/AllRecipes/${recipe._id}`,{
-    //         method: 'PUT',
-    //         headers:{
-    //             'content-type' : 'application/json'
-    //         },
-    //         body: JSON.stringify({likeCount: newLike })
-    //     })
-    //     .then(res => res.json())
-    //     .then(data => {
-    //         console.log(data);
-    //     })
-    // }
+        fetch(`http://localhost:3000/AllRecipes/${recipe._id}`,{
+            method: 'PUT',
+            headers:{
+                'content-type' : 'application/json'
+            },
+            body: JSON.stringify({likeCount: newLike })
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+        })
+    }
 
     return (
         <>
