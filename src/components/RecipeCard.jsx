@@ -6,6 +6,7 @@ import { Link } from 'react-router';
 const RecipeCard = ({ recipe }) => {
 
     return (
+        <>
         <Link to={`/recipe-details/${recipe._id}`} className="card w-full bg-base-100 rounded-xl overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-lg">
             <div className="relative">
                 <img
@@ -52,6 +53,8 @@ const RecipeCard = ({ recipe }) => {
                 </div>
             </div>
         </Link>
+
+        </>
     );
 };
 

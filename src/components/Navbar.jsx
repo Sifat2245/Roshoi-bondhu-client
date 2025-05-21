@@ -41,7 +41,7 @@ const Navbar = () => {
                 </NavLink>
             </li>
             <li>
-                <NavLink to="/recipes" className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4" onClick={closeDrawer}>
+                <NavLink to="/all-recipes" className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4" onClick={closeDrawer}>
                     <p>All Recipes</p>
                     <FaArrowRight className="block lg:hidden" />
                 </NavLink>

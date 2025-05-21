@@ -2,11 +2,12 @@ import { createBrowserRouter } from "react-router";
 import MainLayout from "../layouts/MainLayout";
 import AddRecipe from "../pages/AddRecipe";
 import RecipeDetails from "../pages/RecipeDetails";
+import AllRecipes from "../pages/AllRecipes";
 
 export const router = createBrowserRouter([
     {
         path:'/',
-        loader: () => fetch('http://localhost:3000/AllRecipes'),
+        loader: () => fetch('http://localhost:3000/top-recipes'),
         Component: MainLayout
     },
     {
@@ -17,5 +18,10 @@ export const router = createBrowserRouter([
         path: '/recipe-details/:id',
         loader: ({params}) => fetch(`http://localhost:3000/AllRecipes/${params.id}`),
         Component: RecipeDetails
+    },
+    {
+        path: '/all-recipes',
+         loader: () => fetch('http://localhost:3000/AllRecipes'),
+        Component: AllRecipes
     }
 ])

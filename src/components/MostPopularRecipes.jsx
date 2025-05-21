@@ -1,5 +1,6 @@
 import React from 'react';
 import RecipeCard from './RecipeCard';
+import { Link } from 'react-router';
 
 
 const MostPopularRecipes = ({ AllRecipes }) => {
@@ -17,6 +18,13 @@ const MostPopularRecipes = ({ AllRecipes }) => {
                 ))}
             </div>
 
+            <div className="flex items-center gap-4 my-8 w-3/4 mx-auto">
+                <div className="flex-grow border-t border-gray-300"></div>
+
+                <Link to={'/all-recipes'} className="btn bg-white hover:text-white hover:bg-red-600">Explore All Recipes</Link>
+
+                <div className="flex-grow border-t border-gray-300 "></div>
+            </div>
 
 
 

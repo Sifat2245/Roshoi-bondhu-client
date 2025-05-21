@@ -13,6 +13,7 @@ const AddRecipe = () => {
             details: ''
         }
     ])
+    const [loading, setLoading] = useState(false)
 
     const handleInstructionChange = (index, field, value) => {
         const updateSteps = [...instructionSteps]
@@ -59,6 +60,7 @@ const AddRecipe = () => {
             likeCount: 0
         }
         console.log(recipeData);
+        setLoading(true)
 
         //sending in db
         fetch('https://roshoi-bondhu-server.vercel.app/AllRecipes', {
@@ -79,6 +81,9 @@ const AddRecipe = () => {
                 });
                 console.log('after sent', data);
             })
+            .finally(() => {
+                setLoading(false);
+            });
     }
 
 
@@ -91,9 +96,9 @@ const AddRecipe = () => {
             <Navbar />
 
             <div className='relative text-center py-28 px-4 bg-[#00000010] mt-12'>
-                <h1 className='text-3xl font-bold mb-4'>Add Recipe</h1>
+                <h1 className='text-4xl font-bold mb-4'>Add Recipe</h1>
                 <p className="text-gray-700 mb-4">
-                    Discover and share your favorite recipes on Roshoi-Bondhu! Add your own delicious dishes and inspire others with new <br className="hidden md:block" /> culinary creations.
+                    Discover and share your favorite recipes on Roshoi-Bondhu! Add your own delicious dishes and inspire others with new <br /> culinary creations.
                 </p>
 
                 <img
@@ -166,7 +171,7 @@ const AddRecipe = () => {
                 {/* Preparation Time */}
                 <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
                     <label className='w-full md:w-1/3 text-md font-semibold'>PREPARATION TIME</label>
-                    <input name='preparationTime' type="number" className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='How much time (Number only)'/>
+                    <input name='preparationTime' type="number" className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='How much time (Number only)' />
                 </div>
 
                 {/* Categories */}
@@ -221,12 +226,22 @@ const AddRecipe = () => {
 
                 {/* Submit */}
                 <div className='text-center'>
-                    <input
+                    <button
                         type="submit"
-                        value="Post Recipe"
                         className='btn bg-[#e02f21] text-white hover:bg-black rounded-md px-12 py-2'
-                    />
+                        onClick={loading}
+                    >
+                        {loading ? (
+                            <span className="flex items-center gap-2">
+                                <span className="loading loading-spinner loading-sm"></span>
+                                Posting...
+                            </span>
+                        ) : (
+                            "Post Recipe"
+                        )}
+                    </button>
                 </div>
+
             </form>
         </div>
     );
