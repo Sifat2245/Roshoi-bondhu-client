@@ -61,7 +61,7 @@ const AddRecipe = () => {
         console.log(recipeData);
 
         //sending in db
-        fetch('http://localhost:3000/AllRecipes', {
+        fetch('https://roshoi-bondhu-server.vercel.app/AllRecipes', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
