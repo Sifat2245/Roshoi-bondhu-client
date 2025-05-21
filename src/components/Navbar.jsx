@@ -74,7 +74,7 @@ const Navbar = () => {
                             initial={{ y: -100 }}
                             animate={{ y: 0 }}
                             exit={{ y: -100 }}
-                            transition={{ duration: 0.4,}} // delay on exit
+                            transition={{ duration: 0.4, }} // delay on exit
                         />
 
                         {/* Navbar content comes AFTER background */}
@@ -84,7 +84,7 @@ const Navbar = () => {
                             initial={{ opacity: 0, y: -30 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -30 }}
-                            transition={{ duration: 0.4, delay: 0.5}} // delay on enter
+                            transition={{ duration: 0.7, delay: 0 }} // delay on enter
                         >
                             <div className="navbar max-w-7xl mx-auto px-4 py-2">
                                 <div className="navbar-start space-x-10 w-full">
@@ -100,9 +100,16 @@ const Navbar = () => {
                                     <span>
                                         <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
                                     </span>
-                                    <Link to={'add-recipe'} className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">
+                                    <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">
                                         Add recipe
                                     </Link>
+                                </div>
+                                <div className="ml-2 lg:hidden p-0 m-0">
+                                    <button onClick={openDrawer} className="btn btn-ghost">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </motion.div>
@@ -126,7 +133,7 @@ const Navbar = () => {
                     </div>
                     <div className="navbar-end">
                         <span><FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" /></span>
-                        <Link to={'add-recipe'} className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">Add recipe</Link>
+                        <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">Add recipe</Link>
                     </div>
                     <div className="ml-2 lg:hidden p-0 m-0">
                         <button onClick={openDrawer} className="btn btn-ghost">
@@ -154,7 +161,7 @@ const Navbar = () => {
                 </div>
                 <ul className="space-y-6 font-bold mt-12">
                     {links}
-                    <Link to={'add-recipe'} className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white">Add recipe</Link>
+                    <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white">Add recipe</Link>
                 </ul>
             </div>
         </>
