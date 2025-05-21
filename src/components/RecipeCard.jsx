@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 const RecipeCard = ({ recipe }) => {
 
     return (
-        <Link to={'/recipe-details'} className="card w-full bg-base-100 rounded-xl overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-lg">
+        <Link to={`/recipe-details/${recipe._id}`} className="card w-full bg-base-100 rounded-xl overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-lg">
             <div className="relative">
                 <img
                     src={recipe.image}
@@ -22,9 +22,7 @@ const RecipeCard = ({ recipe }) => {
 
                 {/* Top Right Buttons */}
                 <div className="absolute top-2 right-2 flex flex-col gap-2">
-                    <button className="bg-white p-2 rounded-full shadow hover:bg-red-100">
-                        <FaHeart className="text-red-500" />
-                    </button>
+                  
                     <button className="bg-white p-2 rounded-full shadow hover:bg-red-100">
                         <FaBookmark className="text-red-500" />
                     </button>
@@ -40,16 +38,16 @@ const RecipeCard = ({ recipe }) => {
                 {/* Meta Info */}
                 <div className="flex items-center justify-between gap-4 text-gray-500 text-sm mt-3">
                     <div className="flex items-center gap-1">
+                       <FaHeart className="text-red-500" />
+                        <span>{recipe.likeCount} Likes</span>
+                    </div>
+                    <div className="flex items-center gap-1">
                         <FaClock className="text-gray-500" />
                         <span>{recipe.preparationTime} Min</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <FaFlag className="text-gray-500" />
                         <span>{recipe.cuisine}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <FaUser className="text-gray-500" />
-                        <span>Beginner</span>
                     </div>
                 </div>
             </div>
