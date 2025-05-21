@@ -1,8 +1,12 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
+import MostPopularRecipes from '../components/MostPopularRecipes';
+import { useLoaderData } from 'react-router';
 
 const MainLayout = () => {
+    const AllRecipes = useLoaderData()
+    // console.log(AllRecipes);
     return (
         <div>
             <header>
@@ -10,6 +14,7 @@ const MainLayout = () => {
             </header>
             <main className='mt-6'>
                 <Hero></Hero>
+                <MostPopularRecipes AllRecipes={AllRecipes}></MostPopularRecipes>
             </main>
             <footer>
 
