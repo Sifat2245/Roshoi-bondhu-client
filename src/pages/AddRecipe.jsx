@@ -61,7 +61,7 @@ const AddRecipe = () => {
             cuisine,
             likeCount: 0
         }
-        console.log(recipeData);
+        // console.log(recipeData);
         setLoading(true)
 
         //sending in db

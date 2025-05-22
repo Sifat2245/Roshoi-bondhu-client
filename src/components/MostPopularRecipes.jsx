@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 
 
 const MostPopularRecipes = ({ AllRecipes }) => {
-    console.log(AllRecipes);
+    // console.log(AllRecipes);
     return (
 
         <div className='mt-24'>

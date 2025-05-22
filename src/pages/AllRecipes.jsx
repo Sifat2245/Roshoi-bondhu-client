@@ -9,7 +9,7 @@ import Footer from '../components/Footer';
 
 const AllRecipes = () => {
     const AllRecipes = useLoaderData()
-    console.log(AllRecipes);
+    // console.log(AllRecipes);
     return (
         <div>
             <div>

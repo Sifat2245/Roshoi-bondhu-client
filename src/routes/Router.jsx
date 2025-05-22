@@ -3,11 +3,13 @@ import MainLayout from "../layouts/MainLayout";
 import AddRecipe from "../pages/AddRecipe";
 import RecipeDetails from "../pages/RecipeDetails";
 import AllRecipes from "../pages/AllRecipes";
+import NotFound from "../pages/NotFound";
 
 export const router = createBrowserRouter([
     {
         path:'/',
         loader: () => fetch('http://localhost:3000/top-recipes'),
+        errorElement: <NotFound></NotFound>,
         Component: MainLayout
     },
     {

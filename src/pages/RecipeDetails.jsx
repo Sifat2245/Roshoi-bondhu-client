@@ -10,7 +10,7 @@ import Footer from '../components/Footer';
 
 const RecipeDetails = () => {
     const recipe = useLoaderData();
-    console.log(recipe._id);
+    // console.log(recipe._id);
     const [likeCount, setLikeCount] = useState(recipe.likeCount || 0)
 
     const handleLikeCount = () =>{
