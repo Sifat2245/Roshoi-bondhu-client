@@ -4,6 +4,8 @@ import { useLoaderData } from 'react-router';
 import RecipeCard from '../components/RecipeCard';
 import bg from '../assets/recipe-taxonomies-bg.svg'
 import AllRecipesCard from '../components/AllRecipesCard';
+import PopularTags from '../components/PopularTags';
+import Footer from '../components/Footer';
 
 const AllRecipes = () => {
     const AllRecipes = useLoaderData()
@@ -13,9 +15,9 @@ const AllRecipes = () => {
             <div>
                 <Navbar></Navbar>
             </div>
-            <div className='relative text-center py-28 px-4 bg-[#00000010] mt-12'>
-                <p className='font-semibold text-[12px] mb-6'>Delicious Recipes Await</p>
-                <h1 className='text-4xl font-bold mb-4'>All Recipes</h1>
+            <div className='relative text-center py-24 px-4 bg-[#00000010] mt-12'>
+                <p className='font-semibold text-[12px] mb-8'>Delicious Recipes Await</p>
+                <h1 className='text-4xl font-bold mb-10'>All Recipes</h1>
                 <p className="text-gray-700  mb-4">
                    Discover an array of delicious recipes for every occasion. From quick snacks to gourmet meals, explore endless <br /> inspiration, expert tips, and creative ideas for your kitchen adventures!
                 </p>
@@ -31,6 +33,11 @@ const AllRecipes = () => {
                 {
                     AllRecipes.map(recipe => <AllRecipesCard recipe={recipe} key={recipe._id}></AllRecipesCard>)
                 }
+            </div>
+
+            <div><PopularTags></PopularTags></div>
+            <div>
+                <Footer></Footer>
             </div>
 
         </div>

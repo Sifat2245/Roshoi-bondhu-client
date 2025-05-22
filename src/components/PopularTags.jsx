@@ -21,7 +21,7 @@ const PopularTags = () => {
                 className="absolute top-96 lg:top-60 -z-20" 
             />
             <div className="text-center mb-12">
-                <h1 className="text-2xl md:text-3xl font-bold mb-8">Popular Tags</h1>
+                <h1 className="text-2xl md:text-3xl font-bold mb-8">Explore Popular Tags</h1>
                 <p className="text-gray-600 mt-2 max-w-xl mx-auto">
                     From quick meals to healthy dishes, our popular tags make it easy to explore delicious options with one click.
                 </p>

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import bg from '../assets/recipe-taxonomies-bg.svg';
 import Swal from 'sweetalert2';
+import Footer from '../components/Footer';
+import PopularTags from '../components/PopularTags';
 
 const AddRecipe = () => {
     const [selectedCuisine, setSelectedCuisine] = useState('');
@@ -243,6 +245,12 @@ const AddRecipe = () => {
                 </div>
 
             </form>
+
+            <div>
+                <PopularTags></PopularTags>
+            </div>
+
+            <div><Footer></Footer></div>
         </div>
     );
 };

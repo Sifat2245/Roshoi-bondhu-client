@@ -45,7 +45,7 @@ const Discover = () => {
                     Discover fresh and easy recipes for every meal. From quick breakfasts and light lunches to hearty dinners and indulgent desserts, find endless inspiration to make cooking simple, fun, and enjoyable for any occasion or gathering!
                 </p>
 
-                <button className="btn bg-white text-black border-0 hover:bg-red-600 hover:text-white transition">
+                <button className="btn rounded-md bg-white text-black border-0 hover:bg-red-600 hover:text-white transition">
                     View Recipes
                 </button>
             </motion.div>

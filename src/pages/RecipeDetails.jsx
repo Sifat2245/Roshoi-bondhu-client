@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar';
 import { TbWorld } from 'react-icons/tb';
 import { ImSpoonKnife } from 'react-icons/im';
 import { GoDotFill } from 'react-icons/go';
+import PopularTags from '../components/PopularTags';
+import Footer from '../components/Footer';
 
 const RecipeDetails = () => {
     const recipe = useLoaderData();
@@ -160,6 +162,12 @@ const RecipeDetails = () => {
                 </div>
             </div>
 
+            <div>
+                <PopularTags></PopularTags>
+            </div>
+            <div>
+                <Footer></Footer>
+            </div>
         </>
     );
 };
