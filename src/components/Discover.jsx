@@ -16,6 +16,7 @@ const Discover = () => {
             {/* Overlay */}
             <div className="absolute inset-0  bg-opacity-30" />
 
+
             {/* Rating Badge */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}

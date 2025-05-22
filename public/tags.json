@@ -1,0 +1,18 @@
+[
+  { "id": 1, "name": "Comfort Food" },
+  { "id": 2, "name": "Dairy-Free" },
+  { "id": 3, "name": "Desserts" },
+  { "id": 4, "name": "Healthy" },
+  { "id": 5, "name": "Quick & Easy" },
+  { "id": 6, "name": "Vegetarian" },
+  { "id": 7, "name": "Vegan" },
+  { "id": 8, "name": "Gluten-Free" },
+  { "id": 9, "name": "Low-Carb" },
+  { "id": 10, "name": "Breakfast" },
+  { "id": 11, "name": "Lunch" },
+  { "id": 12, "name": "Dinner" },
+  { "id": 13, "name": "One-Pot Meals" },
+  { "id": 14, "name": "Snacks" },
+  { "id": 15, "name": "Grilling" },
+  { "id": 16, "name": "Meal Prep" }
+]
