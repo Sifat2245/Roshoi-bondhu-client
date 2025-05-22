@@ -89,8 +89,6 @@ const AddRecipe = () => {
     }
 
 
-    //sending data to db;
-
 
 
     return (

@@ -17,7 +17,7 @@ const RecipeDetails = () => {
         const newLike = likeCount +1;
         setLikeCount(newLike)
 
-        fetch(`http://localhost:3000/AllRecipes/${recipe._id}`,{
+        fetch(`https://roshoi-bondhu-server.vercel.app/AllRecipes/${recipe._id}`,{
             method: 'PUT',
             headers:{
                 'content-type' : 'application/json'

@@ -4,11 +4,22 @@ import { FiUser } from 'react-icons/fi';
 import { Link, NavLink } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../../src/assets/logo.png';
+import AuthModal from './AuthModal';
 
 const Navbar = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+
+    const openAuthModal = () => {
+        setIsAuthModalOpen(true);
+    };
+
+    const closeAuthModal = () => {
+        setIsAuthModalOpen(false);
+    };
+
 
     const openDrawer = () => {
         setIsVisible(true);
@@ -97,9 +108,9 @@ const Navbar = () => {
                                     </ul>
                                 </div>
                                 <div className="navbar-end">
-                                    <span>
+                                    <button onClick={openAuthModal}>
                                         <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
-                                    </span>
+                                    </button>
                                     <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">
                                         Add recipe
                                     </Link>
@@ -132,7 +143,7 @@ const Navbar = () => {
                         </ul>
                     </div>
                     <div className="navbar-end">
-                        <span><FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" /></span>
+                        <button onClick={openAuthModal}><FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" /></button>
                         <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">Add recipe</Link>
                     </div>
                     <div className="ml-2 lg:hidden p-0 m-0">
@@ -164,6 +175,7 @@ const Navbar = () => {
                     <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white">Add recipe</Link>
                 </ul>
             </div>
+            <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
         </>
     );
 };

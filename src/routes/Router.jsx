@@ -8,7 +8,7 @@ import NotFound from "../pages/NotFound";
 export const router = createBrowserRouter([
     {
         path:'/',
-        loader: () => fetch('http://localhost:3000/top-recipes'),
+        loader: () => fetch('https://roshoi-bondhu-server.vercel.app/top-recipes'),
         errorElement: <NotFound></NotFound>,
         Component: MainLayout
     },
@@ -18,12 +18,12 @@ export const router = createBrowserRouter([
     },
     {
         path: '/recipe-details/:id',
-        loader: ({params}) => fetch(`http://localhost:3000/AllRecipes/${params.id}`),
+        loader: ({params}) => fetch(`https://roshoi-bondhu-server.vercel.app/AllRecipes/${params.id}`),
         Component: RecipeDetails
     },
     {
         path: '/all-recipes',
-         loader: () => fetch('http://localhost:3000/AllRecipes'),
+         loader: () => fetch('https://roshoi-bondhu-server.vercel.app/AllRecipes'),
         Component: AllRecipes
     }
 ])
