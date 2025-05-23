@@ -22,10 +22,10 @@ const useMediaQuery = (query) => {
 // Google Icon SVG (remains the same)
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
   </svg>
 );
 
@@ -137,10 +137,10 @@ const SignUpForm = ({ onSubmit, setIsLoginView, onGoogleSignUp, loading }) => {
       setPasswordError('Password must include at least one lowercase letter.');
       return;
     } else {
-      setPasswordError(''); 
+      setPasswordError('');
     }
 
-   
+
     if (passwordError) {
       return;
     }
@@ -148,7 +148,7 @@ const SignUpForm = ({ onSubmit, setIsLoginView, onGoogleSignUp, loading }) => {
 
     onSubmit(email, password, name, profileImage);
 
-    
+
   };
 
   return (
@@ -162,16 +162,16 @@ const SignUpForm = ({ onSubmit, setIsLoginView, onGoogleSignUp, loading }) => {
       <h2 className="text-3xl font-bold text-gray-800 mb-3 text-center">Create Account</h2>
       <p className="text-gray-500 mb-6 text-center text-sm">Enter your details or use Google</p>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <InputField type="text" placeholder="Name" id="signup-name" name="name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name"/>
-        <InputField type="email" placeholder="Email" id="signup-email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email"/>
-        <InputField type="password" placeholder="Password (min. 6 characters)" id="signup-password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password"/>
+        <InputField type="text" placeholder="Name" id="signup-name" name="name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
+        <InputField type="email" placeholder="Email" id="signup-email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+        <InputField type="password" placeholder="Password (min. 6 characters)" id="signup-password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
         <InputField
-            type="url"
-            placeholder="Profile Image URL (optional)"
-            id="signup-profile-image"
-            name="profileImage"
-            value={profileImage}
-            onChange={(e) => setProfileImage(e.target.value)}
+          type="url"
+          placeholder="Profile Image URL (optional)"
+          id="signup-profile-image"
+          name="profileImage"
+          value={profileImage}
+          onChange={(e) => setProfileImage(e.target.value)}
         />
         {passwordError && <p className="text-red-500 text-xs text-center -mt-2 mb-2">{passwordError}</p>}
         <button
@@ -209,57 +209,57 @@ const SignUpForm = ({ onSubmit, setIsLoginView, onGoogleSignUp, loading }) => {
 }
 
 const ForgotPasswordForm = ({ onSubmit, onBackToLogin, loading, resetEmailSentMessage }) => {
-    const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('');
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!email) {
-            return;
-        }
-        onSubmit(email);
-      };
-     
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!email) {
+      return;
+    }
+    onSubmit(email);
+  };
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="w-full"
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -30 }}
+      transition={{ duration: 0.4, ease: 'easeInOut' }}
+      className="w-full"
+    >
+      <h2 className="text-3xl font-bold text-gray-800 mb-3 text-center">Reset Password</h2>
+      <p className="text-gray-500 mb-6 text-center text-sm">
+        Enter your email address and we'll send you a link to reset your password.
+      </p>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <InputField
+          type="email"
+          placeholder="Email"
+          id="reset-email"
+          name="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+        />
+        {resetEmailSentMessage && <p className="text-green-600 text-xs text-center -mt-2 mb-2">{resetEmailSentMessage}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition-colors duration-300 font-semibold text-sm tracking-wider disabled:opacity-50"
         >
-            <h2 className="text-3xl font-bold text-gray-800 mb-3 text-center">Reset Password</h2>
-            <p className="text-gray-500 mb-6 text-center text-sm">
-                Enter your email address and we'll send you a link to reset your password.
-            </p>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <InputField 
-                    type="email" 
-                    placeholder="Email" 
-                    id="reset-email" 
-                    name="email" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    autoComplete="email"
-                />
-                 {resetEmailSentMessage && <p className="text-green-600 text-xs text-center -mt-2 mb-2">{resetEmailSentMessage}</p>}
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition-colors duration-300 font-semibold text-sm tracking-wider disabled:opacity-50"
-                >
-                    {loading ? 'Sending Link...' : 'SEND RESET LINK'}
-                </button>
-            </form>
-            <button
-                type="button"
-                onClick={onBackToLogin}
-                className="mt-6 w-full text-sm text-center text-red-500 hover:text-red-700 hover:underline"
-            >
-                Back to Sign In
-            </button>
-        </motion.div>
-    );
+          {loading ? 'Sending Link...' : 'SEND RESET LINK'}
+        </button>
+      </form>
+      <button
+        type="button"
+        onClick={onBackToLogin}
+        className="mt-6 w-full text-sm text-center text-red-500 hover:text-red-700 hover:underline"
+      >
+        Back to Sign In
+      </button>
+    </motion.div>
+  );
 };
 
 
@@ -272,18 +272,18 @@ const AuthModal = ({ isOpen, onClose }) => {
 
   const authContextValue = useContext(AuthContext);
   if (!authContextValue) {
-      console.error("AuthContext not available. Ensure AuthModal is within AuthProvider.");
-      // Render null or a fallback UI if context is not available
-      return null; 
+    console.error("AuthContext not available. Ensure AuthModal is within AuthProvider.");
+    // Render null or a fallback UI if context is not available
+    return null;
   }
 
-  const { 
-    user, 
-    createUserAccount, 
-    loginUser, 
-    loginWithGoogle, 
-    passwordReset, 
-    loading, 
+  const {
+    user,
+    createUserAccount,
+    loginUser,
+    loginWithGoogle,
+    passwordReset,
+    loading,
     authError,
     clearError // Get clearError from context
   } = authContextValue;
@@ -314,32 +314,57 @@ const AuthModal = ({ isOpen, onClose }) => {
       name,
       email,
       password,
-      profileImage
+      profileImage,
+      
     }
 
     try {
       await createUserAccount(email, password, name, profileImage);
 
       //sending userdata in server
-      fetch('https://roshoi-bondhu-server.vercel.app/users',{
+      fetch('https://roshoi-bondhu-server.vercel.app/users', {
         method: 'POST',
         headers: {
-          'content-type' : 'application/json'
+          'content-type': 'application/json'
         },
         body: JSON.stringify(userInfo)
       })
-      .then(res => res.json())
-      .then(data => console.log(data))
+        .then(res => res.json())
+        .then(data => console.log(data))
 
       // Success will be handled by useEffect watching `user`
     } catch (error) {
       console.error('Sign up failed:', error.message);
     }
   };
-  
+
   const handleGoogleAuth = async () => {
     try {
-      await loginWithGoogle();
+
+      const result = await loginWithGoogle();
+
+      if (result && result.user) {
+        const firebaseUser = result.user;
+
+        const userInfo = {
+          name: firebaseUser.displayName,
+          email: firebaseUser.email,
+          profileImage: firebaseUser.photoURL
+        }
+
+        //sending data to the database who logged in with gmail
+        fetch('https://roshoi-bondhu-server.vercel.app/users', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify(userInfo)
+        })
+          .then(async res => res.json())
+          .then(data => console.log(data))
+
+      }
+
       // Success will be handled by useEffect watching `user`
     } catch (error) {
       console.error('Google sign-in failed:', error ? error.message : "Unknown error");
@@ -363,21 +388,21 @@ const AuthModal = ({ isOpen, onClose }) => {
     setIsLoginView(false); // Ensure main form area is ready for a new component
     setIsForgotPasswordView(true);
     setResetEmailSentMessage('');
-    if(clearError) clearError(); // Clear previous errors when switching views
+    if (clearError) clearError(); // Clear previous errors when switching views
   };
 
   const showLoginView = () => {
     setIsForgotPasswordView(false);
     setIsLoginView(true);
     setResetEmailSentMessage('');
-     if(clearError) clearError();
+    if (clearError) clearError();
   };
-  
+
   const showSignUpView = () => {
     setIsForgotPasswordView(false);
     setIsLoginView(false);
     setResetEmailSentMessage('');
-    if(clearError) clearError();
+    if (clearError) clearError();
   }
 
 
@@ -393,45 +418,45 @@ const AuthModal = ({ isOpen, onClose }) => {
       setIsLoginView(true);
       setIsForgotPasswordView(false);
       setResetEmailSentMessage('');
-      if(clearError) clearError();
+      if (clearError) clearError();
     }
   }, [isOpen, clearError]);
 
   const currentViewContent = () => {
     if (isForgotPasswordView) {
-        return (
-            <ForgotPasswordForm
-                key="forgotPassword"
-                onSubmit={handleForgotPasswordSubmit}
-                onBackToLogin={showLoginView}
-                loading={loading}
-                authError={authError}
-                resetEmailSentMessage={resetEmailSentMessage}
-            />
-        );
+      return (
+        <ForgotPasswordForm
+          key="forgotPassword"
+          onSubmit={handleForgotPasswordSubmit}
+          onBackToLogin={showLoginView}
+          loading={loading}
+          authError={authError}
+          resetEmailSentMessage={resetEmailSentMessage}
+        />
+      );
     }
     if (isLoginView) {
-        return (
-            <LoginForm
-                key="login"
-                onSubmit={handleLoginSubmit}
-                onForgotPassword={showForgotPasswordView}
-                setIsLoginView={showSignUpView} // Pass function to switch to sign up
-                onGoogleSignIn={handleGoogleAuth}
-                loading={loading}
-                authError={authError}
-            />
-        );
+      return (
+        <LoginForm
+          key="login"
+          onSubmit={handleLoginSubmit}
+          onForgotPassword={showForgotPasswordView}
+          setIsLoginView={showSignUpView} // Pass function to switch to sign up
+          onGoogleSignIn={handleGoogleAuth}
+          loading={loading}
+          authError={authError}
+        />
+      );
     }
     return (
-        <SignUpForm
-            key="signup"
-            onSubmit={handleSignUpSubmit}
-            setIsLoginView={showLoginView} // Pass function to switch to sign in
-            onGoogleSignUp={handleGoogleAuth}
-            loading={loading}
-            authError={authError}
-        />
+      <SignUpForm
+        key="signup"
+        onSubmit={handleSignUpSubmit}
+        setIsLoginView={showLoginView} // Pass function to switch to sign in
+        onGoogleSignUp={handleGoogleAuth}
+        loading={loading}
+        authError={authError}
+      />
     );
   };
 

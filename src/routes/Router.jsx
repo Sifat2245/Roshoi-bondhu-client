@@ -30,7 +30,9 @@ export const router = createBrowserRouter([
             {
                 path: '/recipe-details/:id',
                 loader: ({ params }) => fetch(`https://roshoi-bondhu-server.vercel.app/AllRecipes/${params.id}`),
-                Component: RecipeDetails
+                element: <PrivateRoute>
+                    <RecipeDetails></RecipeDetails>
+                </PrivateRoute>
             },
             {
                 path: '/all-recipes',

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useLoaderData } from 'react-router';
-import { FaClock, FaUser, FaHeart, FaBookmark, FaPrint } from 'react-icons/fa';
+import { FaClock, FaUser, FaHeart, FaBookmark, FaPrint, FaEdit } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import { TbWorld } from 'react-icons/tb';
 import { ImSpoonKnife } from 'react-icons/im';
@@ -8,32 +8,78 @@ import { GoDotFill } from 'react-icons/go';
 import PopularTags from '../components/PopularTags';
 import Footer from '../components/Footer';
 import PageTitle from '../components/PageTitle';
+import { AuthContext } from '../authProvider/AuthProvider';
+import { FaTrash } from 'react-icons/fa6';
 
 const RecipeDetails = () => {
     const recipe = useLoaderData();
     // console.log(recipe._id);
     const [likeCount, setLikeCount] = useState(recipe.likeCount || 0)
+    const { user } = use(AuthContext)
+    const [editModalOpen, setEditModalOpen] = useState(false);
 
-    const handleLikeCount = () =>{
-        const newLike = likeCount +1;
+    const isOwner = user?.email === recipe.userEmail;
+
+
+    const [selectedCuisine, setSelectedCuisine] = useState('');
+        const [customCuisine, setCustomCuisine] = useState('');
+        const [selectedCategories, setSelectedCategories] = useState([]);
+        const [instructionSteps, setInstructionSteps] = useState([
+            {
+                title: '',
+                details: ''
+            }
+        ])
+        const [loading, setLoading] = useState(false)
+    
+       
+    
+    
+    
+        const handleInstructionChange = (index, field, value) => {
+            const updateSteps = [...instructionSteps]
+            updateSteps[index][field] = value;
+            setInstructionSteps(updateSteps)
+        }
+    
+        const addInstructionStep = () => {
+            setInstructionSteps([...instructionSteps, { title: '', details: '' }])
+        }
+    
+    
+        // if checked having it in a state
+        const handleCheckboxChange = (event) => {
+            const { value, checked } = event.target;
+            if (checked) {
+                setSelectedCategories([...selectedCategories, value]);
+            } else {
+                setSelectedCategories(selectedCategories.filter((cat) => cat !== value));
+            }
+        };
+
+
+
+
+    const handleLikeCount = () => {
+        const newLike = likeCount + 1;
         setLikeCount(newLike)
 
-        fetch(`https://roshoi-bondhu-server.vercel.app/AllRecipes/${recipe._id}`,{
+        fetch(`https://roshoi-bondhu-server.vercel.app/AllRecipes/${recipe._id}`, {
             method: 'PUT',
-            headers:{
-                'content-type' : 'application/json'
+            headers: {
+                'content-type': 'application/json'
             },
-            body: JSON.stringify({likeCount: newLike })
+            body: JSON.stringify({ likeCount: newLike })
         })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data);
-        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+            })
     }
 
     return (
         <>
-        <PageTitle title={`${recipe.title} - RoshoiBondhu`}></PageTitle>
+            <PageTitle title={`${recipe.title} - RoshoiBondhu`}></PageTitle>
             <div>
                 <Navbar></Navbar>
             </div>
@@ -100,28 +146,61 @@ const RecipeDetails = () => {
 
             <div className='w-2/3 mx-auto mt-16' >
                 {/* Author */}
-                <div className='border-b-1 border-gray-300 w-[50%]'>
-                    <div className='flex gap-80 mb-2'>
-                        <div className="flex items-center gap-3 mb-6">
-                            <img src={recipe.authorImage || "https://i.pravatar.cc/40"} className="w-10 h-10 rounded-full" />
+                <div className='border-b border-gray-300 w-full md:w-[50%]'>
+                    <div className='flex flex-col md:flex-row justify-between gap-6 mb-2'>
+
+                        {/* Author Info */}
+                        <div className="flex items-center gap-3 mb-4 md:mb-6">
+                            <img src={recipe.userPhoto || "https://i.pravatar.cc/40"} className="w-10 h-10 rounded-full" />
                             <div>
-                                <h4 className="font-semibold">{recipe.author || 'Unknown Author'}</h4>
+                                <h4 className="font-semibold">{recipe.userName || 'Unknown Author'}</h4>
                                 <p className="text-sm text-gray-500">Recipe Author</p>
                             </div>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-4 mb-6">
-                            <button onClick={handleLikeCount} className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100">
+                        <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4 md:mb-6">
+                            {/* Like */}
+                            <button
+                                onClick={handleLikeCount}
+                                disabled={isOwner}
+                                className={`btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100 
+          ${isOwner ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                title={isOwner ? "You can't like your own recipe" : "Like this recipe"}
+                            >
                                 <FaHeart />
                             </button>
+
+                            {/* Edit (owner only) */}
+                            {isOwner && (
+                                <button
+                                    onClick={() => setEditModalOpen(true)}
+                                    className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-blue-100"
+                                    title="Edit this recipe"
+                                >
+                                    <FaEdit />
+                                </button>
+                            )}
+
+                            {/* Delete (owner only) */}
+                            {isOwner && (
+                                <button
+                                    // onClick={handleDeleteRecipe}
+                                    className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100"
+                                    title="Delete this recipe"
+                                >
+                                    <FaTrash />
+                                </button>
+                            )}
+
+                            {/* Bookmark */}
                             <button className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100">
                                 <FaBookmark />
                             </button>
                         </div>
                     </div>
-
                 </div>
+
 
                 {/* Ingredients */}
                 <div>
@@ -170,6 +249,158 @@ const RecipeDetails = () => {
             <div>
                 <Footer></Footer>
             </div>
+
+
+            {editModalOpen && (
+                <div className="fixed inset-0 bg-[#00000094] bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+                        <button
+                            onClick={() => setEditModalOpen(false)}
+                            className="absolute top-4 right-4 text-gray-600 hover:text-black"
+                        >
+                            ✕
+                        </button>
+
+                        <h2 className="text-2xl font-bold mb-6">Edit Recipe</h2>
+                        <form className='max-w-5xl mx-auto px-4 md:px-8 py-16 space-y-10'>
+                            {/* Image URL */}
+                            <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
+                                <label className='w-full md:w-1/3 text-md font-semibold'>IMAGE URL</label>
+                                <input type="text" name='image' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Image URL' />
+                            </div>
+
+                            {/* Title */}
+                            <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
+                                <label className='w-full md:w-1/3 text-md font-semibold'>TITLE</label>
+                                <input type="text" name='title' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Title' />
+                            </div>
+
+                            {/* Ingredients */}
+                            <div className='flex flex-col md:flex-row gap-4'>
+                                <label className='w-full md:w-1/3 text-md font-semibold'>INGREDIENTS</label>
+                                <textarea name='ingredients' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' rows="6" placeholder='Ingredients'></textarea>
+                            </div>
+
+                            {/* Instructions */}
+                            <div className='flex flex-col md:flex-row gap-4'>
+                                <label className='w-full md:w-1/3 text-md font-semibold'>INSTRUCTIONS</label>
+                                <div className='w-full md:w-2/3 space-y-6'>
+                                    {instructionSteps.map((step, index) => (
+                                        <div
+                                            key={index}
+                                            className='border border-gray-300 bg-white shadow-sm p-5 rounded-xl space-y-3'
+                                        >
+                                            <h4 className='text-lg font-semibold text-gray-700'>
+                                                Step {index + 1}
+                                            </h4>
+                                            <input
+                                                type='text'
+                                                placeholder='Step Title (e.g., Prepare the Ingredients)'
+                                                value={step.title}
+                                                onChange={(e) => handleInstructionChange(index, 'title', e.target.value)}
+                                                className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400'
+                                            />
+                                            <textarea
+                                                placeholder='Step Details'
+                                                value={step.details}
+                                                onChange={(e) => handleInstructionChange(index, 'details', e.target.value)}
+                                                className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400'
+                                                rows={4}
+                                            />
+                                        </div>
+                                    ))}
+                                    <div className='text-right'>
+                                        <button
+                                            type='button'
+                                            onClick={addInstructionStep}
+                                            className='bg-[#e02f21] hover:bg-black text-white font-semibold px-5 py-2 rounded-md transition'
+                                        >
+                                            + Add Another Step
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {/* Preparation Time */}
+                            <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
+                                <label className='w-full md:w-1/3 text-md font-semibold'>PREPARATION TIME</label>
+                                <input name='preparationTime' type="number" className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='How much time (Number only)' />
+                            </div>
+
+                            {/* Categories */}
+                            <div className='flex flex-col md:flex-row gap-4'>
+                                <label className='w-full md:w-1/3 text-md font-semibold'>CATEGORIES</label>
+                                <div className="flex flex-wrap gap-6">
+                                    {['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Vegan'].map((category) => (
+                                        <label key={category} className="flex items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                value={category}
+                                                onChange={handleCheckboxChange}
+                                                className="accent-red-600"
+                                            />
+                                            {category}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Cuisine Type */}
+                            <div className='flex flex-col md:flex-row gap-4'>
+                                <label className='w-full md:w-1/3 text-md font-semibold'>CUISINE TYPE</label>
+                                <div className='flex flex-col md:flex-row gap-4 w-full md:w-2/3'>
+                                    <select
+                                        className='border rounded px-3 py-2 w-full md:w-1/2 '
+                                        value={selectedCuisine}
+                                        onChange={(e) => setSelectedCuisine(e.target.value)}
+                                    >
+                                        <option value="">Select a cuisine</option>
+                                        <option value="Bangladeshi">Bangladeshi</option>
+                                        <option value="Indian">Indian</option>
+                                        <option value="Pakistani">Pakistani</option>
+                                        <option value="Mexican">Mexican</option>
+                                        <option value="Moroccan">Moroccan</option>
+                                        <option value="French">French</option>
+                                        <option value="Thai">Thai</option>
+                                        <option value="Chinese">Chinese</option>
+                                        <option value="Others">Others</option>
+                                    </select>
+                                    {selectedCuisine === 'Others' && (
+                                        <input
+                                            type="text"
+                                            className='border px-3 py-2 rounded w-full md:w-1/2'
+                                            placeholder="Enter custom cuisine"
+                                            value={customCuisine}
+                                            onChange={(e) => setCustomCuisine(e.target.value)}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Submit */}
+                            <div className='text-center'>
+                                <button
+                                    type="submit"
+                                    className='btn bg-[#e02f21] text-white hover:bg-black rounded-md px-12 py-2'
+                                    onClick={loading}
+                                >
+                                    {loading ? (
+                                        <span className="flex items-center gap-2">
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                            Posting...
+                                        </span>
+                                    ) : (
+                                        "Save Change"
+                                    )}
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            )}
+
         </>
     );
 };

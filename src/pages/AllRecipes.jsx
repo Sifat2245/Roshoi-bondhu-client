@@ -3,7 +3,6 @@ import Navbar from '../components/Navbar';
 import { useLoaderData } from 'react-router';
 import RecipeCard from '../components/RecipeCard';
 import bg from '../assets/recipe-taxonomies-bg.svg'
-import AllRecipesCard from '../components/AllRecipesCard';
 import PopularTags from '../components/PopularTags';
 import Footer from '../components/Footer';
 import PageTitle from '../components/PageTitle';
@@ -33,7 +32,7 @@ const AllRecipes = () => {
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-11/12 mx-auto justify-center items-center lg:w-3/4 mt-12'>
                 {
-                    AllRecipes.map(recipe => <AllRecipesCard recipe={recipe} key={recipe._id}></AllRecipesCard>)
+                    AllRecipes.map(recipe => <RecipeCard recipe={recipe} key={recipe._id}></RecipeCard>)
                 }
             </div>
 

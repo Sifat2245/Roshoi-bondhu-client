@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import Navbar from '../components/Navbar';
 import bg from '../assets/recipe-taxonomies-bg.svg';
 import Swal from 'sweetalert2';
 import Footer from '../components/Footer';
 import PopularTags from '../components/PopularTags';
 import PageTitle from '../components/PageTitle';
+import { AuthContext } from '../authProvider/AuthProvider';
 
 const AddRecipe = () => {
     const [selectedCuisine, setSelectedCuisine] = useState('');
@@ -17,6 +18,10 @@ const AddRecipe = () => {
         }
     ])
     const [loading, setLoading] = useState(false)
+
+    const { user } = use(AuthContext);
+
+
 
     const handleInstructionChange = (index, field, value) => {
         const updateSteps = [...instructionSteps]
@@ -50,7 +55,9 @@ const AddRecipe = () => {
         const preparationTime = form.preparationTime.value
         const categories = selectedCategories;
         const cuisine = selectedCuisine === 'Others' ? customCuisine : selectedCuisine;
-
+        const userEmail = user.email;
+        const userName = user.displayName;
+        const userPhoto = user.photoURL;
 
         const recipeData = {
             image,
@@ -60,7 +67,10 @@ const AddRecipe = () => {
             preparationTime,
             categories,
             cuisine,
-            likeCount: 0
+            likeCount: 0,
+            userEmail,
+            userName,
+            userPhoto
         }
         // console.log(recipeData);
         setLoading(true)
