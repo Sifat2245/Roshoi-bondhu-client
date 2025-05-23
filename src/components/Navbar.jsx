@@ -1,16 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { FaArrowRight } from 'react-icons/fa6';
-import { FiUser } from 'react-icons/fi';
-import { Link, NavLink } from 'react-router';
+import { FiLogOut, FiUser } from 'react-icons/fi';
+import { Link, NavLink, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../../src/assets/logo.png';
 import AuthModal from './AuthModal';
+import { AuthContext } from '../authProvider/AuthProvider';
 
 const Navbar = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+    const navigate = useNavigate()
+
+    const { user, logoutUser } = use(AuthContext)
+
 
     const openAuthModal = () => {
         setIsAuthModalOpen(true);
@@ -19,6 +24,16 @@ const Navbar = () => {
     const closeAuthModal = () => {
         setIsAuthModalOpen(false);
     };
+
+
+    const handleUserIconClick = () =>{
+        if(user){
+            navigate('/my-account')
+        }
+        else{
+            openAuthModal()
+        }
+    }
 
 
     const openDrawer = () => {
@@ -108,12 +123,13 @@ const Navbar = () => {
                                     </ul>
                                 </div>
                                 <div className="navbar-end">
-                                    <button onClick={openAuthModal}>
+                                    <button onClick={handleUserIconClick}>
                                         <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
                                     </button>
                                     <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">
                                         Add recipe
                                     </Link>
+
                                 </div>
                                 <div className="ml-2 lg:hidden p-0 m-0">
                                     <button onClick={openDrawer} className="btn btn-ghost">
@@ -143,8 +159,17 @@ const Navbar = () => {
                         </ul>
                     </div>
                     <div className="navbar-end">
-                        <button onClick={openAuthModal}><FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" /></button>
+                        <button onClick={handleUserIconClick}>
+                            <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
+                        </button>
+
+                        {
+                            user? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
+                        }
+
+
                         <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">Add recipe</Link>
+                        
                     </div>
                     <div className="ml-2 lg:hidden p-0 m-0">
                         <button onClick={openDrawer} className="btn btn-ghost">

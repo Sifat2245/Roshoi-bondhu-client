@@ -4,6 +4,7 @@ import AddRecipe from "../pages/AddRecipe";
 import RecipeDetails from "../pages/RecipeDetails";
 import AllRecipes from "../pages/AllRecipes";
 import NotFound from "../pages/NotFound";
+import MyAccount from "../pages/MyAccount";
 
 export const router = createBrowserRouter([
     {
@@ -25,5 +26,9 @@ export const router = createBrowserRouter([
         path: '/all-recipes',
          loader: () => fetch('https://roshoi-bondhu-server.vercel.app/AllRecipes'),
         Component: AllRecipes
+    },
+    {
+        path: '/my-account',
+        Component: MyAccount
     }
 ])
