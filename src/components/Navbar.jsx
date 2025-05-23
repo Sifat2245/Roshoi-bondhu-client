@@ -115,8 +115,8 @@ const Navbar = () => {
                             <div className="navbar max-w-7xl mx-auto px-4 py-2">
                                 <div className="navbar-start space-x-10 w-full">
                                     <div className="flex items-center">
-                                        <img src={logo} className="w-12 h-12" alt="Logo" />
-                                        <a className="p-2 text-[22px] font-bold text-[#e02f21]">RoshoiBondhu</a>
+                                        <img src={logo} className="w-8 lg:w-12 h-8 lg:h-12" alt="Logo" />
+                                        <a className="p-2 text-[18px] lg:text-[22px] font-bold text-[#e02f21]">RoshoiBondhu</a>
                                     </div>
                                     <ul className="menu menu-horizontal px-1 hidden lg:flex text-[15px] font-bold space-x-3">
                                         {links}
@@ -155,8 +155,8 @@ const Navbar = () => {
                 <div className="navbar max-w-7xl mx-auto mt-3">
                     <div className="navbar-start space-x-10 w-full">
                         <div className="flex items-center">
-                            <img src={logo} className="w-12 h-12" alt="Logo" />
-                            <a className="p-2 text-[22px] font-bold text-[#e02f21] ">RoshoiBondhu</a>
+                            <img src={logo} className="w-8 lg:w-12 h-8 lg:h-12" alt="Logo" />
+                            <a className="p-2 text-[18px] lg:text-[22px] font-bold text-[#e02f21] ">RoshoiBondhu</a>
                         </div>
                         <ul className="menu menu-horizontal px-1 hidden lg:flex text-[15px] font-bold space-x-3">
                             {links}

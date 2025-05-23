@@ -12,7 +12,8 @@ import {
     updateProfile
 } from "firebase/auth";
 
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
+
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
@@ -20,6 +21,11 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true); // Start true until first auth check
     const [authError, setAuthError] = useState(null);
+
+
+    // 
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+    const [redirectPath, setRedirectPath] = useState(null)
 
     const clearError = () => setAuthError(null);
 
@@ -122,6 +128,14 @@ const AuthProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
+    const openAuthModal = () =>{
+        setIsAuthModalOpen(true)
+    }
+
+    const closeAuthModal = () =>{
+        setIsAuthModalOpen(false)
+    }
+
     const authData = {
         user,
         loading,
@@ -132,7 +146,13 @@ const AuthProvider = ({ children }) => {
         loginUser,
         loginWithGoogle,
         passwordReset,
-        logoutUser
+        logoutUser,
+        redirectPath,
+        setRedirectPath,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        openAuthModal,
+        closeAuthModal
     };
 
     return <AuthContext.Provider value={authData}>
