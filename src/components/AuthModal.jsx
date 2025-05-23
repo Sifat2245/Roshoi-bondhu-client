@@ -309,8 +309,28 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   const handleSignUpSubmit = async (email, password, name, profileImage) => {
+
+    const userInfo = {
+      name,
+      email,
+      password,
+      profileImage
+    }
+
     try {
       await createUserAccount(email, password, name, profileImage);
+
+      //sending userdata in server
+      fetch('https://roshoi-bondhu-server.vercel.app/users',{
+        method: 'POST',
+        headers: {
+          'content-type' : 'application/json'
+        },
+        body: JSON.stringify(userInfo)
+      })
+      .then(res => res.json())
+      .then(data => console.log(data))
+
       // Success will be handled by useEffect watching `user`
     } catch (error) {
       console.error('Sign up failed:', error.message);

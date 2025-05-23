@@ -7,6 +7,7 @@ import { ImSpoonKnife } from 'react-icons/im';
 import { GoDotFill } from 'react-icons/go';
 import PopularTags from '../components/PopularTags';
 import Footer from '../components/Footer';
+import PageTitle from '../components/PageTitle';
 
 const RecipeDetails = () => {
     const recipe = useLoaderData();
@@ -32,6 +33,7 @@ const RecipeDetails = () => {
 
     return (
         <>
+        <PageTitle title={`${recipe.title} - RoshoiBondhu`}></PageTitle>
             <div>
                 <Navbar></Navbar>
             </div>

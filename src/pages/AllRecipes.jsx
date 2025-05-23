@@ -6,12 +6,14 @@ import bg from '../assets/recipe-taxonomies-bg.svg'
 import AllRecipesCard from '../components/AllRecipesCard';
 import PopularTags from '../components/PopularTags';
 import Footer from '../components/Footer';
+import PageTitle from '../components/PageTitle';
 
 const AllRecipes = () => {
     const AllRecipes = useLoaderData()
     // console.log(AllRecipes);
     return (
         <div>
+            <PageTitle title={'All Recipes - RoshoiBondhu'}></PageTitle>
             <div>
                 <Navbar></Navbar>
             </div>

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 const Hero = () => {
     return (
         <div
-            className="bg-cover bg-center bg-no-repeat w-11/12 mx-auto rounded-3xl mt-12
+            className="bg-cover bg-center bg-no-repeat w-11/12 mx-auto rounded-3xl mt-8
                        p-6 sm:p-10 md:p-16 lg:p-[200px] space-y-6 md:space-y-10"
             style={{
                 background: `url(${heroImage})`,

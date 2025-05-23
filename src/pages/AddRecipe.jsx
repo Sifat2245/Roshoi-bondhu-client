@@ -4,6 +4,7 @@ import bg from '../assets/recipe-taxonomies-bg.svg';
 import Swal from 'sweetalert2';
 import Footer from '../components/Footer';
 import PopularTags from '../components/PopularTags';
+import PageTitle from '../components/PageTitle';
 
 const AddRecipe = () => {
     const [selectedCuisine, setSelectedCuisine] = useState('');
@@ -93,6 +94,7 @@ const AddRecipe = () => {
 
     return (
         <div>
+            <PageTitle title={'Add Recipe - RoshoiBondhu'}></PageTitle>
             <Navbar />
 
             <div className='relative text-center py-28 px-4 bg-[#00000010] mt-12'>

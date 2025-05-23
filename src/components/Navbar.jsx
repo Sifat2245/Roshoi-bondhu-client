@@ -26,11 +26,11 @@ const Navbar = () => {
     };
 
 
-    const handleUserIconClick = () =>{
-        if(user){
+    const handleUserIconClick = () => {
+        if (user) {
             navigate('/my-account')
         }
-        else{
+        else {
             openAuthModal()
         }
     }
@@ -126,6 +126,10 @@ const Navbar = () => {
                                     <button onClick={handleUserIconClick}>
                                         <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
                                     </button>
+                                    {
+                                        user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 lg:mr-6 ml-6 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
+                                    }
+
                                     <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">
                                         Add recipe
                                     </Link>
@@ -164,12 +168,12 @@ const Navbar = () => {
                         </button>
 
                         {
-                            user? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
+                            user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 lg:mr-6  ml-6 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
                         }
 
 
                         <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">Add recipe</Link>
-                        
+
                     </div>
                     <div className="ml-2 lg:hidden p-0 m-0">
                         <button onClick={openDrawer} className="btn btn-ghost">
