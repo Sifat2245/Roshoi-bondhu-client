@@ -1,5 +1,5 @@
 import React, { use, useState } from 'react';
-import { useLoaderData } from 'react-router';
+import { useLoaderData, useNavigate } from 'react-router';
 import { FaClock, FaUser, FaHeart, FaBookmark, FaPrint, FaEdit } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import { TbWorld } from 'react-icons/tb';
@@ -10,10 +10,15 @@ import Footer from '../components/Footer';
 import PageTitle from '../components/PageTitle';
 import { AuthContext } from '../authProvider/AuthProvider';
 import { FaTrash } from 'react-icons/fa6';
+import Swal from 'sweetalert2';
 
 const RecipeDetails = () => {
     const recipe = useLoaderData();
+
+
+ 
     // console.log(recipe._id);
+    const navigate = useNavigate()
     const [likeCount, setLikeCount] = useState(recipe.likeCount || 0)
     const { user } = use(AuthContext)
     const [editModalOpen, setEditModalOpen] = useState(false);
@@ -22,40 +27,40 @@ const RecipeDetails = () => {
 
 
     const [selectedCuisine, setSelectedCuisine] = useState('');
-        const [customCuisine, setCustomCuisine] = useState('');
-        const [selectedCategories, setSelectedCategories] = useState([]);
-        const [instructionSteps, setInstructionSteps] = useState([
-            {
-                title: '',
-                details: ''
-            }
-        ])
-        const [loading, setLoading] = useState(false)
-    
-       
-    
-    
-    
-        const handleInstructionChange = (index, field, value) => {
-            const updateSteps = [...instructionSteps]
-            updateSteps[index][field] = value;
-            setInstructionSteps(updateSteps)
+    const [customCuisine, setCustomCuisine] = useState('');
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [instructionSteps, setInstructionSteps] = useState([
+        {
+            title: '',
+            details: ''
         }
-    
-        const addInstructionStep = () => {
-            setInstructionSteps([...instructionSteps, { title: '', details: '' }])
+    ])
+    const [loading, setLoading] = useState(false)
+
+
+
+
+
+    const handleInstructionChange = (index, field, value) => {
+        const updateSteps = [...instructionSteps]
+        updateSteps[index][field] = value;
+        setInstructionSteps(updateSteps)
+    }
+
+    const addInstructionStep = () => {
+        setInstructionSteps([...instructionSteps, { title: '', details: '' }])
+    }
+
+
+    // if checked having it in a state
+    const handleCheckboxChange = (event) => {
+        const { value, checked } = event.target;
+        if (checked) {
+            setSelectedCategories([...selectedCategories, value]);
+        } else {
+            setSelectedCategories(selectedCategories.filter((cat) => cat !== value));
         }
-    
-    
-        // if checked having it in a state
-        const handleCheckboxChange = (event) => {
-            const { value, checked } = event.target;
-            if (checked) {
-                setSelectedCategories([...selectedCategories, value]);
-            } else {
-                setSelectedCategories(selectedCategories.filter((cat) => cat !== value));
-            }
-        };
+    };
 
 
 
@@ -75,6 +80,105 @@ const RecipeDetails = () => {
             .then(data => {
                 console.log(data);
             })
+    }
+
+
+
+    const handleUpdateRecipe = e => {
+        e.preventDefault()
+        // alert('clicked')
+
+        const form = e.target
+        const image = form.image.value
+        const title = form.title.value
+        const ingredients = form.ingredients.value
+        const instructions = instructionSteps.filter(step => step.title && step.details);
+        const preparationTime = form.preparationTime.value
+        const categories = selectedCategories;
+        const cuisine = selectedCuisine === 'Others' ? customCuisine : selectedCuisine;
+
+        const recipeData = {
+            image,
+            title,
+            ingredients,
+            instructions,
+            preparationTime,
+            categories,
+            cuisine
+
+        }
+        setLoading(true)
+        // console.log(recipeData);
+
+        fetch(`https://roshoi-bondhu-server.vercel.app/AllRecipes/${recipe._id}`, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(recipeData)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.modifiedCount) {
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        title: "Changes Saved Successfully",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    console.log('after update', data);
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+                setEditModalOpen(false)
+                // window.location.reload();
+                setTimeout(() => {
+
+                    window.location.reload();
+                }, 1500);
+            });
+
+    }
+
+
+    const handleDeletePost = () => {
+       
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                fetch(`https://roshoi-bondhu-server.vercel.app/AllRecipes/${recipe._id}`, {
+                    method: 'DELETE'
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.deletedCount) {
+
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: "User has been deleted.",
+                                icon: "success"
+                            });
+
+
+                            // console.log(data);
+                            navigate('/my-recipes')
+                        }
+                    })
+
+
+            }
+        });
     }
 
     return (
@@ -185,7 +289,7 @@ const RecipeDetails = () => {
                             {/* Delete (owner only) */}
                             {isOwner && (
                                 <button
-                                    // onClick={handleDeleteRecipe}
+                                    onClick={handleDeletePost}
                                     className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100"
                                     title="Delete this recipe"
                                 >
@@ -251,6 +355,8 @@ const RecipeDetails = () => {
             </div>
 
 
+
+            {/* recipe update modal */}
             {editModalOpen && (
                 <div className="fixed inset-0 bg-[#00000094] bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white rounded-lg p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
@@ -262,23 +368,23 @@ const RecipeDetails = () => {
                         </button>
 
                         <h2 className="text-2xl font-bold mb-6">Edit Recipe</h2>
-                        <form className='max-w-5xl mx-auto px-4 md:px-8 py-16 space-y-10'>
+                        <form onSubmit={handleUpdateRecipe} className='max-w-5xl mx-auto px-4 md:px-8 py-16 space-y-10'>
                             {/* Image URL */}
                             <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
                                 <label className='w-full md:w-1/3 text-md font-semibold'>IMAGE URL</label>
-                                <input type="text" name='image' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Image URL' />
+                                <input type="text" name='image' defaultValue={recipe.image} className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Image URL' />
                             </div>
 
                             {/* Title */}
                             <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
                                 <label className='w-full md:w-1/3 text-md font-semibold'>TITLE</label>
-                                <input type="text" name='title' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Title' />
+                                <input type="text" name='title' defaultValue={recipe.title} className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Title' />
                             </div>
 
                             {/* Ingredients */}
                             <div className='flex flex-col md:flex-row gap-4'>
                                 <label className='w-full md:w-1/3 text-md font-semibold'>INGREDIENTS</label>
-                                <textarea name='ingredients' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' rows="6" placeholder='Ingredients'></textarea>
+                                <textarea name='ingredients' defaultValue={recipe.ingredients} className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' rows="6" placeholder='Ingredients'></textarea>
                             </div>
 
                             {/* Instructions */}
@@ -297,12 +403,14 @@ const RecipeDetails = () => {
                                                 type='text'
                                                 placeholder='Step Title (e.g., Prepare the Ingredients)'
                                                 value={step.title}
+                                                defaultValue={recipe?.instructions?.title}
                                                 onChange={(e) => handleInstructionChange(index, 'title', e.target.value)}
                                                 className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400'
                                             />
                                             <textarea
                                                 placeholder='Step Details'
                                                 value={step.details}
+                                                defaultValue={recipe?.instructions?.title}
                                                 onChange={(e) => handleInstructionChange(index, 'details', e.target.value)}
                                                 className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400'
                                                 rows={4}
@@ -325,7 +433,7 @@ const RecipeDetails = () => {
                             {/* Preparation Time */}
                             <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
                                 <label className='w-full md:w-1/3 text-md font-semibold'>PREPARATION TIME</label>
-                                <input name='preparationTime' type="number" className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='How much time (Number only)' />
+                                <input name='preparationTime' defaultValue={recipe.preparationTime} type="number" className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='How much time (Number only)' />
                             </div>
 
                             {/* Categories */}

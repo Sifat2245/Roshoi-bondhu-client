@@ -25,7 +25,7 @@ const MyRecipes = () => {
 
         }
     }, [user?.email])
-    console.log(myRecipes);
+    // console.log(myRecipes);
 
 
     return (
