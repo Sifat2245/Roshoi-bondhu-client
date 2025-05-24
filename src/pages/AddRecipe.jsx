@@ -87,14 +87,17 @@ const AddRecipe = () => {
         })
             .then(res => res.json())
             .then(data => {
-                Swal.fire({
-                    position: "center",
-                    icon: "success",
-                    title: "Recipe Posted",
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                console.log('after sent', data);
+                if(data.insertedId){
+
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        title: "Recipe Posted",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+                // console.log('after sent', data);
             })
             .finally(() => {
                 setLoading(false);
@@ -108,7 +111,7 @@ const AddRecipe = () => {
             <PageTitle title={'Add Recipe - RoshoiBondhu'}></PageTitle>
             <Navbar />
 
-            <div className='relative text-center py-28 px-4 bg-[#00000010] mt-12'>
+            <div className='relative text-center py-28 px-4 bg-[#00000010] mt-6'>
                 <h1 className='text-4xl font-bold mb-4'>Add Recipe</h1>
                 <p className="text-gray-700 mb-4">
                     Discover and share your favorite recipes on Roshoi-Bondhu! Add your own delicious dishes and inspire others with new <br /> culinary creations.
