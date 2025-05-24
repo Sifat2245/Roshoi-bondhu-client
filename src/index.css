@@ -6,3 +6,6 @@
 *{
     font-family: "Roboto Serif", serif;
 }
+
+
+@custom-variant dark (&:where(.dark, .dark *));

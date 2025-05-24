@@ -7,7 +7,7 @@ const RecipeCard = ({ recipe }) => {
 
     return (
         <>
-        <Link to={`/recipe-details/${recipe._id}`} className="card w-full bg-base-100 rounded-xl overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-lg">
+        <Link to={`/recipe-details/${recipe._id}`} className="card w-full bg-base-100 rounded-xl overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-lg dark:bg-gray-700 dark:text-white">
             <div className="relative">
                 <img
                     src={recipe.image}

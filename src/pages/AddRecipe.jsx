@@ -88,7 +88,6 @@ const AddRecipe = () => {
             .then(res => res.json())
             .then(data => {
                 if(data.insertedId){
-
                     Swal.fire({
                         position: "center",
                         icon: "success",
@@ -107,13 +106,13 @@ const AddRecipe = () => {
 
 
     return (
-        <div>
+        <div className='dark:bg-gray-800 dark:text-white transition-all duration-400'>
             <PageTitle title={'Add Recipe - RoshoiBondhu'}></PageTitle>
             <Navbar />
 
-            <div className='relative text-center py-28 px-4 bg-[#00000010] mt-6'>
+            <div className='relative text-center py-28 px-4 bg-[#00000010] mt-6 dark:bg-gray-900'>
                 <h1 className='text-4xl font-bold mb-4'>Add Recipe</h1>
-                <p className="text-gray-700 mb-4">
+                <p className="text-gray-700 mb-4 dark:text-white">
                     Discover and share your favorite recipes on Roshoi-Bondhu! Add your own delicious dishes and inspire others with new <br /> culinary creations.
                 </p>
 
@@ -128,31 +127,31 @@ const AddRecipe = () => {
                 {/* Image URL */}
                 <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
                     <label className='w-full md:w-1/3 text-md font-semibold'>IMAGE URL</label>
-                    <input type="text" name='image' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Image URL' />
+                    <input type="text" name='image' className='dark:bg-gray-900 focus:outline-none dark:bg-gray-900 focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Image URL' />
                 </div>
 
                 {/* Title */}
                 <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
                     <label className='w-full md:w-1/3 text-md font-semibold'>TITLE</label>
-                    <input type="text" name='title' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Title' />
+                    <input type="text" name='title' className='focus:outline-none dark:bg-gray-900 focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='Title' />
                 </div>
 
                 {/* Ingredients */}
                 <div className='flex flex-col md:flex-row gap-4'>
                     <label className='w-full md:w-1/3 text-md font-semibold'>INGREDIENTS</label>
-                    <textarea name='ingredients' className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' rows="6" placeholder='Ingredients'></textarea>
+                    <textarea name='ingredients' className='focus:outline-none dark:bg-gray-900 focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' rows="6" placeholder='Ingredients'></textarea>
                 </div>
 
                 {/* Instructions */}
                 <div className='flex flex-col md:flex-row gap-4'>
                     <label className='w-full md:w-1/3 text-md font-semibold'>INSTRUCTIONS</label>
-                    <div className='w-full md:w-2/3 space-y-6'>
+                    <div className='w-full md:w-2/3 space-y-6 dark:bg-gray-800'>
                         {instructionSteps.map((step, index) => (
                             <div
                                 key={index}
-                                className='border border-gray-300 bg-white shadow-sm p-5 rounded-xl space-y-3'
+                                className='dark:bg-gray-800 border border-gray-300 bg-white shadow-sm p-5 rounded-xl space-y-3'
                             >
-                                <h4 className='text-lg font-semibold text-gray-700'>
+                                <h4 className='text-lg font-semibold text-gray-700 dark:text-white'>
                                     Step {index + 1}
                                 </h4>
                                 <input
@@ -160,13 +159,13 @@ const AddRecipe = () => {
                                     placeholder='Step Title (e.g., Prepare the Ingredients)'
                                     value={step.title}
                                     onChange={(e) => handleInstructionChange(index, 'title', e.target.value)}
-                                    className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400'
+                                    className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none dark:bg-gray-900 focus:ring-2 focus:ring-red-400'
                                 />
                                 <textarea
                                     placeholder='Step Details'
                                     value={step.details}
                                     onChange={(e) => handleInstructionChange(index, 'details', e.target.value)}
-                                    className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400'
+                                    className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none dark:bg-gray-900 focus:ring-2 focus:ring-red-400'
                                     rows={4}
                                 />
                             </div>
@@ -187,7 +186,7 @@ const AddRecipe = () => {
                 {/* Preparation Time */}
                 <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
                     <label className='w-full md:w-1/3 text-md font-semibold'>PREPARATION TIME</label>
-                    <input name='preparationTime' type="number" className='focus:outline-none focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='How much time (Number only)' />
+                    <input name='preparationTime' type="number" className='focus:outline-none dark:bg-gray-900 focus:ring-2 focus:ring-red-400 w-full md:w-2/3 border border-gray-400 rounded-lg p-3' placeholder='How much time (Number only)' />
                 </div>
 
                 {/* Categories */}
@@ -209,11 +208,11 @@ const AddRecipe = () => {
                 </div>
 
                 {/* Cuisine Type */}
-                <div className='flex flex-col md:flex-row gap-4'>
+                <div className='flex flex-col md:flex-row gap-4 '>
                     <label className='w-full md:w-1/3 text-md font-semibold'>CUISINE TYPE</label>
                     <div className='flex flex-col md:flex-row gap-4 w-full md:w-2/3'>
                         <select
-                            className='border rounded px-3 py-2 w-full md:w-1/2 '
+                            className='border rounded px-3 py-2 w-full md:w-1/2 dark:bg-gray-900'
                             value={selectedCuisine}
                             onChange={(e) => setSelectedCuisine(e.target.value)}
                         >

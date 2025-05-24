@@ -40,14 +40,14 @@ const AllRecipes = () => {
         }
     
     return (
-        <div>
+        <div className='dark:bg-gray-800 dark:text-white transition-all duration-400'>
             <PageTitle title={'All Recipes - RoshoiBondhu'} />
             <Navbar />
 
-            <div className='relative text-center py-24 px-4 bg-[#00000010] mt-6'>
+            <div className='relative text-center py-24 px-4 bg-[#00000010] mt-6 dark:bg-gray-900'>
                 <p className='font-semibold text-[12px] mb-8'>Delicious Recipes Await</p>
                 <h1 className='text-4xl font-bold mb-10'>All Recipes</h1>
-                <p className="text-gray-700 mb-4">
+                <p className="text-gray-700 mb-4 dark:text-white">
                     Discover an array of delicious recipes for every occasion. From quick snacks to gourmet meals,
                     explore endless <br /> inspiration, expert tips, and creative ideas for your kitchen adventures!
                 </p>
@@ -58,7 +58,7 @@ const AllRecipes = () => {
             <div className='w-11/12 lg:w-3/4 mx-auto my-6 text-right flex gap-4 items-center'>
                 <p>Filter By Cuisine</p>
                 <select
-                    className="px-4 py-2 border rounded shadow"
+                    className="px-4 py-2 border rounded shadow dark:bg-gray-900"
                     value={selectedCuisine}
                     onChange={e => setSelectedCuisine(e.target.value)}
                 >

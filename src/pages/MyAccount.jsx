@@ -11,12 +11,12 @@ const MyAccount = () => {
 
     const { user } = use(AuthContext)
     return (
-        <div>
+        <div className='dark:bg-gray-800 dark:text-white transition-all duration-400'>
             <PageTitle title={'My Account - RoshoiBondhu'}></PageTitle>
             <div>
                 <Navbar></Navbar>
             </div>
-            <div className='relative text-center py-28 px-4 bg-[#00000010] mt-12'>
+            <div className='dark:bg-gray-900 relative text-center py-28 px-4 bg-[#00000010] mt-12'>
                 <h1 className='text-4xl font-bold mb-4'>My Account</h1>
 
 
@@ -53,7 +53,7 @@ const MyAccount = () => {
                                                 type="text"
                                                 id="firstName"
                                                 name="firstName"
-                                                className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
+                                                className="w-full border border-gray-300 dark:bg-gray-900 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
                                                 placeholder="Enter First Name"
                                             />
                                         </div>
@@ -65,7 +65,7 @@ const MyAccount = () => {
                                                 type="text"
                                                 id="lastName"
                                                 name="lastName"
-                                                className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
+                                                className="w-full border border-gray-300 dark:bg-gray-900 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
                                                 placeholder="Enter Last Name"
                                             />
                                         </div>
@@ -81,7 +81,7 @@ const MyAccount = () => {
                                             id="displayName"
                                             name="displayName"
                                             defaultValue={user?.displayName}
-                                            className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
+                                            className="w-full border border-gray-300 dark:bg-gray-900 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
                                             This will be how your name will be displayed in the account section and in reviews
@@ -98,7 +98,7 @@ const MyAccount = () => {
                                             id="email"
                                             name="email"
                                             defaultValue={user?.email}
-                                            className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
+                                            className="w-full border border-gray-300 dark:bg-gray-900 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
                                             readOnly
                                         />
                                     </div>

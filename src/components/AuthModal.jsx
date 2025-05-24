@@ -63,7 +63,7 @@ const LoginForm = ({ onForgotPassword, onSubmit, setIsLoginView, onGoogleSignIn,
       transition={{ duration: 0.4, ease: 'easeInOut' }}
       className="w-full"
     >
-      <h2 className="text-3xl font-bold text-gray-800 mb-3 text-center">Sign In</h2>
+      <h2 className="text-3xl font-bold text-gray-800 mb-3 text-center dark:text-white">Sign In</h2>
       <p className="text-gray-500 mb-6 text-center text-sm">Use your email account or Google</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <InputField type="email" placeholder="Email" id="login-email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
@@ -96,7 +96,7 @@ const LoginForm = ({ onForgotPassword, onSubmit, setIsLoginView, onGoogleSignIn,
           type="button"
           onClick={onGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-300 text-sm text-gray-700 font-medium disabled:opacity-50"
+          className="w-full dark:text-white flex items-center justify-center py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-300 text-sm text-gray-700 font-medium disabled:opacity-50"
         >
           <GoogleIcon />
           Sign in with Google
@@ -159,7 +159,7 @@ const SignUpForm = ({ onSubmit, setIsLoginView, onGoogleSignUp, loading }) => {
       transition={{ duration: 0.4, ease: 'easeInOut' }}
       className="w-full"
     >
-      <h2 className="text-3xl font-bold text-gray-800 mb-3 text-center">Create Account</h2>
+      <h2 className="text-3xl font-bold text-gray-800 mb-3 text-center dark:text-white">Create Account</h2>
       <p className="text-gray-500 mb-6 text-center text-sm">Enter your details or use Google</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <InputField type="text" placeholder="Name" id="signup-name" name="name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
@@ -188,7 +188,7 @@ const SignUpForm = ({ onSubmit, setIsLoginView, onGoogleSignUp, loading }) => {
           type="button"
           onClick={onGoogleSignUp}
           disabled={loading}
-          className="w-full flex items-center justify-center py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-300 text-sm text-gray-700 font-medium disabled:opacity-50"
+          className="w-full dark:text-white flex items-center justify-center py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-300 text-sm text-gray-700 font-medium disabled:opacity-50"
         >
           <GoogleIcon />
           Sign up with Google
@@ -465,7 +465,7 @@ const AuthModal = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-[#000000d3] bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-[#000000d3]  bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -490,7 +490,7 @@ const AuthModal = ({ isOpen, onClose }) => {
             </button>
 
             <motion.div
-              className="absolute top-0 h-full w-full md:w-1/2 bg-white flex flex-col justify-center items-center p-8 md:p-14 z-10"
+              className="dark:bg-gray-800 dark:text-white absolute top-0 h-full w-full md:w-1/2 bg-white flex flex-col justify-center items-center p-8 md:p-14 z-10"
               animate={{ x: isMobile ? '0%' : ((isLoginView || isForgotPasswordView) ? '100%' : '0%') }}
               transition={{ duration: 0.6, ease: [0.30, 0.00, 0.20, 1.00] }}
             >

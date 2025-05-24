@@ -1,5 +1,5 @@
 import React, { useState, useEffect, use } from 'react';
-import { FaArrowRight } from 'react-icons/fa6';
+import { FaArrowRight, FaMoon, FaSun } from 'react-icons/fa6';
 import { FiLogOut, FiUser } from 'react-icons/fi';
 import { Link, NavLink, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,6 +7,7 @@ import logo from '../../src/assets/logo.png';
 import AuthModal from './AuthModal';
 import { AuthContext } from '../authProvider/AuthProvider';
 import { Tooltip } from 'react-tooltip';
+import { useDarkMode } from '../context/ThemeContext';
 
 const Navbar = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -59,6 +60,9 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+
+    const { darkMode, setDarkMode } = useDarkMode()
+
     const links = (
         <>
             <li>
@@ -97,7 +101,7 @@ const Navbar = () => {
                         {/* White background comes FIRST */}
                         <motion.div
                             key="navbar-bg"
-                            className="fixed top-0 left-0 w-full bg-white shadow z-50 h-[80px]"
+                            className="fixed top-0 left-0 w-full bg-white shadow z-50 h-[80px] dark:bg-gray-900"
                             initial={{ y: -100 }}
                             animate={{ y: 0 }}
                             exit={{ y: -100 }}
@@ -124,6 +128,12 @@ const Navbar = () => {
                                     </ul>
                                 </div>
                                 <div className="navbar-end">
+                                    <button
+                                        onClick={() => setDarkMode(!darkMode)}
+                                        className="text-xl p-2 rounded-full transition-colors duration-300"
+                                    >
+                                        {darkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-800" />}
+                                    </button>
                                     <button data-tooltip-id="user-info"
                                         data-tooltip-content={user?.displayName}
                                         onClick={handleUserIconClick}>
@@ -133,7 +143,7 @@ const Navbar = () => {
                                         user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 lg:mr-6 ml-6 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
                                     }
 
-                                    <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">
+                                    <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block dark:bg-gray-700 dark:text-white">
                                         Add recipe
                                     </Link>
 
@@ -155,7 +165,7 @@ const Navbar = () => {
 
             {/* Original Navbar (when not scrolled) */}
             {!scrolled && (
-                <div className="navbar max-w-7xl mx-auto mt-3">
+                <div className="navbar max-w-7xl mx-auto">
                     <div className="navbar-start space-x-10 w-full">
                         <div className="flex items-center">
                             <img src={logo} className="w-8 lg:w-12 h-8 lg:h-12" alt="Logo" />
@@ -166,6 +176,14 @@ const Navbar = () => {
                         </ul>
                     </div>
                     <div className="navbar-end">
+
+                        <button
+                            onClick={() => setDarkMode(!darkMode)}
+                            className="text-xl p-2 rounded-full transition-colors duration-300"
+                        >
+                            {darkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-800" />}
+                        </button>
+
                         <button onClick={handleUserIconClick}
                             data-tooltip-id="user-info"
                             data-tooltip-content={user?.displayName}>
@@ -173,11 +191,11 @@ const Navbar = () => {
                         </button>
 
                         {
-                            user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 lg:mr-6  ml-6 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
+                            user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 mr-0 lg:mr-6  ml-4 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
                         }
 
 
-                        <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block">Add recipe</Link>
+                        <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block dark:bg-gray-700 dark:text-white">Add recipe</Link>
 
                     </div>
                     <div className="ml-2 lg:hidden p-0 m-0">

@@ -19,7 +19,7 @@ const RecipeDetails = () => {
     const recipe = useLoaderData();
 
 
- 
+
     // console.log(recipe._id);
     const navigate = useNavigate()
     const [likeCount, setLikeCount] = useState(recipe.likeCount || 0)
@@ -148,7 +148,7 @@ const RecipeDetails = () => {
 
 
     const handleDeletePost = () => {
-       
+
         Swal.fire({
             title: "Are you sure?",
             text: "You won't be able to revert this!",
@@ -198,176 +198,181 @@ const RecipeDetails = () => {
 
     return (
         <>
-            <PageTitle title={`${recipe.title} - RoshoiBondhu`}></PageTitle>
-            <div>
-                <Navbar></Navbar>
-            </div>
+            <div className='dark:bg-gray-800 dark:text-white transition-all duration-400'>
 
-            <div className="bg-gray-100 mt-6 pt-8 relative">
-                <div className="w-11/12 mx-auto py-10 max-w-7xl">
-                    {/* Image and Details Container */}
-                    <div className="flex flex-col lg:block relative">
-                        {/* Left: Image */}
-                        <div className=" mb-6 lg:absolute lg:right-0 lg:top-0">
-                            <img
-                                src={recipe.image}
-                                alt={recipe.title}
-                                className="rounded-xl w-full max-w-lg mx-auto lg:w-auto"
-                            />
-                        </div>
+                <PageTitle title={`${recipe.title} - RoshoiBondhu`}></PageTitle>
+                <div className=''>
+                    <Navbar></Navbar>
+                </div>
 
-                        {/* Right: Details */}
-                        <div className="w-full">
-                            <p className="text-red-500 font-semibold mb-4 mt-4 lg:mt-0 text-center lg:text-left">
-                                {likeCount} people interested in this recipe
-                            </p>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center lg:text-left">
-                                {recipe.title}
-                            </h1>
+                <div className="bg-gray-100 mt-6 pt-8 relative dark:bg-gray-900 dark:text-white">
+                    <div className="w-11/12 mx-auto py-10 max-w-7xl">
+                        {/* Image and Details Container */}
+                        <div className="flex flex-col lg:block relative">
+                            {/* Left: Image */}
+                            <div className=" mb-6 lg:absolute lg:right-0 lg:top-0">
+                                <img
+                                    src={recipe.image}
+                                    alt={recipe.title}
+                                    className="rounded-xl w-full max-w-lg mx-auto lg:w-auto"
+                                />
+                            </div>
 
-                            {/* Meta Info */}
-                            <div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-gray-600 mb-6">
-                                <div className="flex flex-col space-y-2 items-center lg:items-start">
-                                    <div className="flex items-center gap-2">
-                                        <FaClock /> <span>{recipe.preparationTime} min</span>
+                            {/* Right: Details */}
+                            <div className="w-full">
+                                <p className="text-red-500 font-semibold mb-4 mt-4 lg:mt-0 text-center lg:text-left">
+                                    {likeCount} people interested in this recipe
+                                </p>
+                                <h1 className="dark:text-white text-3xl font-bold text-gray-800 mb-8 text-center lg:text-left">
+                                    {recipe.title}
+                                </h1>
+
+                                {/* Meta Info */}
+                                <div className="dark:text-white flex flex-wrap justify-center lg:justify-start items-center gap-6 text-gray-600 mb-6">
+                                    <div className="flex flex-col space-y-2 items-center lg:items-start">
+                                        <div className="flex items-center gap-2">
+                                            <FaClock /> <span>{recipe.preparationTime} min</span>
+                                        </div>
+                                        <p className="text-[10px]">Cooking Time</p>
                                     </div>
-                                    <p className="text-[10px]">Cooking Time</p>
-                                </div>
 
-                                <div className="flex flex-col space-y-2 items-center lg:items-start">
-                                    <div className="flex items-center gap-2">
-                                        <TbWorld />
-                                        <span>{recipe.cuisine}</span>
+                                    <div className="flex flex-col space-y-2 items-center lg:items-start">
+                                        <div className="flex items-center gap-2">
+                                            <TbWorld />
+                                            <span>{recipe.cuisine}</span>
+                                        </div>
+                                        <p className="text-[10px]">Cuisine</p>
                                     </div>
-                                    <p className="text-[10px]">Cuisine</p>
-                                </div>
 
-                                <div className="flex flex-col space-y-2 items-center lg:items-start">
-                                    <div className="flex items-center gap-2">
-                                        <ImSpoonKnife />
-                                        <span>Serves {recipe.serving || 1}</span>
+                                    <div className="flex flex-col space-y-2 items-center lg:items-start">
+                                        <div className="flex items-center gap-2">
+                                            <ImSpoonKnife />
+                                            <span>Serves {recipe.serving || 1}</span>
+                                        </div>
+                                        <p className="text-[10px]">Serving</p>
                                     </div>
-                                    <p className="text-[10px]">Serving</p>
-                                </div>
 
-                                <div className="flex flex-col space-y-2 items-center lg:items-start">
-                                    <div className="flex items-center gap-2">
-                                        <FaUser /> <span>{recipe.difficulty || 'Beginner'}</span>
+                                    <div className="flex flex-col space-y-2 items-center lg:items-start">
+                                        <div className="flex items-center gap-2">
+                                            <FaUser /> <span>{recipe.difficulty || 'Beginner'}</span>
+                                        </div>
+                                        <p className="text-[10px] text-center lg:text-left">Degree of Difficulties</p>
                                     </div>
-                                    <p className="text-[10px] text-center lg:text-left">Degree of Difficulties</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
 
-            <div className='w-2/3 mx-auto mt-16' >
-                {/* Author */}
-                <div className='border-b border-gray-300 w-full md:w-[50%]'>
-                    <div className='flex flex-col md:flex-row justify-between gap-6 mb-2'>
+                <div className='w-2/3 mx-auto mt-16' >
+                    {/* Author */}
+                    <div className='border-b border-gray-300 w-full md:w-[50%]'>
+                        <div className='flex flex-col md:flex-row justify-between gap-6 mb-2'>
 
-                        {/* Author Info */}
-                        <div className="flex items-center gap-3 mb-4 md:mb-6">
-                            <img src={recipe.userPhoto || "https://i.pravatar.cc/40"} className="w-10 h-10 rounded-full" />
-                            <div>
-                                <h4 className="font-semibold">{recipe.userName || 'Unknown Author'}</h4>
-                                <p className="text-sm text-gray-500">Recipe Author</p>
+                            {/* Author Info */}
+                            <div className="flex items-center gap-3 mb-4 md:mb-6">
+                                <img src={recipe.userPhoto || "https://i.pravatar.cc/40"} className="w-10 h-10 rounded-full" />
+                                <div>
+                                    <h4 className="font-semibold">{recipe.userName || 'Unknown Author'}</h4>
+                                    <p className="text-sm text-gray-500">Recipe Author</p>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4 md:mb-6">
+                                {/* Like */}
+                                <button
+                                    onClick={handleLikeCount}
+                                    disabled={isOwner}
+                                    className={`btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100 
+                   ${isOwner ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    title={isOwner ? "You can't like your own recipe" : "Like this recipe"}
+                                >
+                                    <FaHeart />
+                                </button>
+
+                                {/* Edit (owner only) */}
+                                {isOwner && (
+                                    <button
+                                        onClick={() => setEditModalOpen(true)}
+                                        className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-blue-100"
+                                        title="Edit this recipe"
+                                    >
+                                        <FaEdit />
+                                    </button>
+                                )}
+
+                                {/* Delete (owner only) */}
+                                {isOwner && (
+                                    <button
+                                        onClick={handleDeletePost}
+                                        className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100"
+                                        title="Delete this recipe"
+                                    >
+                                        <FaTrash />
+                                    </button>
+                                )}
+
+                                {/* Bookmark */}
+                                <button className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100">
+                                    <FaBookmark />
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4 md:mb-6">
-                            {/* Like */}
-                            <button
-                                onClick={handleLikeCount}
-                                disabled={isOwner}
-                                className={`btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100 
-          ${isOwner ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                title={isOwner ? "You can't like your own recipe" : "Like this recipe"}
-                            >
-                                <FaHeart />
-                            </button>
 
-                            {/* Edit (owner only) */}
-                            {isOwner && (
-                                <button
-                                    onClick={() => setEditModalOpen(true)}
-                                    className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-blue-100"
-                                    title="Edit this recipe"
-                                >
-                                    <FaEdit />
-                                </button>
-                            )}
+                    {/* Ingredients */}
+                    <div className=''>
+                        <h3 className="text-xl font-bold mb-8 mt-8">
+                            Ingredients <span className="text-base font-medium text-gray-500">(1 Person)</span>
+                        </h3>
 
-                            {/* Delete (owner only) */}
-                            {isOwner && (
-                                <button
-                                    onClick={handleDeletePost}
-                                    className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100"
-                                    title="Delete this recipe"
-                                >
-                                    <FaTrash />
-                                </button>
-                            )}
+                        <div className="dark:text-white grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 text-gray-800">
+                            {recipe.ingredients?.split(',').map((item, index) => (
+                                <label key={index} className="flex items-center gap-2">
+                                    <GoDotFill />
 
-                            {/* Bookmark */}
-                            <button className="btn btn-circle bg-white border border-red-200 text-red-500 hover:bg-red-100">
-                                <FaBookmark />
-                            </button>
+                                    <span>{item.trim()}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div className='w-4/5 lg:w-2/3 mx-auto'>
+                    <div className='lg:w-2/3 mt-52'>
+                        <h1 className='text-3xl font-bold mb-10'>Directions</h1>
+
+                        <div className="space-y-6">
+                            {recipe.instructions?.map((step, index) => (
+                                <div key={index} className="space-y-12">
+                                    <div className="flex items-center gap-4">
+                                        <h4 className="dark:text-red-800 text-xl font-semibold text-red-600 whitespace-nowrap">
+                                            {step.title}
+                                        </h4>
+                                        <div className="flex-grow border-t border-gray-300"></div>
+                                    </div>
+
+                                    <p className="text-gray-600 dark:text-white">{step.details}</p>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
 
-
-                {/* Ingredients */}
                 <div>
-                    <h3 className="text-xl font-bold mb-8 mt-8">
-                        Ingredients <span className="text-base font-medium text-gray-500">(1 Person)</span>
-                    </h3>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 text-gray-800">
-                        {recipe.ingredients?.split(',').map((item, index) => (
-                            <label key={index} className="flex items-center gap-2">
-                                <GoDotFill />
-
-                                <span>{item.trim()}</span>
-                            </label>
-                        ))}
-                    </div>
+                    <PopularTags></PopularTags>
+                </div>
+                <div>
+                    <Footer></Footer>
                 </div>
 
-
             </div>
 
-            <div className='w-4/5 lg:w-2/3 mx-auto'>
-                <div className='lg:w-2/3 mt-52'>
-                    <h1 className='text-3xl font-bold mb-10'>Directions</h1>
-
-                    <div className="space-y-6">
-                        {recipe.instructions?.map((step, index) => (
-                            <div key={index} className="space-y-12">
-                                <div className="flex items-center gap-4">
-                                    <h4 className="text-xl font-semibold text-red-600 whitespace-nowrap">
-                                        {step.title}
-                                    </h4>
-                                    <div className="flex-grow border-t border-gray-300"></div>
-                                </div>
-
-                                <p className="text-gray-600">{step.details}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <PopularTags></PopularTags>
-            </div>
-            <div>
-                <Footer></Footer>
-            </div>
 
 
 

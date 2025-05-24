@@ -13,7 +13,7 @@ const PopularTags = () => {
     }, []);
 
     return (
-        <div className=" relative mt-24  text-center py-20 px-4 bg-[#00000010] space-y-6">
+        <div className=" relative mt-24  text-center py-20 px-4 bg-[#00000010] space-y-6 dark:bg-gray-900">
 
             <img
                 src={bg}
@@ -22,7 +22,7 @@ const PopularTags = () => {
             />
             <div className="text-center mb-12">
                 <h1 className="text-2xl md:text-3xl font-bold mb-8">Explore Popular Tags</h1>
-                <p className="text-gray-600 mt-2 max-w-xl mx-auto">
+                <p className="text-gray-600 mt-2 max-w-xl mx-auto dark:text-white">
                     From quick meals to healthy dishes, our popular tags make it easy to explore delicious options with one click.
                 </p>
             </div>

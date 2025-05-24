@@ -43,7 +43,7 @@ const MainLayout = () => {
     }
 
     return (
-        <div>
+        <div className='dark:bg-gray-800 dark:text-white transition-all duration-400'>
             <header>
                 <Navbar />
             </header>

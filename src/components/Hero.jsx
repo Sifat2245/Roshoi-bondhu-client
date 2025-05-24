@@ -38,7 +38,7 @@ const Hero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.0, delay: 0.7 }}
             >
-                <div className="bg-white w-full sm:w-[85%] md:w-[75%] lg:w-[55%] p-2 md:p-3 rounded-2xl flex items-center gap-2 md:gap-4 mb-4">
+                <div className=" bg-white w-full sm:w-[85%] md:w-[75%] lg:w-[55%] p-2 md:p-3 rounded-2xl flex items-center gap-2 md:gap-4 mb-4">
                     <span>
                         <ImSpoonKnife className="text-[#e02f21] h-6 w-6 md:h-7 md:w-7 ml-2 md:ml-3" />
                     </span>
