@@ -12,7 +12,7 @@ const MyRecipes = () => {
     const [myRecipes, setMyRecipes] = useState([])
     const { user } = use(AuthContext)
 
-    
+
 
 
     useEffect(() => {
@@ -30,7 +30,7 @@ const MyRecipes = () => {
 
     return (
         <>
-        <PageTitle title={'Your Recipe Collection'}></PageTitle>
+            <PageTitle title={'Your Recipe Collection'}></PageTitle>
 
             <div>
                 <Navbar></Navbar>
@@ -52,7 +52,15 @@ const MyRecipes = () => {
 
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-11/12 mx-auto justify-center items-center lg:w-3/4 my-32'>
                     {
-                        myRecipes.map(recipe => <RecipeCard recipe={recipe} key={recipe._id}></RecipeCard>)
+                        myRecipes.length > 0 ? (
+                            myRecipes.map(recipe => (
+                                <RecipeCard recipe={recipe} key={recipe._id} />
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center text-gray-500 text-xl">
+                                You haven’t added any recipes yet. Start cooking and share your first dish!
+                            </div>
+                        )
                     }
                 </div>
 

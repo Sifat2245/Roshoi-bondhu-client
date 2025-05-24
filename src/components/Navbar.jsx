@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../../src/assets/logo.png';
 import AuthModal from './AuthModal';
 import { AuthContext } from '../authProvider/AuthProvider';
+import { Tooltip } from 'react-tooltip';
 
 const Navbar = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -123,7 +124,9 @@ const Navbar = () => {
                                     </ul>
                                 </div>
                                 <div className="navbar-end">
-                                    <button onClick={handleUserIconClick}>
+                                    <button data-tooltip-id="user-info"
+                                        data-tooltip-content={user?.displayName}
+                                        onClick={handleUserIconClick}>
                                         <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
                                     </button>
                                     {
@@ -163,7 +166,9 @@ const Navbar = () => {
                         </ul>
                     </div>
                     <div className="navbar-end">
-                        <button onClick={handleUserIconClick}>
+                        <button onClick={handleUserIconClick}
+                            data-tooltip-id="user-info"
+                            data-tooltip-content={user?.displayName}>
                             <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
                         </button>
 
@@ -205,6 +210,7 @@ const Navbar = () => {
                 </ul>
             </div>
             <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
+            <Tooltip id="user-info" place="top" />
         </>
     );
 };
