@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { AuthContext } from '../authProvider/AuthProvider';
+import spinner from '../../public/spinner.json'
+import Lottie from 'lottie-react';
 
 const PrivateRoute = ({children}) => {
   const authData = useContext(AuthContext)
@@ -13,7 +15,13 @@ const PrivateRoute = ({children}) => {
     const {user, loading, openAuthModal, setRedirectPath} = authData;
 
     if(loading){
-        return <div>loading</div>
+         return (
+            <div className="min-h-screen flex justify-center items-center">
+                <div className="w-52">
+                    <Lottie animationData={spinner} loop={true} />
+                </div>
+            </div>
+        );
     }
     if(user){
         return children;

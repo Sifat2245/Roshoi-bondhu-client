@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { useLoaderData } from 'react-router';
+import React, { useRef, useState } from 'react';
+import { useLoaderData, useNavigation } from 'react-router';
 import { motion, useInView } from 'framer-motion';
 
 import Navbar from '../components/Navbar';
@@ -8,6 +8,8 @@ import MostPopularRecipes from '../components/MostPopularRecipes';
 import Discover from '../components/Discover';
 import PopularTags from '../components/PopularTags';
 import Footer from '../components/Footer';
+import spinner from '../../public/spinner.json'
+import Lottie from 'lottie-react';
 
 const FadeInSection = ({ children }) => {
     const ref = useRef(null);
@@ -27,6 +29,18 @@ const FadeInSection = ({ children }) => {
 
 const MainLayout = () => {
     const AllRecipes = useLoaderData();
+
+    const navigation = useNavigation()
+
+    if (navigation.state === 'loading') {
+        return (
+            <div className="min-h-screen flex justify-center items-center">
+                <div className="w-52">
+                    <Lottie animationData={spinner} loop={true} />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div>

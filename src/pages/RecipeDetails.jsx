@@ -11,6 +11,9 @@ import PageTitle from '../components/PageTitle';
 import { AuthContext } from '../authProvider/AuthProvider';
 import { FaTrash } from 'react-icons/fa6';
 import Swal from 'sweetalert2';
+import Lottie from 'lottie-react';
+import spinner from '../../public/spinner.json'
+
 
 const RecipeDetails = () => {
     const recipe = useLoaderData();
@@ -128,7 +131,7 @@ const RecipeDetails = () => {
                         timer: 1500
                     });
 
-                    console.log('after update', data);
+                    // console.log('after update', data);
                 }
             })
             .finally(() => {
@@ -166,7 +169,7 @@ const RecipeDetails = () => {
 
                             Swal.fire({
                                 title: "Deleted!",
-                                text: "User has been deleted.",
+                                text: "Recipe Post Deleted Successfully.",
                                 icon: "success"
                             });
 
@@ -180,6 +183,18 @@ const RecipeDetails = () => {
             }
         });
     }
+
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex justify-center items-center">
+                <div className="w-52">
+                    <Lottie animationData={spinner} loop={true} />
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <>

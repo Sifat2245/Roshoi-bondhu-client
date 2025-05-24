@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import PopularTags from '../components/PopularTags';
 import PageTitle from '../components/PageTitle';
 import { AuthContext } from '../authProvider/AuthProvider';
+import { useNavigate } from 'react-router';
 
 const AddRecipe = () => {
     const [selectedCuisine, setSelectedCuisine] = useState('');
@@ -18,6 +19,7 @@ const AddRecipe = () => {
         }
     ])
     const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
 
     const { user } = use(AuthContext);
 
@@ -96,10 +98,9 @@ const AddRecipe = () => {
             })
             .finally(() => {
                 setLoading(false);
+                navigate('/my-recipes')
             });
     }
-
-
 
 
     return (

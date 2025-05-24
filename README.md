@@ -1,12 +1,85 @@
-# React + Vite
+# 🧑‍🍳 Roshoi Bondhu
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Roshoi Bondhu** is an engaging recipe-sharing platform where users can create accounts, post their favorite recipes, browse and like others’ dishes, and manage their personal recipe collection.
 
-Currently, two official plugins are available:
+🌐 **Live Site**: [https://roshoi-bondhu-app-8e8ae.web.app/](https://roshoi-bondhu-app-8e8ae.web.app/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+![Hero Section](./src/assets/Screenshot%202025-05-24%20144439.png)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## ✨ Features
+
+- 🔐 **User Authentication**  
+  - Email/password sign-up  
+  - Google login
+
+- 📝 **Recipe Management**  
+  - Create, edit, delete recipes  
+  - View personal recipe collection
+
+- ❤️ **Like Feature**  
+  - Like recipes from others  
+  - Prevent multiple likes from the same user
+
+- 🔎 **Cuisine Filter**  
+  - Filter recipes by cuisine type
+
+- 💻 **Responsive UI**  
+  - Fully mobile-friendly  
+  - Smooth animations
+
+---
+
+## 🛠️ Technologies Used
+
+### 🔧 Frontend
+- **React**
+- **React Router**
+- **Tailwind CSS**
+- **DaisyUI**
+- **Framer Motion**
+- **Lottie React**
+- **React Tooltip**
+
+### 🔐 Authentication
+- **Firebase Authentication**
+  - Email/Password
+  - Google Sign-in
+
+### 🔙 Backend (API)
+- Hosted REST API on **Vercell**
+  - Built with **Node.js**, **Express**
+  - **MongoDB** for database
+
+### 📦 NPM Packages Used
+
+| Package           | Purpose                                            |
+|-------------------|----------------------------------------------------|
+| `react`           | Core UI library                                    |
+| `react-dom`       | DOM rendering                                      |
+| `react-router-dom`| SPA routing/navigation                             |
+| `tailwindcss`     | Utility-first CSS framework                        |
+| `daisyui`         | Tailwind-based UI component library                |
+| `framer-motion`   | Animations and transitions                         |
+| `lottie-react`    | Animated SVGs using JSON                           |
+| `firebase`        | Authentication & deployment                        |
+| `classnames`      | Conditional class management *(if used)*           |
+| `react-icons`     | Icon library for React                             |
+| `react-tooltip`   | Tooltips for UI elements                           |
+| `sweetalert2`     | Popup alerts for success/error prompts             |
+| `react-helmet`    | Manage HTML `<head>` (meta tags, titles)           |
+
+
+## 📁 Folder Structure
+
+```bash
+src/
+├── assets/              # Images, icons, backgrounds
+├── components/          # Navbar, Footer, Cards, etc.
+├── pages/               # Page components (Home, Recipes, Profile, etc.)
+├── authProvider/        # Firebase Auth Context
+├── App.jsx
+└── main.jsx
