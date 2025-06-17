@@ -2,7 +2,7 @@ import React, { useState, useEffect, use } from 'react';
 import { FaArrowRight, FaMoon, FaSun } from 'react-icons/fa6';
 import { FiLogOut, FiUser } from 'react-icons/fi';
 import { Link, NavLink, useNavigate } from 'react-router';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import logo from '../../src/assets/logo.png';
 import AuthModal from './AuthModal';
 import { AuthContext } from '../authProvider/AuthProvider';

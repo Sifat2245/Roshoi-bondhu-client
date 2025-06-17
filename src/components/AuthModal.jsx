@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react'; // Removed 'use'
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState, useContext } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import { AuthContext } from '../authProvider/AuthProvider';
 
 // Custom hook to detect screen size (remains the same)

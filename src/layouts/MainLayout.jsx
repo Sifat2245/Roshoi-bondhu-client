@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useLoaderData, useNavigation } from 'react-router';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion'; // eslint-disable-line no-unused-vars
 
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';

@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import bgImg from '../assets/section-bg.jpg'; // Replace with your background image
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import { FaStar } from 'react-icons/fa6';
 
 const Discover = () => {

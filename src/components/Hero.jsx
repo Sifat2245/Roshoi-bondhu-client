@@ -2,7 +2,7 @@ import React from 'react';
 import heroImage from '../assets/search-hero-2.jpg';
 import { IoSearch } from 'react-icons/io5';
 import { ImSpoonKnife } from 'react-icons/im';
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'; // eslint-disable-line no-unused-vars
 
 const Hero = () => {
     return (
