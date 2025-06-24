@@ -16,8 +16,7 @@ const AllRecipes = () => {
 
     const navigation = useNavigation()
 
-
-    // Extract unique cuisines
+    
     const cuisines = useMemo(() => {
         const types = allRecipes.map(r => r.cuisine).filter(Boolean);
         return ['All', ...new Set(types)];
