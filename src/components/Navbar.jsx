@@ -84,7 +84,7 @@ const Navbar = () => {
                 </NavLink>
             </li>
             <li>
-                <NavLink to="/about" className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4" onClick={closeDrawer}>
+                <NavLink to="/about-us" className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4" onClick={closeDrawer}>
                     <p>About Us</p>
                     <FaArrowRight className="block lg:hidden" />
                 </NavLink>
@@ -137,10 +137,10 @@ const Navbar = () => {
                                     <button data-tooltip-id="user-info"
                                         data-tooltip-content={user?.displayName}
                                         onClick={handleUserIconClick}>
-                                        <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
+                                        <FiUser className="w-6 h-6 lg:mr-3 hover:cursor-pointer hover:text-[#e02f21]" />
                                     </button>
                                     {
-                                        user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 lg:mr-6 ml-6 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
+                                        user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 lg:mr-6 ml-3 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
                                     }
 
                                     <Link to='/add-recipe' className="btn border-0 bg-[#dbdbdbc5] px-4 py-3 hover:bg-[#e02f21] hover:text-white hidden lg:block dark:bg-gray-700 dark:text-white">
@@ -149,7 +149,7 @@ const Navbar = () => {
 
                                 </div>
                                 <div className="ml-2 lg:hidden p-0 m-0">
-                                    <button onClick={openDrawer} className="btn btn-ghost">
+                                    <button onClick={openDrawer} className="p-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                                         </svg>
@@ -179,7 +179,7 @@ const Navbar = () => {
 
                         <button
                             onClick={() => setDarkMode(!darkMode)}
-                            className="text-xl p-2 rounded-full transition-colors duration-300"
+                            className="text-xl lg:mr-1 p-2 rounded-full transition-colors duration-300"
                         >
                             {darkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-800" />}
                         </button>
@@ -187,11 +187,11 @@ const Navbar = () => {
                         <button onClick={handleUserIconClick}
                             data-tooltip-id="user-info"
                             data-tooltip-content={user?.displayName}>
-                            <FiUser className="w-6 h-6 lg:mr-6 hover:cursor-pointer hover:text-[#e02f21]" />
+                            <FiUser className="w-6 h-6 lg:mr-3 hover:cursor-pointer hover:text-[#e02f21]" />
                         </button>
 
                         {
-                            user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 mr-0 lg:mr-6  ml-4 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
+                            user ? <button onClick={logoutUser}><FiLogOut className='w-6 h-6 mr-0 lg:mr-6  ml-3 lg:ml-0 hover:cursor-pointer hover:text-[#e02f21]' /></button> : ''
                         }
 
 
@@ -199,7 +199,7 @@ const Navbar = () => {
 
                     </div>
                     <div className="ml-2 lg:hidden p-0 m-0">
-                        <button onClick={openDrawer} className="btn btn-ghost">
+                        <button onClick={openDrawer} className="p-2 ">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>

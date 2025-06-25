@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useLoaderData, useNavigation } from 'react-router';
 import { motion, useInView } from 'framer-motion'; // eslint-disable-line no-unused-vars
 
@@ -10,6 +10,8 @@ import PopularTags from '../components/PopularTags';
 import Footer from '../components/Footer';
 import spinner from '../../public/spinner.json'
 import Lottie from 'lottie-react';
+import NewsLatter from '../components/NewsLatter';
+import Testimonial from '../components/Testimonial';
 
 const FadeInSection = ({ children }) => {
     const ref = useRef(null);
@@ -59,6 +61,14 @@ const MainLayout = () => {
 
                 <FadeInSection>
                     <Discover />
+                </FadeInSection>
+
+                <FadeInSection>
+                    <NewsLatter></NewsLatter>
+                </FadeInSection>
+
+                <FadeInSection>
+                   <Testimonial></Testimonial>
                 </FadeInSection>
 
                 <FadeInSection>

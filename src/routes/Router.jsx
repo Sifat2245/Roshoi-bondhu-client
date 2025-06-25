@@ -8,6 +8,7 @@ import MyAccount from "../pages/MyAccount";
 import MyRecipes from "../pages/MyRecipes";
 import RootWithModal from "../components/RootWithModal";
 import PrivateRoute from "./PrivateRoute";
+import AboutUs from "../pages/AboutUs";
 
 export const router = createBrowserRouter([
 
@@ -48,6 +49,10 @@ export const router = createBrowserRouter([
                 element: <PrivateRoute>
                     <MyRecipes></MyRecipes>
                 </PrivateRoute>
+            },
+            {
+                path: '/about-us',
+                Component: AboutUs
             }
 
         ]

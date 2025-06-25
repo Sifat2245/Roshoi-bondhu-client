@@ -10,7 +10,7 @@ const Discover = () => {
     return (
         <div
             ref={ref}
-            className="relative w-11/12 lg:w-2/3 mx-auto mt-12 rounded-3xl overflow-hidden h-[500px] sm:h-[550px] md:h-[600px] bg-cover bg-center"
+            className="relative w-11/12 lg:w-2/3 mx-auto mt-24 rounded-3xl overflow-hidden h-[500px] sm:h-[550px] md:h-[600px] bg-cover bg-center"
             style={{ backgroundImage: `url(${bgImg})` }}
         >
             {/* Overlay */}
