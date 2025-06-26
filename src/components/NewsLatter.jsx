@@ -17,13 +17,13 @@ const NewsLatter = () => {
           Subscribe to our newsletter and get delicious recipes, expert cooking
           tips, and the latest food trends
         </p>
-        <div className="flex w-11/12 md:w-1/2 mx-auto bg-white py-2 px-2 rounded-xl flex-row items-center ">
+        <div className="flex w-1/2 mx-auto bg-white py-2 px-2 rounded-xl flex-row items-center ">
           <input
             type="email"
             className="w-full px-2 md:px-4 py-2 md:py-4 border placeholder-gray-500 text-black  border-gray-300 rounded-bl-lg rounded-tl-lg focus:outline-none focus:ring-2 focus:ring-red-500"
             placeholder="Enter your email address"
           />
-          <button className="w-1/2 sm:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold md:px-6 py-2 md:py-4 rounded-br-lg rounded-tr-lg text-sm md:text-lg transition duration-300">
+          <button className="w-1/2 sm:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold px-3 md:px-6 py-3 md:py-4 rounded-br-lg rounded-tr-lg text-sm md:text-lg transition duration-300">
             Subscribe
           </button>
         </div>

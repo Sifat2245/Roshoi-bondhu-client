@@ -29,7 +29,7 @@ const MyAccount = () => {
 
             <div>
                 {user ? (
-                    <div className="w-full max-w-4xl my-36 mx-auto px-4 my-12">
+                    <div className="w-full max-w-4xl my-36 mx-auto px-4">
                         <div className="flex flex-col md:flex-row gap-10 items-center md:items-start">
                             {/* Profile Image */}
                             <div className="flex-shrink-0">

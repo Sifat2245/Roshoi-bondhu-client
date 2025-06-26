@@ -10,6 +10,9 @@ import RootWithModal from "../components/RootWithModal";
 import PrivateRoute from "./PrivateRoute";
 import AboutUs from "../pages/AboutUs";
 import Dashboard from "../pages/Dashboard";
+import Categories from "../pages/Categories";
+import Cuisine from "../pages/Cuisine";
+import Blogs from "../pages/Blogs";
 
 export const router = createBrowserRouter([
   {
@@ -57,6 +60,18 @@ export const router = createBrowserRouter([
             <MyRecipes></MyRecipes>
           </PrivateRoute>
         ),
+      },
+      {
+        path: '/cuisine',
+        Component: Cuisine
+      },
+      {
+        path: '/categories',
+        Component: Categories
+      },
+      {
+        path: '/blogs',
+        Component: Blogs
       },
       {
         path: "/about-us",
