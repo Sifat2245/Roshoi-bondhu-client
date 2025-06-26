@@ -12,7 +12,7 @@ const MostPopularRecipes = ({ AllRecipes }) => {
                 <h1 className='text-3xl font-bold'>Top Recipes</h1>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-11/12 mx-auto justify-center items-center lg:w-3/4 mt-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-11/12 mx-auto justify-center items-center lg:w-3/4 mt-12">
                 {AllRecipes.map(recipe => (
                     <RecipeCard recipe={recipe} key={recipe._id} />
                 ))}

@@ -67,7 +67,7 @@ const Navbar = () => {
           onClick={closeDrawer}
         >
           <p>Home</p>
-          <FaArrowRight className="block lg:hidden" />
+          <FaArrowRight className="block 2xl:hidden" />
         </NavLink>
       </li>
       {/* <li>
@@ -77,7 +77,7 @@ const Navbar = () => {
           onClick={closeDrawer}
         >
           <p>Dashboard</p>
-          <FaArrowRight className="block lg:hidden" />
+          <FaArrowRight className="block 2xl:hidden" />
         </NavLink>
       </li> */}
       <li>
@@ -87,17 +87,37 @@ const Navbar = () => {
           onClick={closeDrawer}
         >
           <p>All Recipes</p>
-          <FaArrowRight className="block lg:hidden" />
+          <FaArrowRight className="block 2xl:hidden" />
         </NavLink>
       </li>
       <li>
         <NavLink
-          to="/my-recipes"
+          to="/cuisine"
           className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4"
           onClick={closeDrawer}
         >
-          <p>My Recipes</p>
-          <FaArrowRight className="block lg:hidden" />
+          <p>Cuisine</p>
+          <FaArrowRight className="block 2xl:hidden" />
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/categories"
+          className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4"
+          onClick={closeDrawer}
+        >
+          <p>Category</p>
+          <FaArrowRight className="block 2xl:hidden" />
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/blogs"
+          className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4"
+          onClick={closeDrawer}
+        >
+          <p>Blogs</p>
+          <FaArrowRight className="block 2xl:hidden" />
         </NavLink>
       </li>
       <li>
@@ -107,7 +127,7 @@ const Navbar = () => {
           onClick={closeDrawer}
         >
           <p>About Us</p>
-          <FaArrowRight className="block lg:hidden" />
+          <FaArrowRight className="block 2xl:hidden" />
         </NavLink>
       </li>
     </>
@@ -138,7 +158,7 @@ const Navbar = () => {
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.7, delay: 0 }} // delay on enter
             >
-              <div className="navbar max-w-2/3 mx-auto px-4 py-2">
+              <div className="navbar px-4 md:px-0 md:max-w-4/5 mx-auto">
                 <div className="navbar-start space-x-10 w-full">
                   <div className="flex items-center">
                     <img
@@ -150,7 +170,7 @@ const Navbar = () => {
                       RoshoiBondhu
                     </a>
                   </div>
-                  <ul className="menu menu-horizontal px-1 hidden lg:flex text-[15px] font-bold space-x-3">
+                  <ul className="menu menu-horizontal px-1 hidden 2xl:flex text-[15px] font-bold space-x-3">
                     {links}
                   </ul>
                 </div>
@@ -165,13 +185,32 @@ const Navbar = () => {
                       <FaMoon className="text-gray-800" />
                     )}
                   </button>
-                  <button
-                    data-tooltip-id="user-info"
-                    data-tooltip-content={user?.displayName}
-                    onClick={handleUserIconClick}
-                  >
-                    <FiUser className="w-6 h-6 lg:mr-3 hover:cursor-pointer hover:text-[#e02f21]" />
-                  </button>
+                  <div className="dropdown hidden 2xl:block drawer-end pt-[6px]">
+                    <label tabIndex={0} className="hover:cursor-pointer">
+                      <button
+                        onClick={handleUserIconClick}
+                        data-tooltip-id="user-info"
+                        data-tooltip-content={user?.displayName}
+                      >
+                        <FiUser className="w-6 h-6 lg:mr-3 hover:cursor-pointer hover:text-[#e02f21]" />
+                      </button>
+                    </label>
+
+                    <ul
+                      tabIndex={0}
+                      className="mt-3 z-[1] p-4 shadow menu menu-sm dropdown-content bg-white rounded-box w-52 text-black space-y-2"
+                    >
+                      <li>
+                        <NavLink
+                          to="/dashboard"
+                          className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4"
+                          onClick={closeDrawer}
+                        >
+                          <p>Dashboard</p>
+                        </NavLink>
+                      </li>
+                    </ul>
+                  </div>
 
                   {user ? (
                     <button onClick={logoutUser}>
@@ -188,7 +227,7 @@ const Navbar = () => {
                     Add recipe
                   </Link>
                 </div>
-                <div className="ml-2 lg:hidden p-0 m-0">
+                <div className="ml-2 2xl:hidden p-0 m-0">
                   <button onClick={openDrawer} className="p-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -214,7 +253,7 @@ const Navbar = () => {
 
       {/* Original Navbar (when not scrolled) */}
       {!scrolled && (
-        <div className="navbar max-w-2/3 mx-auto">
+        <div className="navbar px-3 pt-4 md:px-0 md:max-w-4/5 mx-auto">
           <div className="navbar-start space-x-10 w-full">
             <div className="flex items-center">
               <img src={logo} className="w-8 lg:w-12 h-8 lg:h-12" alt="Logo" />
@@ -222,7 +261,7 @@ const Navbar = () => {
                 RoshoiBondhu
               </a>
             </div>
-            <ul className="menu menu-horizontal px-1 hidden lg:flex text-[15px] font-bold space-x-3">
+            <ul className="menu menu-horizontal px-1 hidden 2xl:flex text-[15px] font-bold space-x-3">
               {links}
             </ul>
           </div>
@@ -238,7 +277,7 @@ const Navbar = () => {
               )}
             </button>
 
-            <div className="dropdown drawer-end pt-[6px]">
+            <div className="dropdown hidden 2xl:block drawer-end pt-[6px]">
               <label tabIndex={0} className="hover:cursor-pointer">
                 <button
                   onClick={handleUserIconClick}
@@ -260,7 +299,6 @@ const Navbar = () => {
                     onClick={closeDrawer}
                   >
                     <p>Dashboard</p>
-                    <FaArrowRight className="block lg:hidden" />
                   </NavLink>
                 </li>
               </ul>
@@ -281,7 +319,7 @@ const Navbar = () => {
               Add recipe
             </Link>
           </div>
-          <div className="ml-2 lg:hidden p-0 m-0">
+          <div className="ml-2 2xl:hidden p-0 m-0">
             <button onClick={openDrawer} className="p-2 ">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -335,6 +373,15 @@ const Navbar = () => {
           </button>
         </div>
         <ul className="space-y-6 font-bold mt-12">
+          <NavLink
+            to="/dashboard"
+            className="hover:text-[#e02f21] lg:hover:bg-[#f8deddbe] px-4 py-2 rounded-2xl flex items-center gap-4"
+            onClick={closeDrawer}
+          >
+            <p>Dashboard</p>
+            <FaArrowRight className="block 2xl:hidden" />
+          </NavLink>
+
           {links}
           <Link
             to="/add-recipe"
