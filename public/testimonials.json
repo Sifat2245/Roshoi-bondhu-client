@@ -3,7 +3,7 @@
     "id": 1,
     "name": "Chloe Sanders",
     "role": "Chef",
-    "image": "https://i.ibb.co/9nt6D2q/testimonial-chef.jpg",
+    "image": "https://i.pravatar.cc/60",
     "rating": 5,
     "message": "Platea offers more than just food; it’s an experience. As a chef, working here means discovering new things every day. The creative presentations and bold flavors set Platea apart in the culinary world. Being part of such a dedicated team is a real pleasure, and I’m excited to see what innovations are next."
   },
@@ -11,7 +11,7 @@
     "id": 2,
     "name": "James Carter",
     "role": "Food Critic",
-    "image": "https://i.ibb.co/zZDq9M6/testimonial-critic.jpg",
+    "image": "https://i.pravatar.cc/10",
     "rating": 4,
     "message": "Every dish tells a story. The ambiance and creativity here are unmatched. As a food critic, I’ve tasted many meals, but few have left such a lasting impression."
   },
@@ -19,7 +19,7 @@
     "id": 3,
     "name": "Ava Rodriguez",
     "role": "Customer",
-    "image": "https://i.ibb.co/qRYDvTh/testimonial-customer1.jpg",
+    "image": "https://i.pravatar.cc/20",
     "rating": 5,
     "message": "From the moment we walked in, we were treated like royalty. The food was exquisite, and the service was top-notch. Definitely coming back!"
   },
@@ -27,7 +27,7 @@
     "id": 4,
     "name": "Liam Johnson",
     "role": "Event Organizer",
-    "image": "https://i.ibb.co/zJ5FfFn/testimonial-event.jpg",
+    "image": "https://i.pravatar.cc/50",
     "rating": 5,
     "message": "We hosted a corporate dinner here, and everything was flawless. The staff handled every detail professionally, and our guests were impressed beyond words."
   },
@@ -35,7 +35,7 @@
     "id": 5,
     "name": "Sophia Martinez",
     "role": "Sous Chef",
-    "image": "https://i.ibb.co/HgKhWPC/testimonial-souschef.jpg",
+    "image": "https://i.pravatar.cc/40",
     "rating": 4,
     "message": "Working here challenges me every day in the best way. The team pushes each other to be creative and deliver unforgettable dining experiences."
   },
@@ -43,7 +43,7 @@
     "id": 6,
     "name": "Benjamin Lee",
     "role": "Food Blogger",
-    "image": "https://i.ibb.co/cQpQs4C/testimonial-blogger.jpg",
+    "image": "https://i.pravatar.cc/30",
     "rating": 5,
     "message": "I love discovering hidden culinary gems, and this place is definitely one of them. The fusion of flavors is bold and inspiring—perfect for my next blog post!"
   }

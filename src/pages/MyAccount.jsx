@@ -13,10 +13,10 @@ const MyAccount = () => {
     return (
         <div className='dark:bg-gray-800 dark:text-white transition-all duration-400'>
             <PageTitle title={'My Account - RoshoiBondhu'}></PageTitle>
-            <div>
+            {/* <div>
                 <Navbar></Navbar>
-            </div>
-            <div className='dark:bg-gray-900 relative text-center py-28 px-4 bg-[#00000010] mt-12'>
+            </div> */}
+            {/* <div className='dark:bg-gray-900 relative text-center py-28 px-4 bg-[#00000010] mt-12'>
                 <h1 className='text-4xl font-bold mb-4'>My Account</h1>
 
 
@@ -25,7 +25,7 @@ const MyAccount = () => {
                     alt="Background Decoration"
                     className="absolute top-60 lg:top-28"
                 />
-            </div>
+            </div> */}
 
             <div>
                 {user ? (
@@ -147,13 +147,13 @@ const MyAccount = () => {
 
 
 
-            <div>
+            {/* <div>
                 <PopularTags></PopularTags>
             </div>
 
             <div>
                 <Footer></Footer>
-            </div>
+            </div> */}
         </div>
     );
 };
