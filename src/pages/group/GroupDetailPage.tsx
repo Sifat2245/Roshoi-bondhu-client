@@ -190,6 +190,14 @@ const GroupDetailPage = () => {
                       onOpenComments={(selected) => setSelectedPostForComments(selected)}
                       onOpenShare={() => {}}
                       onRequireAuth={requireAuth}
+                      onDeletePost={(deletedId) =>
+                        setPosts((prev) => prev.filter((p) => p.id !== deletedId))
+                      }
+                      onUpdatePost={(updated) =>
+                        setPosts((prev) =>
+                          prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
+                        )
+                      }
                     />
                   ))
                 ) : (

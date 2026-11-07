@@ -60,7 +60,7 @@ const ProfileHeader = ({
       </div>
 
       {/* 2. Profile Details & Overlapping Avatar Row */}
-      <div className="max-w-[1095px] mx-auto px-4 sm:px-8 pb-3">
+      <div className="max-w-[1095px] mx-auto px-4 sm:px-8 pb-6 sm:pb-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 -mt-16 sm:-mt-24 relative z-10">
           {/* Left: Overlapping Avatar + Names */}
           <div className="flex flex-col sm:flex-row sm:items-end gap-5">

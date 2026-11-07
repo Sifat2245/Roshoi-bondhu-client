@@ -52,7 +52,7 @@ const AllFriendsSplitView = ({ friends = [], token, loading = false }) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search Friends"
-            className="w-full pl-9 pr-3 py-2 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-xs font-medium dark:text-white focus:outline-none focus:ring-1 focus:ring-[#1877f2]"
+            className="w-full pl-9 pr-3 py-2 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-xs font-medium dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21]"
           />
         </div>
 
@@ -77,14 +77,14 @@ const AllFriendsSplitView = ({ friends = [], token, loading = false }) => {
                   onClick={() => setSelectedFriendId(f.id)}
                   className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition ${
                     isSelected
-                      ? 'bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40'
+                      ? 'bg-red-50/70 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40'
                       : 'hover:bg-gray-100 dark:hover:bg-[#3a3b3c]'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar src={f.image} alt={f.name} size="md" />
                     <div className="truncate">
-                      <p className={`font-bold text-xs truncate ${isSelected ? 'text-[#1877f2]' : 'text-gray-900 dark:text-white'}`}>
+                      <p className={`font-bold text-xs truncate ${isSelected ? 'text-[#e02f21]' : 'text-gray-900 dark:text-white'}`}>
                         {f.name}
                       </p>
                       <p className="text-[11px] text-gray-500 truncate">

@@ -73,7 +73,7 @@ const FriendRequestsView: React.FC<FriendRequestsViewProps> = ({
               <button
                 type="button"
                 onClick={() => setVisibleCount((prev) => prev + 12)}
-                className="flex items-center gap-1.5 text-xs font-bold text-[#1877f2] hover:bg-blue-50 dark:hover:bg-blue-950/40 px-4 py-2 rounded-xl transition"
+                className="flex items-center gap-1.5 text-xs font-bold text-[#e02f21] hover:bg-red-50 dark:hover:bg-red-950/40 px-4 py-2 rounded-xl transition cursor-pointer"
               >
                 <span>See more</span>
                 <ChevronDown size={14} />

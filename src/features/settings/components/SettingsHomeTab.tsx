@@ -1,135 +1,135 @@
 import React from 'react';
-import { Link } from 'react-router';
 import Avatar from '../../../components/ui/Avatar';
+import logo from '../../../assets/logo.png';
 import {
   ChevronRight,
-  User,
-  Lock,
-  ChefHat,
+  ShieldAlert,
+  BadgeCheck,
+  Users2,
+  Glasses,
 } from 'lucide-react';
 
-const SettingsHomeTab = ({ user, onNavigateTab }) => {
+export interface SettingsHomeTabProps {
+  user: any;
+  onNavigateTab: (tab: string) => void;
+}
+
+export const SettingsHomeTab: React.FC<SettingsHomeTabProps> = ({ user, onNavigateTab }) => {
   return (
-    <div className="space-y-6 animate-in fade-in duration-150">
-      {/* Clean Meta-style Header without noisy banners */}
-      <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
-        <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-          Account Center
-        </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-          Manage your connected experiences and account settings across Heshel.
+    <div className="space-y-7 animate-in fade-in duration-150 select-none">
+      {/* 1. Header matching Screenshot 1 */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+          Home
+        </h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+          Manage your settings across your profiles and Heshel devices all in one place.
         </p>
       </div>
 
-      {/* Profiles Card */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-          Profiles
-        </h4>
+      {/* 2. Top Account & Security Cards matching Screenshot 1 */}
+      <div className="space-y-3">
+        {/* User Account / Profiles Pill Card */}
         <button
           type="button"
-          onClick={() => onNavigateTab('PERSONAL')}
-          className="w-full bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-5 border border-gray-200 dark:border-gray-800 shadow-xs flex items-center justify-between hover:border-gray-300 dark:hover:border-gray-700 transition cursor-pointer text-left"
+          onClick={() => onNavigateTab('MANAGE')}
+          className="w-full bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-4.5 border border-gray-200/90 dark:border-gray-800 shadow-2xs flex items-center justify-between hover:bg-gray-50/70 dark:hover:bg-[#2c2d2e] transition cursor-pointer text-left"
         >
-          <div className="flex items-center gap-3.5">
-            <Avatar src={user?.image} alt={user?.name} size="md" />
-            <div>
-              <p className="font-bold text-sm text-gray-900 dark:text-white">
-                {user?.name}
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#343536] flex items-center justify-center shrink-0">
+              <img src={logo} alt="Heshel" className="h-6 w-auto object-contain" />
+            </div>
+            <div className="truncate">
+              <p className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                {user?.email || 'chef@heshel.com'}
               </p>
-              <p className="text-xs text-gray-400">{user?.email}</p>
-              <span className="inline-block mt-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
-                Heshel • {user?.role || 'User'}
-              </span>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                1 profile
+              </p>
             </div>
           </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Avatar src={user?.image} alt={user?.name} size="sm" />
+            <ChevronRight size={18} className="text-gray-400" />
+          </div>
+        </button>
+
+        {/* Security Checkup Card */}
+        <button
+          type="button"
+          onClick={() => onNavigateTab('SECURITY')}
+          className="w-full bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-4.5 border border-gray-200/90 dark:border-gray-800 shadow-2xs flex items-center justify-between hover:bg-gray-50/70 dark:hover:bg-[#2c2d2e] transition cursor-pointer text-left"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <ShieldAlert size={20} />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-gray-900 dark:text-white">
+                Heshel Security Checkup
+              </p>
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
+                1 recommended action
+              </p>
+            </div>
+          </div>
+
           <ChevronRight size={18} className="text-gray-400 shrink-0" />
         </button>
       </div>
 
-      {/* Security Checkup Card (Subtle & Monochrome) */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-          Account Settings
-        </h4>
-        <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs divide-y divide-gray-100 dark:divide-gray-800">
-          {/* Password & Security Row */}
-          <button
-            type="button"
-            onClick={() => onNavigateTab('SECURITY')}
-            className="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#3a3b3c]/50 transition cursor-pointer text-left rounded-t-2xl"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
-                <Lock size={18} />
-              </div>
-              <div>
-                <p className="font-bold text-sm text-gray-900 dark:text-white">
-                  Password and security
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Change password, two-factor authentication, and where you're logged in
-                </p>
-              </div>
-            </div>
-            <ChevronRight size={18} className="text-gray-400 shrink-0" />
-          </button>
+      {/* 3. More from Heshel matching Screenshot 1 */}
+      <div className="space-y-3 pt-2">
+        <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+          More from Heshel
+        </h3>
 
-          {/* Personal Details Row */}
-          <button
-            type="button"
-            onClick={() => onNavigateTab('PERSONAL')}
-            className="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#3a3b3c]/50 transition cursor-pointer text-left rounded-b-2xl"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
-                <User size={18} />
-              </div>
-              <div>
-                <p className="font-bold text-sm text-gray-900 dark:text-white">
-                  Personal details
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Contact info, username, birthday, and culinary bio
-                </p>
-              </div>
-            </div>
-            <ChevronRight size={18} className="text-gray-400 shrink-0" />
-          </button>
-        </div>
-      </div>
-
-      {/* Quick Shortcuts (Clean Monochrome) */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-          More For You
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Link
-            to={user ? `/profile/${user.id}` : '/login'}
-            className="p-4 bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition shadow-xs flex items-center gap-3.5"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
-              <User size={18} />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          {/* Card 1: Heshel Verified */}
+          <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 border border-gray-200/90 dark:border-gray-800 shadow-2xs space-y-4 hover:border-gray-300 dark:hover:border-gray-700 transition">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <BadgeCheck size={22} />
             </div>
             <div>
-              <p className="font-bold text-xs text-gray-900 dark:text-white">Public Profile</p>
-              <p className="text-[11px] text-gray-400">View how others see your profile</p>
+              <h4 className="font-bold text-sm text-gray-900 dark:text-white">
+                Heshel Verified
+              </h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Verified home chef badge
+              </p>
             </div>
-          </Link>
+          </div>
 
-          <Link
-            to="/groups"
-            className="p-4 bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition shadow-xs flex items-center gap-3.5"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
-              <ChefHat size={18} />
+          {/* Card 2: Foodie Communities */}
+          <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 border border-gray-200/90 dark:border-gray-800 shadow-2xs space-y-4 hover:border-gray-300 dark:hover:border-gray-700 transition">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <Users2 size={22} />
             </div>
             <div>
-              <p className="font-bold text-xs text-gray-900 dark:text-white">Food Groups</p>
-              <p className="text-[11px] text-gray-400">Manage your culinary communities</p>
+              <h4 className="font-bold text-sm text-gray-900 dark:text-white">
+                Foodie Clubs
+              </h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Family & secret recipe groups
+              </p>
             </div>
-          </Link>
+          </div>
+
+          {/* Card 3: AI Kitchen / Smart Specs */}
+          <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 border border-gray-200/90 dark:border-gray-800 shadow-2xs space-y-4 hover:border-gray-300 dark:hover:border-gray-700 transition">
+            <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <Glasses size={22} />
+            </div>
+            <div>
+              <h4 className="font-bold text-sm text-gray-900 dark:text-white">
+                Chef Studio
+              </h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Smart kitchen recipes & AI tools
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

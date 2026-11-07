@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router';
 import {
   Users,
   UserCheck,
@@ -15,6 +16,8 @@ const FriendsSidebar = ({
   onSelectSection,
   requestCount = 0,
 }) => {
+  const navigate = useNavigate();
+
   const menuItems = [
     {
       id: 'home',
@@ -60,6 +63,14 @@ const FriendsSidebar = ({
     },
   ];
 
+  const handleItemClick = (id) => {
+    if (id === 'all') {
+      navigate('/friends/list');
+    } else {
+      onSelectSection(id);
+    }
+  };
+
   return (
     <div className="w-full bg-white dark:bg-[#242526] h-full flex flex-col p-3 border-r border-gray-200 dark:border-gray-800 shadow-xs">
       {/* Top Header */}
@@ -69,7 +80,7 @@ const FriendsSidebar = ({
         </h1>
         <button
           type="button"
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition"
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition cursor-pointer"
           title="Friend Settings"
         >
           <Settings size={18} />
@@ -86,7 +97,7 @@ const FriendsSidebar = ({
             <button
               key={item.id}
               type="button"
-              onClick={() => onSelectSection(item.id)}
+              onClick={() => handleItemClick(item.id)}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer ${
                 isActive
                   ? 'bg-gray-100 dark:bg-[#3a3b3c] text-gray-900 dark:text-white font-bold'
@@ -97,7 +108,7 @@ const FriendsSidebar = ({
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                     isActive
-                      ? 'bg-[#1877f2] text-white'
+                      ? 'bg-[#e02f21] text-white shadow-xs'
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
                   }`}
                 >

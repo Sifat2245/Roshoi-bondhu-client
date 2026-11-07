@@ -23,6 +23,8 @@ import {
   X,
   Bell,
   UserCheck,
+  Menu,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 const RECENT_SEARCHES_KEY = 'heshel_recent_searches';
@@ -30,9 +32,17 @@ const DEFAULT_RECENT = ['#KacchiBiryani', 'Chef Rahima', 'Shahi Morog Polao', 'I
 
 export interface SocialHeaderProps {
   onOpenCreatePost?: () => void;
+  onToggleLeftSidebar?: () => void;
+  onToggleRightSidebar?: () => void;
+  hasActiveFilters?: boolean;
 }
 
-const SocialHeader: React.FC<SocialHeaderProps> = ({ onOpenCreatePost }) => {
+const SocialHeader: React.FC<SocialHeaderProps> = ({
+  onOpenCreatePost,
+  onToggleLeftSidebar,
+  onToggleRightSidebar,
+  hasActiveFilters = false,
+}) => {
   const { data: session } = useSession();
   const { language, toggleLanguage } = useLanguage();
   const { darkMode, setDarkMode } = useDarkMode();
@@ -182,10 +192,22 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({ onOpenCreatePost }) => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full h-14 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-gray-800 shadow-xs px-3 sm:px-4 flex items-center justify-between">
-      {/* Left: Brand Logo & Interactive Search with Recent Searches Dropdown */}
-      <div ref={searchContainerRef} className="relative flex items-center gap-2 sm:gap-3 min-w-[200px] sm:min-w-[260px]">
+      {/* Left: Brand Logo, Mobile Drawer Toggle & Interactive Search */}
+      <div ref={searchContainerRef} className="relative flex items-center gap-1.5 sm:gap-2.5 min-w-0 sm:min-w-[240px]">
+        {/* Mobile Left Sidebar Toggle Button */}
+        {onToggleLeftSidebar && (
+          <button
+            type="button"
+            onClick={onToggleLeftSidebar}
+            className="lg:hidden w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer shrink-0"
+            title="Open Menu"
+          >
+            <Menu size={18} />
+          </button>
+        )}
+
         <Link to="/" className="flex-shrink-0 flex items-center">
-          <img src={logo} alt="Heshel" className="h-9 w-auto object-contain" />
+          <img src={logo} alt="Heshel" className="h-8 sm:h-9 w-auto object-contain" />
         </Link>
 
         {/* Search Input Box */}
@@ -301,7 +323,22 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({ onOpenCreatePost }) => {
       </nav>
 
       {/* Right: Controls & User Profile */}
-      <div className="flex items-center gap-1.5 sm:gap-2 min-w-[200px] sm:min-w-[260px] justify-end">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-end">
+        {/* Mobile Recipe Filter Toggle Button */}
+        {onToggleRightSidebar && (
+          <button
+            type="button"
+            onClick={onToggleRightSidebar}
+            className="xl:hidden relative w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer shrink-0"
+            title="Filter Recipes & Food"
+          >
+            <SlidersHorizontal size={17} />
+            {hasActiveFilters && (
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#e02f21] rounded-full ring-2 ring-white dark:ring-[#242526]" />
+            )}
+          </button>
+        )}
+
         {/* Create Post Quick Button */}
         {user && onOpenCreatePost && (
           <button

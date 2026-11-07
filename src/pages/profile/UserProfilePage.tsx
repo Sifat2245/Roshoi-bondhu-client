@@ -6,6 +6,9 @@ import SocialHeader from '../../widgets/navbar/SocialHeader';
 import ProfileHeader from '../../features/profile/components/ProfileHeader';
 import ProfileNavTabs from '../../features/profile/components/ProfileNavTabs';
 import ProfileIntroCard from '../../features/profile/components/ProfileIntroCard';
+import ProfileAboutCard from '../../features/profile/components/ProfileAboutCard';
+import ProfileFriendsCard from '../../features/profile/components/ProfileFriendsCard';
+import ProfilePhotosCard from '../../features/profile/components/ProfilePhotosCard';
 import CreatePostTrigger from '../../features/posts/components/CreatePostTrigger';
 import PostCard from '../../features/posts/components/PostCard';
 import EditProfileModal from '../../features/profile/components/EditProfileModal';
@@ -259,50 +262,98 @@ const UserProfilePage = () => {
           postCount={posts.length}
         />
 
-        {/* Main 2-Column Content Area with generous gap */}
-        <div className="max-w-[1095px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
-            {/* Left Column: Intro & Personal Details Card */}
-            <div className="w-full lg:w-[360px] shrink-0 lg:sticky lg:top-18 self-start">
-              <ProfileIntroCard
+        {/* Main Content Area with generous gap (matching Image 1) */}
+        <div className="max-w-[1095px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-16">
+          {activeTab === 'ABOUT' ? (
+            /* About View (Matching Image 2 & Image 3) */
+            <div className="space-y-8 animate-in fade-in duration-200">
+              <ProfileAboutCard
                 profile={profile}
                 isOwnProfile={isOwnProfile}
                 onOpenEditModal={() => setIsEditModalOpen(true)}
               />
+              <ProfileFriendsCard
+                profile={profile}
+                isOwnProfile={isOwnProfile}
+              />
             </div>
-
-            {/* Right Column: User Stream / Posts Feed */}
-            <div className="flex-1 max-w-[700px] w-full mx-auto space-y-4">
-              {/* "What's on your mind?" Create Post Trigger (if own profile) */}
-              {isOwnProfile && (
-                <CreatePostTrigger
-                  onClick={(mode) => {
-                    setCreateInitialMode(mode);
-                    setIsCreatePostOpen(true);
-                  }}
-                  onRequireAuth={requireAuth}
+          ) : activeTab === 'FOLLOWERS' ? (
+            /* Friends / Followers View (Matching Image 3) */
+            <div className="animate-in fade-in duration-200">
+              <ProfileFriendsCard
+                profile={profile}
+                isOwnProfile={isOwnProfile}
+              />
+            </div>
+          ) : activeTab === 'PHOTOS' ? (
+            /* Photos View (Matching Image 4) */
+            <div className="animate-in fade-in duration-200">
+              <ProfilePhotosCard posts={posts} />
+            </div>
+          ) : (
+            /* Default 2-Column Feed: Intro Sidebar + Posts (Matching Image 1) */
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
+              {/* Left Column: Intro & Personal Details Card */}
+              <div className="w-full lg:w-[360px] shrink-0 lg:sticky lg:top-18 self-start">
+                <ProfileIntroCard
+                  profile={profile}
+                  isOwnProfile={isOwnProfile}
+                  onOpenEditModal={() => setIsEditModalOpen(true)}
                 />
-              )}
+              </div>
 
-              {/* Posts Stream */}
-              {filteredPosts.length > 0 ? (
-                filteredPosts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    onOpenComments={(selected) => setSelectedPostForComments(selected)}
-                    onOpenShare={() => {}}
+              {/* Right Column: User Stream / Posts Feed */}
+              <div className="flex-1 max-w-[700px] w-full mx-auto space-y-4">
+                {/* "What's on your mind?" Create Post Trigger (if own profile) */}
+                {isOwnProfile && (
+                  <CreatePostTrigger
+                    onClick={(mode) => {
+                      setCreateInitialMode(mode);
+                      setIsCreatePostOpen(true);
+                    }}
                     onRequireAuth={requireAuth}
                   />
-                ))
-              ) : (
-                <div className="bg-white dark:bg-[#242526] rounded-2xl p-10 text-center border border-gray-100 dark:border-gray-800 space-y-2">
-                  <Utensils size={28} className="mx-auto text-gray-400" />
-                  <p className="text-xs text-gray-500 font-medium">No posts or recipes shared yet.</p>
-                </div>
-              )}
+                )}
+
+                {/* Posts Stream */}
+                {filteredPosts.length > 0 ? (
+                  filteredPosts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      onOpenComments={(selected) => setSelectedPostForComments(selected)}
+                      onOpenShare={() => {}}
+                      onRequireAuth={requireAuth}
+                      onDeletePost={(deletedId) =>
+                        setPosts((prev) => prev.filter((p) => p.id !== deletedId))
+                      }
+                      onUpdatePost={(updated) =>
+                        setPosts((prev) =>
+                          prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
+                        )
+                      }
+                      onPinPost={(pinnedId, pinnedState) => {
+                        setPosts((prev) => {
+                          const updated = prev.map((p) =>
+                            p.id === pinnedId ? { ...p, isPinned: pinnedState } : p
+                          );
+                          return [
+                            ...updated.filter((p) => p.isPinned),
+                            ...updated.filter((p) => !p.isPinned),
+                          ];
+                        });
+                      }}
+                    />
+                  ))
+                ) : (
+                  <div className="bg-white dark:bg-[#242526] rounded-2xl p-10 text-center border border-gray-100 dark:border-gray-800 space-y-2">
+                    <Utensils size={28} className="mx-auto text-gray-400" />
+                    <p className="text-xs text-gray-500 font-medium">No posts or recipes shared yet.</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

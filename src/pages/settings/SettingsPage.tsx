@@ -3,15 +3,15 @@ import { useSession } from '../../lib/auth-client';
 import { SettingsLayout } from '../../app/layouts/SettingsLayout';
 import SettingsSidebar from '../../features/settings/components/SettingsSidebar';
 import SettingsHomeTab from '../../features/settings/components/SettingsHomeTab';
-import SettingsPersonalTab from '../../features/settings/components/SettingsPersonalTab';
 import SettingsSecurityTab from '../../features/settings/components/SettingsSecurityTab';
+import SettingsManageAccountTab from '../../features/settings/components/SettingsManageAccountTab';
 import { Link } from 'react-router';
 
 const SettingsPage = () => {
   const { data: session } = useSession();
   const user = session?.user;
 
-  const [activeTab, setActiveTab] = useState('HOME'); // 'HOME', 'PERSONAL', 'SECURITY'
+  const [activeTab, setActiveTab] = useState('HOME'); // 'HOME', 'SECURITY', 'MANAGE'
 
   if (!user) {
     return (
@@ -48,15 +48,14 @@ const SettingsPage = () => {
         />
       )}
 
-      {activeTab === 'PERSONAL' && (
-        <SettingsPersonalTab
+      {activeTab === 'SECURITY' && (
+        <SettingsSecurityTab
           user={user}
-          onUserUpdated={() => window.location.reload()}
         />
       )}
 
-      {activeTab === 'SECURITY' && (
-        <SettingsSecurityTab
+      {activeTab === 'MANAGE' && (
+        <SettingsManageAccountTab
           user={user}
         />
       )}

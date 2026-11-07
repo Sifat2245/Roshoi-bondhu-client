@@ -226,6 +226,14 @@ const SocialFeed = () => {
                   onOpenComments={(selected) => setSelectedPostForComments(selected)}
                   onOpenShare={handleSharePost}
                   onRequireAuth={requireAuth}
+                  onDeletePost={(deletedId) =>
+                    setPosts((prev) => prev.filter((p) => p.id !== deletedId))
+                  }
+                  onUpdatePost={(updated) =>
+                    setPosts((prev) =>
+                      prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
+                    )
+                  }
                 />
               ))
             ) : (

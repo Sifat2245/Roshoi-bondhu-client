@@ -45,6 +45,10 @@ export const postsApi = {
     return apiClient.delete(`/api/post/${postId}`, { token });
   },
 
+  updatePost: async (postId: string, data: { caption?: string; title?: string }, token: string | null = null) => {
+    return apiClient.put(`/api/post/${postId}`, data, { token });
+  },
+
   uploadImage: async (file: File, token: string | null = null): Promise<any> => {
     const formData = new FormData();
     formData.append('image', file);

@@ -7,8 +7,8 @@ const LoginPage = () => {
   return (
     <AuthLayout maxWidth="max-w-[1280px]">
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-        {/* Left Column: Storytelling / Hero */}
-        <div className="lg:col-span-7 flex justify-center lg:justify-start">
+        {/* Left Column: Storytelling / Hero (Desktop only, hidden on responsive mobile/tablet) */}
+        <div className="hidden lg:flex lg:col-span-7 justify-center lg:justify-start">
           <LoginHero />
         </div>
 

@@ -104,7 +104,7 @@ const FriendProfilePreview = ({ friend, token }) => {
           <div className="flex items-center gap-2">
             <Link
               to={`/profile/${p.id}`}
-              className="px-4 py-2 bg-[#1877f2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+              className="px-4 py-2 bg-[#e02f21] hover:bg-[#c22417] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
             >
               <ExternalLink size={14} />
               <span>View Full Profile</span>
@@ -112,7 +112,7 @@ const FriendProfilePreview = ({ friend, token }) => {
 
             <Button
               variant="secondary"
-              className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
               <MessageCircle size={14} />
               <span>Message</span>
@@ -120,7 +120,7 @@ const FriendProfilePreview = ({ friend, token }) => {
 
             <button
               type="button"
-              className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition"
+              className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition cursor-pointer"
             >
               <MoreHorizontal size={16} />
             </button>
@@ -146,7 +146,7 @@ const FriendProfilePreview = ({ friend, token }) => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Briefcase size={15} className="text-blue-500 shrink-0" />
+            <Briefcase size={15} className="text-gray-500 dark:text-gray-400 shrink-0" />
             <span>Works as <b className="text-gray-800 dark:text-gray-200">{p.work || 'Culinary Creator'}</b></span>
           </div>
 

@@ -8,6 +8,7 @@ export const ROUTES = {
   PROFILE: '/profile',
   USER_PROFILE: (id: string) => `/profile/${id}`,
   FRIENDS: '/friends',
+  FRIENDS_LIST: '/friends/list',
   NOTIFICATIONS: '/notifications',
   SETTINGS: '/settings',
   ADMIN_PORTAL: '/admin-portal',

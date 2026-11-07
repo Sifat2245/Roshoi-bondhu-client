@@ -4,6 +4,7 @@ import GroupsPage from '../../pages/group/GroupsPage';
 import GroupDetailPage from '../../pages/group/GroupDetailPage';
 import UserProfilePage from '../../pages/profile/UserProfilePage';
 import FriendsPage from '../../pages/friends/FriendsPage';
+import FriendsListPage from '../../pages/friends/FriendsListPage';
 import NotificationsPage from '../../pages/notifications/NotificationsPage';
 import AdminPortal from '../../pages/admin-dashboard/AdminPortal';
 import LoginPage from '../../pages/auth/LoginPage';
@@ -80,6 +81,15 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <FriendsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/friends/list',
+    errorElement: <NotFound />,
+    element: (
+      <PrivateRoute>
+        <FriendsListPage />
       </PrivateRoute>
     ),
   },
