@@ -1,15 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Serif:ital,opsz,wght@0,8..144,100..900;1,8..144,100..900&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
 
-
-*{
-    font-family: "Roboto Serif", serif;
-}
-
 html, body {
   overflow-x: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f0f2f5;
 }
 
-
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Hide scrollbars for clean Facebook-style sticky panels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
