@@ -7,6 +7,7 @@ import LeftSidebar from '../../components/LeftSidebar';
 import GroupCard from '../../components/groups/GroupCard';
 import GroupSearchBar from '../../components/groups/GroupSearchBar';
 import CreateGroupModal from '../../components/groups/CreateGroupModal';
+import { GroupCardSkeleton } from '../../components/ui/Skeleton';
 import { Users } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -115,10 +116,15 @@ const GroupsPage = () => {
                 onOpenCreate={() => (user ? setIsCreateModalOpen(true) : requireAuth())}
               />
 
-              {/* Groups Grid */}
+              {/* Groups Grid / Skeleton Loading */}
               {loading ? (
-                <div className="py-20 text-center">
-                  <span className="w-8 h-8 border-3 border-[#e02f21] border-t-transparent rounded-full animate-spin inline-block" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                  <GroupCardSkeleton />
+                  <GroupCardSkeleton />
+                  <GroupCardSkeleton />
+                  <GroupCardSkeleton />
+                  <GroupCardSkeleton />
+                  <GroupCardSkeleton />
                 </div>
               ) : groups.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">

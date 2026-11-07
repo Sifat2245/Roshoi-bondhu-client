@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChefHat, Grid, Image as ImageIcon, Users, Info, MoreHorizontal } from 'lucide-react';
+import { ChefHat, Image as ImageIcon, Users, Info } from 'lucide-react';
 
 const ProfileNavTabs = ({ activeTab, onSelectTab, postCount = 0 }) => {
   const tabs = [
@@ -11,8 +11,8 @@ const ProfileNavTabs = ({ activeTab, onSelectTab, postCount = 0 }) => {
   ];
 
   return (
-    <div className="bg-white dark:bg-[#242526] shadow-xs border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-[1150px] mx-auto px-4 sm:px-8">
+    <div className="w-full bg-white dark:bg-[#242526] border-t border-b border-gray-200 dark:border-gray-800 shadow-xs">
+      <div className="max-w-[1095px] mx-auto px-4 sm:px-8">
         <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 no-scrollbar">
           {tabs.map((tab) => {
             const isSelected = activeTab === tab.id;
@@ -42,4 +42,3 @@ const ProfileNavTabs = ({ activeTab, onSelectTab, postCount = 0 }) => {
 };
 
 export default ProfileNavTabs;
-

@@ -11,7 +11,11 @@ import PostCard from '../../components/feed/PostCard';
 import EditProfileModal from '../../components/profile/EditProfileModal';
 import CreatePostModal from '../../components/modals/CreatePostModal';
 import PostDetailsModal from '../../components/modals/PostDetailsModal';
-import { Utensils } from 'lucide-react';
+import {
+  ProfileHeaderSkeleton,
+  ProfileIntroSkeleton,
+  PostSkeleton,
+} from '../../components/ui/Skeleton';
 import Swal from 'sweetalert2';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -251,8 +255,22 @@ const UserProfilePage = () => {
 
   if (loading && !profile) {
     return (
-      <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] flex items-center justify-center">
-        <span className="w-8 h-8 border-3 border-[#e02f21] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
+        <SocialHeader />
+        <div className="pt-14 w-full">
+          <ProfileHeaderSkeleton />
+          <div className="max-w-[1095px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
+              <div className="w-full lg:w-[360px] shrink-0">
+                <ProfileIntroSkeleton />
+              </div>
+              <div className="flex-1 max-w-[700px] w-full mx-auto space-y-4">
+                <PostSkeleton />
+                <PostSkeleton />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -313,11 +331,11 @@ const UserProfilePage = () => {
           postCount={posts.length}
         />
 
-        {/* Main 2-Column Content Area */}
-        <div className="max-w-[1150px] mx-auto px-4 sm:px-8 py-5">
-          <div className="flex flex-col lg:flex-row gap-5 items-start">
+        {/* Main 2-Column Content Area with generous gap */}
+        <div className="max-w-[1095px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
             {/* Left Column: Intro & Personal Details Card */}
-            <div className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-18 self-start">
+            <div className="w-full lg:w-[360px] shrink-0 lg:sticky lg:top-18 self-start">
               <ProfileIntroCard
                 profile={profile}
                 isOwnProfile={isOwnProfile}
@@ -326,7 +344,7 @@ const UserProfilePage = () => {
             </div>
 
             {/* Right Column: User Stream / Posts Feed */}
-            <div className="flex-1 max-w-[720px] w-full mx-auto space-y-4">
+            <div className="flex-1 max-w-[700px] w-full mx-auto space-y-4">
               {/* "What's on your mind?" Create Post Trigger (if own profile) */}
               {isOwnProfile && (
                 <CreatePostTrigger
