@@ -188,14 +188,14 @@ const UserProfilePage = () => {
     return (
       <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
         <SocialHeader />
-        <div className="pt-14 w-full">
+        <div className="pt-[100px] md:pt-14 w-full">
           <ProfileHeaderSkeleton />
-          <div className="max-w-[1095px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
-            <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
-              <div className="w-full lg:w-[360px] shrink-0">
+          <div className="max-w-[1250px] mx-auto px-4 sm:px-6 py-8">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
+              <div className="w-full lg:w-[420px] shrink-0">
                 <ProfileIntroSkeleton />
               </div>
-              <div className="flex-1 max-w-[700px] w-full mx-auto space-y-4">
+              <div className="flex-1 max-w-[780px] w-full mx-auto space-y-4">
                 <PostSkeleton />
                 <PostSkeleton />
               </div>
@@ -228,15 +228,10 @@ const UserProfilePage = () => {
   return (
     <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
       {/* 1. Fixed Topbar */}
-      <SocialHeader
-        onOpenCreatePost={() => {
-          setCreateInitialMode('CASUAL');
-          setIsCreatePostOpen(true);
-        }}
-      />
+      <SocialHeader />
 
-      {/* 2. Profile Page Body with pt-14 */}
-      <div className="pt-14 w-full">
+      {/* 2. Profile Page Body with pt-[100px] on mobile and pt-14 on desktop */}
+      <div className="pt-[100px] md:pt-14 w-full">
         {/* Profile Header Banner & Details */}
         <ProfileHeader
           profile={profile}
@@ -263,7 +258,7 @@ const UserProfilePage = () => {
         />
 
         {/* Main Content Area with generous gap (matching Image 1) */}
-        <div className="max-w-[1095px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-16">
+        <div className="max-w-[1250px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-16">
           {activeTab === 'ABOUT' ? (
             /* About View (Matching Image 2 & Image 3) */
             <div className="space-y-8 animate-in fade-in duration-200">
@@ -294,7 +289,7 @@ const UserProfilePage = () => {
             /* Default 2-Column Feed: Intro Sidebar + Posts (Matching Image 1) */
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
               {/* Left Column: Intro & Personal Details Card */}
-              <div className="w-full lg:w-[360px] shrink-0 lg:sticky lg:top-18 self-start">
+              <div className="w-full lg:w-[420px] xl:w-[440px] shrink-0 lg:sticky lg:top-18 self-start">
                 <ProfileIntroCard
                   profile={profile}
                   isOwnProfile={isOwnProfile}
@@ -303,7 +298,7 @@ const UserProfilePage = () => {
               </div>
 
               {/* Right Column: User Stream / Posts Feed */}
-              <div className="flex-1 max-w-[700px] w-full mx-auto space-y-4">
+              <div className="flex-1 max-w-[780px] w-full mx-auto space-y-4">
                 {/* "What's on your mind?" Create Post Trigger (if own profile) */}
                 {isOwnProfile && (
                   <CreatePostTrigger

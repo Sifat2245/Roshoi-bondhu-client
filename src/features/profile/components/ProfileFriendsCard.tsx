@@ -90,12 +90,12 @@ const ProfileFriendsCard: React.FC<ProfileFriendsCardProps> = ({ profile, isOwnP
           <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
             Friends
           </h2>
-          <p className="text-xs text-gray-500 font-medium">
+          <p className="text-sm text-gray-500 font-medium">
             {profile?.followersCount || MOCK_FRIENDS.length * 120} friends
           </p>
         </div>
 
-        <div className="flex items-center gap-3 text-xs font-bold">
+        <div className="flex items-center gap-3.5 text-sm font-bold">
           <Link
             to="/friends"
             className="text-[#e02f21] hover:underline transition"
@@ -111,9 +111,9 @@ const ProfileFriendsCard: React.FC<ProfileFriendsCardProps> = ({ profile, isOwnP
           </Link>
           <button
             type="button"
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 cursor-pointer"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 cursor-pointer"
           >
-            <MoreHorizontal size={18} />
+            <MoreHorizontal size={20} />
           </button>
         </div>
       </div>
@@ -127,7 +127,7 @@ const ProfileFriendsCard: React.FC<ProfileFriendsCardProps> = ({ profile, isOwnP
               key={tab}
               type="button"
               onClick={() => setActiveSubTab(tab)}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer ${
                 isSelected
                   ? 'bg-red-50 dark:bg-red-950/40 text-[#e02f21]'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -144,7 +144,7 @@ const ProfileFriendsCard: React.FC<ProfileFriendsCardProps> = ({ profile, isOwnP
         {filteredFriends.map((friend) => (
           <div
             key={friend.id}
-            className="flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800/50 border border-gray-100 dark:border-gray-800 transition group"
+            className="flex items-center justify-between p-3.5 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800/50 border border-gray-100 dark:border-gray-800 transition group"
           >
             <div className="flex items-center gap-3.5 min-w-0">
               <img
@@ -155,11 +155,11 @@ const ProfileFriendsCard: React.FC<ProfileFriendsCardProps> = ({ profile, isOwnP
               <div className="min-w-0">
                 <Link
                   to={`/profile/${friend.id}`}
-                  className="font-black text-xs sm:text-sm text-gray-900 dark:text-white hover:underline truncate block"
+                  className="font-black text-base sm:text-lg text-gray-900 dark:text-white hover:underline truncate block"
                 >
                   {friend.name}
                 </Link>
-                <p className="text-[11px] text-gray-500 font-medium mt-0.5">
+                <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5">
                   {friend.mutualFriends} mutual friends
                 </p>
               </div>
@@ -168,9 +168,9 @@ const ProfileFriendsCard: React.FC<ProfileFriendsCardProps> = ({ profile, isOwnP
             <button
               type="button"
               title="Friend options"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer shrink-0"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer shrink-0"
             >
-              <MoreHorizontal size={18} />
+              <MoreHorizontal size={20} />
             </button>
           </div>
         ))}
@@ -180,9 +180,9 @@ const ProfileFriendsCard: React.FC<ProfileFriendsCardProps> = ({ profile, isOwnP
       <div className="pt-2">
         <Link
           to="/friends/list"
-          className="w-full py-3 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full py-3 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-sm sm:text-base font-bold transition flex items-center justify-center gap-2 cursor-pointer"
         >
-          See all
+          See all friends
         </Link>
       </div>
     </div>

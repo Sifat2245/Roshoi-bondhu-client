@@ -131,7 +131,7 @@ export const FriendsListPage = () => {
       <SocialHeader />
 
       {/* 2. Main 2-Column Container */}
-      <div className="flex-1 mt-14 flex overflow-hidden">
+      <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
         {/* Left Sidebar: All Friends List (matching Facebook Screenshot 5) */}
         <aside className="w-full md:w-[340px] lg:w-[360px] h-full shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex flex-col shadow-xs">
           {/* Header with Back Arrow to /friends */}
@@ -145,7 +145,7 @@ export const FriendsListPage = () => {
                 <ArrowLeft size={20} />
               </Link>
               <div>
-                <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 block -mb-0.5">
+                <span className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 block -mb-0.5">
                   Friends
                 </span>
                 <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -156,19 +156,19 @@ export const FriendsListPage = () => {
 
             {/* Search Friends Input */}
             <div className="relative mt-2">
-              <Search size={15} className="absolute left-3 top-2.5 text-gray-400" />
+              <Search size={16} className="absolute left-3 top-3 text-gray-400" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search friends"
-                className="w-full pl-9 pr-3 py-2 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-xs font-medium dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21] transition"
+                className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm font-medium dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21] transition"
               />
             </div>
 
             {/* Friend count */}
             <div className="pt-2 px-1">
-              <p className="text-xs font-bold text-gray-700 dark:text-gray-300">
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
                 {friends.length} {friends.length === 1 ? 'friend' : 'friends'}
               </p>
             </div>
@@ -202,10 +202,10 @@ export const FriendsListPage = () => {
                     <div className="flex items-center gap-3 min-w-0">
                       <Avatar src={f.image} alt={f.name} size="md" />
                       <div className="truncate">
-                        <p className="font-bold text-xs truncate text-gray-900 dark:text-white">
+                        <p className="font-bold text-base truncate text-gray-900 dark:text-white">
                           {f.name}
                         </p>
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                           {f.mutualCount || 2} mutual friends
                         </p>
                       </div>
@@ -216,13 +216,13 @@ export const FriendsListPage = () => {
                       onClick={(e) => e.stopPropagation()}
                       className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition cursor-pointer"
                     >
-                      <MoreHorizontal size={16} />
+                      <MoreHorizontal size={18} />
                     </button>
                   </div>
                 );
               })
             ) : (
-              <div className="p-8 text-center text-xs text-gray-500">
+              <div className="p-8 text-center text-sm text-gray-500">
                 <Users size={28} className="mx-auto mb-2 text-gray-400" />
                 No friends found matching "{search}"
               </div>
@@ -299,7 +299,7 @@ export const FriendsListPage = () => {
                         <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                           {selectedFriend.name}
                         </h1>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-0.5">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 font-semibold mt-0.5">
                           {selectedFriend.mutualCount || 3} mutual friends •{' '}
                           {friendProfile?.followersCount || 12} followers
                         </p>
@@ -307,28 +307,28 @@ export const FriendsListPage = () => {
                     </div>
 
                     {/* Action Buttons: Message + Friends + View Full Profile */}
-                    <div className="flex items-center gap-2 self-center sm:self-end flex-wrap justify-center">
+                    <div className="flex items-center gap-2.5 self-center sm:self-end flex-wrap justify-center">
                       <Button
                         variant="secondary"
-                        className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer"
                       >
-                        <UserCheck size={14} className="text-[#e02f21]" />
+                        <UserCheck size={16} className="text-[#e02f21]" />
                         <span>Friends</span>
                       </Button>
 
                       <Button
                         variant="secondary"
-                        className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer"
                       >
-                        <MessageCircle size={14} />
+                        <MessageCircle size={16} />
                         <span>Message</span>
                       </Button>
 
                       <Link
                         to={`/profile/${selectedFriend.id}`}
-                        className="px-4 py-2 bg-[#e02f21] hover:bg-[#c22417] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                        className="px-5 py-2.5 bg-[#e02f21] hover:bg-[#c22417] text-white rounded-xl text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer"
                       >
-                        <ExternalLink size={14} />
+                        <ExternalLink size={16} />
                         <span>View Full Profile</span>
                       </Link>
                     </div>
@@ -336,7 +336,7 @@ export const FriendsListPage = () => {
 
                   {/* Profile Bio */}
                   {(friendProfile?.bio || selectedFriend?.bio) && (
-                    <div className="pt-2 text-xs text-gray-600 dark:text-gray-300 italic max-w-xl">
+                    <div className="pt-2 text-sm text-gray-600 dark:text-gray-300 italic max-w-xl">
                       "{friendProfile?.bio || selectedFriend?.bio}"
                     </div>
                   )}
@@ -348,7 +348,7 @@ export const FriendsListPage = () => {
                         key={tab}
                         type="button"
                         onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2.5 text-xs font-bold rounded-xl transition cursor-pointer shrink-0 ${
+                        className={`px-4 py-2.5 text-sm font-bold rounded-xl transition cursor-pointer shrink-0 ${
                           activeTab === tab
                             ? 'bg-[#e02f21] text-white shadow-xs'
                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'

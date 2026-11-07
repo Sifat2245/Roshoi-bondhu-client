@@ -98,13 +98,13 @@ const FriendsSidebar = ({
               key={item.id}
               type="button"
               onClick={() => handleItemClick(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-base font-bold transition cursor-pointer ${
                 isActive
-                  ? 'bg-gray-100 dark:bg-[#3a3b3c] text-gray-900 dark:text-white font-bold'
+                  ? 'bg-gray-100 dark:bg-[#3a3b3c] text-gray-900 dark:text-white shadow-xs'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/70 dark:hover:bg-[#3a3b3c]/60'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3.5">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                     isActive
@@ -112,19 +112,19 @@ const FriendsSidebar = ({
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
                   }`}
                 >
-                  <Icon size={18} />
+                  <Icon size={19} />
                 </div>
                 <span>{item.label}</span>
               </div>
 
               <div className="flex items-center gap-2">
                 {item.badge > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-[#e02f21] text-white text-xs font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-[#e02f21] text-white text-xs font-black">
                     {item.badge}
                   </span>
                 )}
                 {item.hasChevron && (
-                  <ChevronRight size={16} className="text-gray-400" />
+                  <ChevronRight size={18} className="text-gray-400" />
                 )}
               </div>
             </button>

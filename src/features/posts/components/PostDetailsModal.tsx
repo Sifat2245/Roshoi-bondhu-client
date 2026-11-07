@@ -123,11 +123,11 @@ const PostDetailsModal = ({ post, isOpen, onClose, onPostUpdated, onRequireAuth 
             <div>
               <Link
                 to={`/profile/${post.author?.id}`}
-                className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white hover:underline"
+                className="font-bold text-sm sm:text-base text-gray-900 dark:text-white hover:underline"
               >
                 {post.author?.name}
               </Link>
-              <p className="text-[11px] text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-400">
                 {new Date(post.createdAt).toLocaleDateString(undefined, {
                   month: 'short',
                   day: 'numeric',
@@ -141,26 +141,26 @@ const PostDetailsModal = ({ post, isOpen, onClose, onPostUpdated, onRequireAuth 
           {/* Recipe Title & Badges */}
           {isRecipe && post.title && (
             <div className="space-y-2">
-              <h4 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <ChefHat size={18} className="text-[#e02f21]" />
+              <h4 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                <ChefHat size={22} className="text-[#e02f21]" />
                 <span>{post.title}</span>
               </h4>
 
-              <div className="flex items-center gap-2 flex-wrap text-xs">
+              <div className="flex items-center gap-2 flex-wrap text-sm sm:text-base">
                 {post.preparationTime && (
-                  <span className="px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-semibold flex items-center gap-1">
-                    <Clock size={12} />
+                  <span className="px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-semibold flex items-center gap-1.5">
+                    <Clock size={14} />
                     <span>{post.preparationTime} mins</span>
                   </span>
                 )}
                 {post.servings && (
-                  <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1">
-                    <Users size={12} />
+                  <span className="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1.5">
+                    <Users size={14} />
                     <span>{post.servings} servings</span>
                   </span>
                 )}
                 {post.cuisine && (
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-semibold">
                     {post.cuisine}
                   </span>
                 )}
@@ -170,7 +170,7 @@ const PostDetailsModal = ({ post, isOpen, onClose, onPostUpdated, onRequireAuth 
 
           {/* Caption */}
           {post.caption && (
-            <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
               {post.caption}
             </p>
           )}
@@ -183,50 +183,50 @@ const PostDetailsModal = ({ post, isOpen, onClose, onPostUpdated, onRequireAuth 
           )}
 
           {/* Engagement Count line */}
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-1">
-            <span className="flex items-center gap-1 font-medium">
-              <Heart size={14} className="text-rose-500 fill-rose-500" />
+          <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500 dark:text-gray-400 pt-1">
+            <span className="flex items-center gap-1.5 font-semibold">
+              <Heart size={15} className="text-rose-500 fill-rose-500" />
               <span>{likeCount}</span>
             </span>
-            <span>{comments.length} comments</span>
+            <span className="font-medium">{comments.length} comments</span>
           </div>
 
           {/* Action Buttons Row */}
-          <div className="grid grid-cols-3 gap-1 pt-2 border-t border-gray-100 dark:border-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300">
+          <div className="grid grid-cols-3 gap-1 pt-2 border-t border-gray-100 dark:border-gray-800 text-sm font-bold text-gray-600 dark:text-gray-300">
             <button
               type="button"
               onClick={handleLike}
-              className={`py-2 rounded-xl flex items-center justify-center gap-1.5 transition ${
+              className={`py-2.5 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer ${
                 hasLiked
                   ? 'text-rose-500 font-black'
                   : 'hover:bg-gray-100 dark:hover:bg-[#3a3b3c]'
               }`}
             >
-              <Heart size={16} fill={hasLiked ? 'currentColor' : 'none'} />
+              <Heart size={18} fill={hasLiked ? 'currentColor' : 'none'} />
               <span>{hasLiked ? 'Liked' : 'Like'}</span>
             </button>
 
             <button
               type="button"
-              className="py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#3a3b3c] flex items-center justify-center gap-1.5 transition"
+              className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[#3a3b3c] flex items-center justify-center gap-2 transition cursor-pointer"
             >
-              <MessageCircle size={16} />
+              <MessageCircle size={18} />
               <span>Comment</span>
             </button>
 
             <button
               type="button"
-              className="py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#3a3b3c] flex items-center justify-center gap-1.5 transition"
+              className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[#3a3b3c] flex items-center justify-center gap-2 transition cursor-pointer"
             >
-              <Share2 size={16} />
+              <Share2 size={18} />
               <span>Share</span>
             </button>
           </div>
         </div>
 
         {/* Comments Section */}
-        <div className="p-4 sm:p-5 space-y-3.5 bg-gray-50/50 dark:bg-[#1e1f20]/50 flex-1">
-          <h5 className="font-bold text-xs uppercase tracking-wider text-gray-500">
+        <div className="p-4 sm:p-5 space-y-4 bg-gray-50/50 dark:bg-[#1e1f20]/50 flex-1">
+          <h5 className="font-black text-sm uppercase tracking-wider text-gray-500">
             Comments ({comments.length})
           </h5>
 
@@ -243,25 +243,25 @@ const PostDetailsModal = ({ post, isOpen, onClose, onPostUpdated, onRequireAuth 
               ))}
             </div>
           ) : comments.length > 0 ? (
-            <div className="space-y-3 max-h-60 overflow-y-auto no-scrollbar">
+            <div className="space-y-3.5 max-h-60 overflow-y-auto no-scrollbar">
               {comments.map((comment) => (
-                <div key={comment.id} className="flex gap-2.5 items-start group">
+                <div key={comment.id} className="flex gap-3 items-start group">
                   <Link to={`/profile/${comment.author?.id}`}>
                     <Avatar src={comment.author?.image} alt={comment.author?.name} size="sm" />
                   </Link>
                   <div className="flex-1">
-                    <div className="bg-white dark:bg-[#242526] p-2.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xs inline-block max-w-full">
+                    <div className="bg-white dark:bg-[#242526] p-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xs inline-block max-w-full">
                       <Link
                         to={`/profile/${comment.author?.id}`}
-                        className="font-bold text-xs text-gray-900 dark:text-white hover:underline block"
+                        className="font-bold text-sm text-gray-900 dark:text-white hover:underline block"
                       >
                         {comment.author?.name}
                       </Link>
-                      <p className="text-xs text-gray-800 dark:text-gray-200 mt-0.5 leading-relaxed break-words">
+                      <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5 leading-relaxed break-words">
                         {comment.content}
                       </p>
                     </div>
-                    <span className="text-[10px] text-gray-400 ml-2 mt-0.5 block">
+                    <span className="text-xs sm:text-sm text-gray-400 ml-2 mt-0.5 block">
                       {new Date(comment.createdAt).toLocaleDateString(undefined, {
                         month: 'short',
                         day: 'numeric',
@@ -272,13 +272,13 @@ const PostDetailsModal = ({ post, isOpen, onClose, onPostUpdated, onRequireAuth 
               ))}
             </div>
           ) : (
-            <p className="text-xs text-gray-400 py-3 text-center">
+            <p className="text-sm text-gray-400 py-3 text-center">
               No comments yet. Start the conversation!
             </p>
           )}
 
           {/* Add Comment Input Form */}
-          <form onSubmit={handleAddComment} className="flex items-center gap-2 pt-2">
+          <form onSubmit={handleAddComment} className="flex items-center gap-3 pt-2">
             <Avatar src={user?.image} alt={user?.name} size="sm" />
             <div className="flex-1 relative flex items-center">
               <input
@@ -286,7 +286,7 @@ const PostDetailsModal = ({ post, isOpen, onClose, onPostUpdated, onRequireAuth 
                 value={commentInput}
                 onChange={(e) => setCommentInput(e.target.value)}
                 placeholder="Write a public comment..."
-                className="w-full pl-3 pr-10 py-2 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-full text-xs dark:text-white focus:outline-none focus:border-[#e02f21]"
+                className="w-full pl-4 pr-11 py-2.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-full text-sm dark:text-white focus:outline-none focus:border-[#e02f21]"
               />
               <Button
                 type="submit"
@@ -294,9 +294,9 @@ const PostDetailsModal = ({ post, isOpen, onClose, onPostUpdated, onRequireAuth 
                 disabled={!commentInput.trim()}
                 variant="primary"
                 size="sm"
-                className="absolute right-1 w-7 h-7 p-0 rounded-full flex items-center justify-center shadow-none"
+                className="absolute right-1 w-8 h-8 p-0 rounded-full flex items-center justify-center shadow-none cursor-pointer"
               >
-                {!submittingComment && <Send size={12} />}
+                {!submittingComment && <Send size={14} />}
               </Button>
             </div>
           </form>

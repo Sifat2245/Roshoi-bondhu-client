@@ -13,7 +13,7 @@ export const FriendsLayout: React.FC<FriendsLayoutProps> = ({ children, sidebar 
       <SocialHeader />
 
       {/* Main 2-Column Split Layout */}
-      <div className="flex-1 mt-14 flex overflow-hidden">
+      <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
         {/* Left Sidebar (320px-360px) */}
         <aside className="w-full sm:w-[320px] md:w-[340px] xl:w-[360px] h-full shrink-0 overflow-y-auto no-scrollbar">
           {sidebar}

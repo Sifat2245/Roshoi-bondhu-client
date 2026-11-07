@@ -99,13 +99,13 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
       <div className="space-y-3">
         <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200/90 dark:border-gray-800 shadow-2xs overflow-hidden">
           <div className="flex items-center justify-between p-4 sm:p-4.5 border-b border-gray-100 dark:border-gray-800">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <span className="text-sm font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Heshel Profile
             </span>
             <button
               type="button"
               onClick={() => setIsEditProfileOpen(true)}
-              className="px-3.5 py-1.5 rounded-full bg-gray-100 dark:bg-[#343536] hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold text-gray-800 dark:text-gray-200 transition cursor-pointer"
+              className="px-4 py-2 rounded-full bg-gray-100 dark:bg-[#343536] hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-bold text-gray-800 dark:text-gray-200 transition cursor-pointer"
             >
               Manage
             </button>
@@ -114,10 +114,10 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
           <div className="p-4 sm:p-4.5 flex items-center gap-3.5">
             <Avatar src={user?.image} alt={user?.name} size="md" />
             <div>
-              <p className="font-bold text-sm text-gray-900 dark:text-white">
+              <p className="font-bold text-base text-gray-900 dark:text-white">
                 {user?.name}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {user?.email}
               </p>
             </div>
@@ -127,10 +127,10 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
 
       {/* 4. Account Ownership and Control (Deactivate / Delete) */}
       <div className="space-y-2 pt-2">
-        <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+        <h3 className="font-bold text-base text-gray-900 dark:text-white">
           Account ownership and control
         </h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1 leading-relaxed">
+        <p className="text-sm text-gray-500 dark:text-gray-400 -mt-1 leading-relaxed">
           Manage your data, deactivate or permanently delete your account.
         </p>
 
@@ -141,19 +141,19 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
             className="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50/70 dark:hover:bg-[#2c2d2e] transition cursor-pointer text-left"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/40 text-[#e02f21] flex items-center justify-center shrink-0">
-                <AlertTriangle size={20} />
+              <div className="w-11 h-11 rounded-xl bg-red-50 dark:bg-red-950/40 text-[#e02f21] flex items-center justify-center shrink-0">
+                <AlertTriangle size={22} />
               </div>
               <div>
-                <p className="font-bold text-sm text-gray-900 dark:text-white">
+                <p className="font-bold text-base text-gray-900 dark:text-white">
                   Deactivation or deletion
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   Temporarily deactivate or permanently delete your account and profiles
                 </p>
               </div>
             </div>
-            <ChevronRight size={18} className="text-gray-400 shrink-0" />
+            <ChevronRight size={20} className="text-gray-400 shrink-0" />
           </button>
         </div>
       </div>
@@ -173,7 +173,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
       >
         {!isConfirmStep ? (
           <div className="space-y-5">
-            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
               If you want to take a break from Heshel, you can deactivate your account. If you want to permanently remove your account, posts, recipes and data, let us know.
             </p>
 
@@ -181,7 +181,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
               {/* Option 1: Deactivate Account */}
               <label
                 onClick={() => setActionType('DEACTIVATE')}
-                className={`p-4 rounded-2xl border flex items-start gap-3.5 cursor-pointer transition ${
+                className={`p-4.5 rounded-2xl border flex items-start gap-3.5 cursor-pointer transition ${
                   actionType === 'DEACTIVATE'
                     ? 'border-[#e02f21] bg-red-50/40 dark:bg-red-950/20'
                     : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#2e2f30]'
@@ -196,12 +196,12 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
                 />
                 <div>
                   <div className="flex items-center gap-2">
-                    <UserX size={16} className="text-gray-700 dark:text-gray-300" />
-                    <p className="font-bold text-sm text-gray-900 dark:text-white">
+                    <UserX size={18} className="text-gray-700 dark:text-gray-300" />
+                    <p className="font-bold text-base text-gray-900 dark:text-white">
                       Deactivate account
                     </p>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                     Deactivating your account is temporary. Your profile and recipes will be hidden until you log back in.
                   </p>
                 </div>
@@ -210,7 +210,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
               {/* Option 2: Delete Account */}
               <label
                 onClick={() => setActionType('DELETE')}
-                className={`p-4 rounded-2xl border flex items-start gap-3.5 cursor-pointer transition ${
+                className={`p-4.5 rounded-2xl border flex items-start gap-3.5 cursor-pointer transition ${
                   actionType === 'DELETE'
                     ? 'border-[#e02f21] bg-red-50/40 dark:bg-red-950/20'
                     : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#2e2f30]'
@@ -225,22 +225,22 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
                 />
                 <div>
                   <div className="flex items-center gap-2">
-                    <Trash2 size={16} className="text-[#e02f21]" />
-                    <p className="font-bold text-sm text-gray-900 dark:text-white">
+                    <Trash2 size={18} className="text-[#e02f21]" />
+                    <p className="font-bold text-base text-gray-900 dark:text-white">
                       Delete account
                     </p>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                     Deleting your account is permanent. When you delete your Heshel account, you won't be able to retrieve your recipes, reviews, or followers.
                   </p>
                 </div>
               </label>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
               <Button
                 variant="secondary"
-                size="sm"
+                size="md"
                 onClick={() => setIsDeactivateModalOpen(false)}
                 className="cursor-pointer"
               >
@@ -248,7 +248,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
               </Button>
               <Button
                 variant="primary"
-                size="sm"
+                size="md"
                 onClick={handleProceedToConfirm}
                 className="cursor-pointer"
               >
@@ -259,27 +259,27 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
         ) : (
           /* Password Confirmation Step */
           <form onSubmit={handleExecuteAction} className="space-y-5">
-            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3">
-              <ShieldAlert size={20} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3">
+              <ShieldAlert size={22} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
                 For your security, please enter your password to confirm you want to{' '}
                 <b>{actionType === 'DEACTIVATE' ? 'deactivate' : 'permanently delete'}</b> your Heshel account.
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">
                 Password
               </label>
               <div className="relative">
-                <Lock size={15} className="absolute left-3.5 top-3 text-gray-400" />
+                <Lock size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
                 <input
                   type="password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Enter your current password"
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-[#f0f2f5] dark:bg-[#343536] rounded-xl text-xs dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21]"
+                  className="w-full pl-9 pr-3.5 py-3 bg-[#f0f2f5] dark:bg-[#343536] rounded-xl text-sm sm:text-base dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21]"
                 />
               </div>
             </div>

@@ -219,28 +219,28 @@ const PostCard: React.FC<PostCardProps> = ({
             <div className="flex items-center gap-1.5 flex-wrap">
               <Link
                 to={`/profile/${post.author?.id}`}
-                className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white hover:underline"
+                className="font-bold text-sm sm:text-base text-gray-900 dark:text-white hover:underline"
               >
                 {post.author?.name}
               </Link>
               {post.author?.role && post.author.role !== 'USER' && (
-                <span className="text-[9px] uppercase px-1.5 py-0.2 rounded font-black bg-red-100 dark:bg-red-950 text-[#e02f21]">
+                <span className="text-[10px] uppercase px-1.5 py-0.2 rounded font-black bg-red-100 dark:bg-red-950 text-[#e02f21]">
                   {post.author.role}
                 </span>
               )}
               {post.group && (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs sm:text-sm text-gray-500">
                   in{' '}
                   <Link
                     to={`/group/${post.group.slug}`}
-                    className="font-bold text-gray-700 dark:text-gray-300 hover:underline"
+                    className="font-bold text-gray-800 dark:text-gray-200 hover:underline"
                   >
                     {post.group.name}
                   </Link>
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               <span>
                 {new Date(post.createdAt).toLocaleDateString(undefined, {
                   month: 'short',
@@ -248,7 +248,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 })}
               </span>
               <span>•</span>
-              <Globe size={11} />
+              <Globe size={14} />
             </div>
           </div>
         </div>
@@ -258,25 +258,25 @@ const PostCard: React.FC<PostCardProps> = ({
           <button
             type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
             aria-label="Post options"
           >
-            <MoreHorizontal size={18} />
+            <MoreHorizontal size={20} />
           </button>
 
           {/* Action Menu Dropdown */}
           {isMenuOpen && (
-            <div className="absolute right-0 top-9 w-56 bg-white dark:bg-[#242526] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute right-0 top-10 w-64 bg-white dark:bg-[#242526] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 py-2 z-40 animate-in fade-in zoom-in-95 duration-100">
               {/* 1. Pin / Unpin Post */}
               <button
                 type="button"
                 onClick={handleTogglePin}
-                className="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-2.5 cursor-pointer"
+                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
               >
-                <Pin size={15} className={isPinned ? 'text-[#e02f21]' : 'text-gray-500'} />
+                <Pin size={18} className={isPinned ? 'text-[#e02f21]' : 'text-gray-500'} />
                 <div>
-                  <p className="font-bold">{isPinned ? 'Unpin post' : 'Pin post'}</p>
-                  <p className="text-[10px] text-gray-400 font-normal">
+                  <p className="font-bold text-sm text-gray-900 dark:text-white">{isPinned ? 'Unpin post' : 'Pin post'}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
                     {isPinned ? 'Remove from top' : 'Keep at the top of your profile'}
                   </p>
                 </div>
@@ -287,12 +287,12 @@ const PostCard: React.FC<PostCardProps> = ({
                 <button
                   type="button"
                   onClick={handleOpenEdit}
-                  className="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-2.5 cursor-pointer"
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
                 >
-                  <Edit3 size={15} className="text-gray-500" />
+                  <Edit3 size={18} className="text-gray-500" />
                   <div>
-                    <p className="font-bold">Edit post</p>
-                    <p className="text-[10px] text-gray-400 font-normal">Update title or description</p>
+                    <p className="font-bold text-sm text-gray-900 dark:text-white">Edit post</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">Update title or description</p>
                   </div>
                 </button>
               )}
@@ -301,12 +301,12 @@ const PostCard: React.FC<PostCardProps> = ({
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-2.5 cursor-pointer"
+                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
               >
-                <Copy size={15} className="text-gray-500" />
+                <Copy size={18} className="text-gray-500" />
                 <div>
-                  <p className="font-bold">Copy link</p>
-                  <p className="text-[10px] text-gray-400 font-normal">Copy post link to clipboard</p>
+                  <p className="font-bold text-sm text-gray-900 dark:text-white">Copy link</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">Copy post link to clipboard</p>
                 </div>
               </button>
 
@@ -320,12 +320,12 @@ const PostCard: React.FC<PostCardProps> = ({
                       setIsMenuOpen(false);
                       setShowTrashConfirm(true);
                     }}
-                    className="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-[#e02f21] hover:bg-red-50 dark:hover:bg-red-950/40 transition flex items-center gap-2.5 cursor-pointer"
+                    className="w-full px-4 py-2.5 text-left text-sm font-semibold text-[#e02f21] hover:bg-red-50 dark:hover:bg-red-950/40 transition flex items-center gap-3 cursor-pointer"
                   >
-                    <Trash2 size={15} className="text-[#e02f21]" />
+                    <Trash2 size={18} className="text-[#e02f21]" />
                     <div>
-                      <p className="font-bold">Move to trash</p>
-                      <p className="text-[10px] text-red-400 font-normal">Items in trash are removed</p>
+                      <p className="font-bold text-sm text-[#e02f21]">Move to trash</p>
+                      <p className="text-xs text-red-500/80 dark:text-red-400 font-normal">Items in trash are removed</p>
                     </div>
                   </button>
                 </>
@@ -340,7 +340,7 @@ const PostCard: React.FC<PostCardProps> = ({
         <div className="p-4 bg-gray-50/70 dark:bg-gray-800/40 border-y border-gray-200 dark:border-gray-800 space-y-3">
           {isRecipe && (
             <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Recipe Title
               </label>
               <input
@@ -383,8 +383,8 @@ const PostCard: React.FC<PostCardProps> = ({
       ) : (
         /* Caption Text */
         caption && (
-          <div className="px-4 pb-2.5">
-            <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">
+          <div className="px-4 pb-3">
+            <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">
               {caption}
             </p>
           </div>
@@ -393,22 +393,22 @@ const PostCard: React.FC<PostCardProps> = ({
 
       {/* Recipe Header (if RECIPE) */}
       {isRecipe && (
-        <div className="mx-4 mb-3 p-3.5 rounded-2xl bg-red-50/60 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40">
-          <h3 className="font-black text-sm sm:text-base text-[#e02f21] mb-2">{title || post.title}</h3>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+        <div className="mx-4 mb-3.5 p-4 rounded-2xl bg-red-50/60 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40">
+          <h3 className="font-black text-base sm:text-lg text-[#e02f21] mb-2">{title || post.title}</h3>
+          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
             {post.cuisine && (
-              <span className="px-2.5 py-0.5 rounded-lg bg-white dark:bg-gray-800 font-bold text-gray-800 dark:text-gray-200 shadow-xs flex items-center gap-1">
-                <ChefHat size={12} className="text-[#e02f21]" /> {post.cuisine}
+              <span className="px-3 py-1 rounded-lg bg-white dark:bg-gray-800 font-bold text-gray-800 dark:text-gray-200 shadow-xs flex items-center gap-1.5">
+                <ChefHat size={14} className="text-[#e02f21]" /> {post.cuisine}
               </span>
             )}
             {post.preparationTime && (
-              <span className="px-2.5 py-0.5 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 shadow-xs flex items-center gap-1">
-                <Clock size={12} /> {post.preparationTime} mins
+              <span className="px-3 py-1 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 shadow-xs flex items-center gap-1.5">
+                <Clock size={14} /> {post.preparationTime} mins
               </span>
             )}
             {post.servings && (
-              <span className="px-2.5 py-0.5 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 shadow-xs flex items-center gap-1">
-                <Users size={12} /> Serves {post.servings}
+              <span className="px-3 py-1 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 shadow-xs flex items-center gap-1.5">
+                <Users size={14} /> Serves {post.servings}
               </span>
             )}
           </div>
@@ -457,32 +457,32 @@ const PostCard: React.FC<PostCardProps> = ({
       )}
 
       {/* Metrics Row */}
-      <div className="px-4 py-2 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100 dark:border-gray-800">
-        <span className="flex items-center gap-1">
-          <span className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center text-white">
-            <Heart size={10} fill="white" />
+      <div className="px-4 py-2.5 flex items-center justify-between text-xs sm:text-sm text-gray-500 border-b border-gray-100 dark:border-gray-800">
+        <span className="flex items-center gap-1.5">
+          <span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white">
+            <Heart size={12} fill="white" />
           </span>
-          <span>{likeCount}</span>
+          <span className="font-semibold">{likeCount}</span>
         </span>
         <button
           type="button"
           onClick={() => onOpenComments && onOpenComments(post)}
-          className="hover:underline cursor-pointer"
+          className="hover:underline cursor-pointer font-medium"
         >
           {post.commentCount || 0} comments
         </button>
       </div>
 
       {/* Facebook Action Row */}
-      <div className="px-2 py-1 grid grid-cols-3 text-xs font-semibold text-gray-600 dark:text-gray-300">
+      <div className="px-2 py-1.5 grid grid-cols-3 text-sm font-bold text-gray-600 dark:text-gray-300">
         <button
           type="button"
           onClick={handleLike}
-          className={`py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer ${
+          className={`py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer ${
             hasLiked ? 'text-[#e02f21]' : ''
           }`}
         >
-          <Heart size={18} fill={hasLiked ? '#e02f21' : 'none'} />
+          <Heart size={19} fill={hasLiked ? '#e02f21' : 'none'} />
           <span>Like</span>
         </button>
 
@@ -490,18 +490,18 @@ const PostCard: React.FC<PostCardProps> = ({
         <button
           type="button"
           onClick={() => onOpenComments && onOpenComments(post)}
-          className="py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
+          className="py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
         >
-          <MessageCircle size={18} />
+          <MessageCircle size={19} />
           <span>Comment</span>
         </button>
 
         <button
           type="button"
           onClick={() => onOpenShare && onOpenShare(post)}
-          className="py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
+          className="py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
         >
-          <Share2 size={18} />
+          <Share2 size={19} />
           <span>Share</span>
         </button>
       </div>
@@ -509,26 +509,26 @@ const PostCard: React.FC<PostCardProps> = ({
       {/* Move to Trash Confirmation Dialog */}
       {showTrashConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#242526] rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-gray-200 dark:border-gray-800 space-y-4">
-            <div className="flex items-center gap-3 text-[#e02f21]">
-              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/60 flex items-center justify-center">
-                <Trash2 size={20} />
+          <div className="bg-white dark:bg-[#242526] rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 space-y-4">
+            <div className="flex items-center gap-3.5 text-[#e02f21]">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/60 flex items-center justify-center shrink-0">
+                <Trash2 size={24} />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-gray-900 dark:text-white">Move to trash?</h3>
-                <p className="text-xs text-gray-500">This post will be deleted from your feed.</p>
+                <h3 className="font-black text-lg text-gray-900 dark:text-white">Move to trash?</h3>
+                <p className="text-sm text-gray-500">This post will be deleted from your feed.</p>
               </div>
             </div>
 
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Are you sure you want to move this post to trash? You can create a new post or recipe at any time.
             </p>
 
-            <div className="flex items-center justify-end gap-2.5 pt-2">
+            <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowTrashConfirm(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -536,7 +536,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 type="button"
                 disabled={isDeleting}
                 onClick={handleConfirmTrash}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#e02f21] hover:bg-[#c92518] transition cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#e02f21] hover:bg-[#c92518] transition cursor-pointer disabled:opacity-50"
               >
                 {isDeleting ? 'Moving to trash...' : 'Move to trash'}
               </button>

@@ -50,12 +50,12 @@ export const ToastProvider = ({ children }) => {
 
               <div className="flex-1 min-w-0">
                 {toast.title && (
-                  <h4 className="font-bold text-xs tracking-tight text-gray-900 dark:text-white">
+                  <h4 className="font-bold text-sm tracking-tight text-gray-900 dark:text-white">
                     {toast.title}
                   </h4>
                 )}
                 {toast.message && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
                     {toast.message}
                   </p>
                 )}
@@ -64,9 +64,9 @@ export const ToastProvider = ({ children }) => {
               <button
                 type="button"
                 onClick={() => removeToast(toast.id)}
-                className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-0.5 rounded-lg transition shrink-0"
+                className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1 rounded-lg transition shrink-0"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             </div>
           );

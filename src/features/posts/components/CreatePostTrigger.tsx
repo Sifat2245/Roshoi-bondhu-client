@@ -25,7 +25,7 @@ const CreatePostTrigger = ({ onClick, onRequireAuth }) => {
         <button
           type="button"
           onClick={() => handleClick('CASUAL')}
-          className="flex-1 bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200/70 dark:hover:bg-gray-700/70 rounded-full px-4 py-2.5 text-left text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium transition cursor-pointer"
+          className="flex-1 bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200/70 dark:hover:bg-gray-700/70 rounded-full px-4 py-2.5 text-left text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium transition cursor-pointer"
         >
           {user
             ? t('whatsCooking', { name: user.name.split(' ')[0] })
@@ -37,22 +37,22 @@ const CreatePostTrigger = ({ onClick, onRequireAuth }) => {
       <div className="border-t border-gray-100 dark:border-gray-800 my-2.5"></div>
 
       {/* Bottom Icons Row */}
-      <div className="grid grid-cols-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
+      <div className="grid grid-cols-2 text-sm sm:text-base font-bold text-gray-600 dark:text-gray-300">
         <button
           type="button"
           onClick={() => handleClick('CASUAL')}
-          className="py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition cursor-pointer"
+          className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2.5 transition cursor-pointer"
         >
-          <ImageIcon size={20} className="text-emerald-500" />
+          <ImageIcon size={22} className="text-emerald-500" />
           <span>Photo / Story</span>
         </button>
 
         <button
           type="button"
           onClick={() => handleClick('RECIPE')}
-          className="py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition cursor-pointer text-[#e02f21]"
+          className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2.5 transition cursor-pointer text-[#e02f21]"
         >
-          <ChefHat size={20} />
+          <ChefHat size={22} />
           <span>Share Recipe</span>
         </button>
       </div>

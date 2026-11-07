@@ -4,6 +4,7 @@ export const ROUTES = {
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
   GROUPS: '/groups',
+  GROUPS_CREATE: '/groups/create',
   GROUP_DETAIL: (slug: string) => `/group/${slug}`,
   PROFILE: '/profile',
   USER_PROFILE: (id: string) => `/profile/${id}`,

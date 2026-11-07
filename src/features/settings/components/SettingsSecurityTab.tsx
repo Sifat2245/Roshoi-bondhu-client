@@ -410,28 +410,28 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
         maxWidth="max-w-md"
       >
         <div className="space-y-4">
-          <div className="p-3.5 rounded-xl bg-gray-50 dark:bg-[#343536] space-y-1">
-            <p className="text-xs font-bold text-gray-500">Email Address</p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.email}</p>
-            <p className="text-[11px] text-emerald-600 font-bold">Primary & Verified</p>
+          <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#343536] space-y-1.5">
+            <p className="text-sm font-bold text-gray-500">Email Address</p>
+            <p className="text-base font-bold text-gray-900 dark:text-white">{user?.email}</p>
+            <p className="text-xs sm:text-sm text-emerald-600 font-bold">Primary & Verified</p>
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">
               Mobile Phone
             </label>
             <input
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#f0f2f5] dark:bg-[#343536] rounded-xl text-xs dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21]"
+              className="w-full px-4 py-3 bg-[#f0f2f5] dark:bg-[#343536] rounded-xl text-sm sm:text-base dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21]"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2.5 pt-2">
             <Button
               variant="secondary"
-              size="sm"
+              size="md"
               onClick={() => setIsContactModalOpen(false)}
               className="cursor-pointer"
             >
@@ -439,7 +439,7 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
             </Button>
             <Button
               variant="primary"
-              size="sm"
+              size="md"
               onClick={() => {
                 notify.success('Contact info updated successfully.');
                 setIsContactModalOpen(false);

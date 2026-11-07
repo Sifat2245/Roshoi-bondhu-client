@@ -120,12 +120,12 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
     >
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
         {/* User Row with Audience Badge */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <Avatar src={user.image} alt={user.name} size="md" />
           <div>
-            <p className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white">{user.name}</p>
-            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#e4e6eb] dark:bg-[#3a3b3c] text-[11px] font-semibold text-gray-700 dark:text-gray-300 mt-0.5">
-              <Globe size={11} />
+            <p className="font-bold text-sm sm:text-base text-gray-900 dark:text-white">{user.name}</p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#e4e6eb] dark:bg-[#3a3b3c] text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mt-0.5">
+              <Globe size={14} />
               <span>Public ▾</span>
             </div>
           </div>
@@ -136,7 +136,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
           <button
             type="button"
             onClick={() => setMode('CASUAL')}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
+            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition ${
               mode === 'CASUAL'
                 ? 'bg-white dark:bg-[#242526] text-gray-900 dark:text-white shadow-xs'
                 : 'text-gray-500 hover:text-gray-700'
@@ -147,22 +147,22 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
           <button
             type="button"
             onClick={() => setMode('RECIPE')}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
               mode === 'RECIPE'
                 ? 'bg-white dark:bg-[#242526] text-[#e02f21] shadow-xs'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            <ChefHat size={14} />
+            <ChefHat size={18} />
             <span>Recipe Post</span>
           </button>
         </div>
 
         {/* RECIPE SPECIFIC FORM FIELDS */}
         {mode === 'RECIPE' && (
-          <div className="space-y-3.5 bg-red-50/50 dark:bg-red-950/20 p-3.5 rounded-xl border border-red-100 dark:border-red-900/30">
+          <div className="space-y-4 bg-red-50/50 dark:bg-red-950/20 p-4 rounded-xl border border-red-100 dark:border-red-900/30">
             <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Recipe Title *
               </label>
               <input
@@ -171,49 +171,49 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Traditional Dhakai Kacchi Biryani"
-                className="w-full px-3 py-2 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-xl text-xs dark:text-white focus:outline-none focus:border-[#e02f21]"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold dark:text-white focus:outline-none focus:border-[#e02f21]"
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2.5">
               <div>
-                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                   Time (mins)
                 </label>
                 <div className="relative">
-                  <Clock size={12} className="absolute left-2.5 top-2.5 text-gray-400" />
+                  <Clock size={16} className="absolute left-2.5 top-3 text-gray-400" />
                   <input
                     type="number"
                     value={preparationTime}
                     onChange={(e) => setPreparationTime(e.target.value)}
-                    className="w-full pl-7 pr-2 py-1.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-xs dark:text-white"
+                    className="w-full pl-8 pr-2.5 py-2.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                   Servings
                 </label>
                 <div className="relative">
-                  <Users size={12} className="absolute left-2.5 top-2.5 text-gray-400" />
+                  <Users size={16} className="absolute left-2.5 top-3 text-gray-400" />
                   <input
                     type="number"
                     value={servings}
                     onChange={(e) => setServings(e.target.value)}
-                    className="w-full pl-7 pr-2 py-1.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-xs dark:text-white"
+                    className="w-full pl-8 pr-2.5 py-2.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                   Cuisine
                 </label>
                 <select
                   value={cuisine}
                   onChange={(e) => setCuisine(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-xs dark:text-white"
+                  className="w-full px-2.5 py-2.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white"
                 >
                   <option value="Bangladeshi">Bangladeshi</option>
                   <option value="Indian">Indian Curries</option>
@@ -227,22 +227,22 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
 
             {/* Ingredients Tags / Quick list */}
             <div>
-              <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Ingredients (Press Enter to add)
               </label>
-              <div className="flex flex-wrap gap-1.5 mb-1.5">
+              <div className="flex flex-wrap gap-1.5 mb-2">
                 {ingredients.map((ing, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-[11px] font-semibold"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-semibold"
                   >
                     <span>{ing}</span>
                     <button
                       type="button"
                       onClick={() => setIngredients(ingredients.filter((_, i) => i !== idx))}
-                      className="text-gray-400 hover:text-red-500"
+                      className="text-gray-400 hover:text-red-500 cursor-pointer"
                     >
-                      <Trash2 size={11} />
+                      <Trash2 size={14} />
                     </button>
                   </span>
                 ))}
@@ -260,39 +260,39 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
                     }
                   }
                 }}
-                className="w-full px-2.5 py-1.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-xs dark:text-white"
+                className="w-full px-3 py-2.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white"
               />
             </div>
 
             {/* Step-by-Step Instructions */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-300">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">
                   Cooking Instructions
                 </label>
                 <button
                   type="button"
                   onClick={handleAddInstruction}
-                  className="text-[11px] text-[#e02f21] font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                  className="text-sm text-[#e02f21] font-bold flex items-center gap-1 hover:underline cursor-pointer"
                 >
-                  <Plus size={12} />
+                  <Plus size={16} />
                   <span>Add Step</span>
                 </button>
               </div>
               <div className="space-y-2">
                 {instructions.map((step, idx) => (
-                  <div key={idx} className="bg-white dark:bg-[#242526] p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-1.5 relative">
+                  <div key={idx} className="bg-white dark:bg-[#242526] p-3 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2 relative">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase text-gray-400">
+                      <span className="text-xs font-black uppercase text-gray-400">
                         Step {idx + 1}
                       </span>
                       {instructions.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveInstruction(idx)}
-                          className="text-gray-400 hover:text-red-500 p-0.5"
+                          className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer"
                         >
-                          <Trash2 size={12} />
+                          <Trash2 size={13} />
                         </button>
                       )}
                     </div>
@@ -301,14 +301,14 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
                       placeholder="Step Title"
                       value={step.title}
                       onChange={(e) => handleInstructionChange(idx, 'title', e.target.value)}
-                      className="w-full px-2 py-1 text-xs font-semibold bg-gray-50 dark:bg-[#3a3b3c] rounded-lg"
+                      className="w-full px-3 py-1.5 text-sm font-semibold bg-gray-50 dark:bg-[#3a3b3c] rounded-lg"
                     />
                     <textarea
                       rows={2}
                       placeholder="Step details..."
                       value={step.details}
                       onChange={(e) => handleInstructionChange(idx, 'details', e.target.value)}
-                      className="w-full p-2 text-xs bg-gray-50 dark:bg-[#3a3b3c] rounded-lg resize-none"
+                      className="w-full p-2.5 text-sm bg-gray-50 dark:bg-[#3a3b3c] rounded-lg resize-none"
                     />
                   </div>
                 ))}
@@ -328,7 +328,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
                 ? 'Share story, secret tips, or flavor profile...'
                 : `What are you cooking today, ${user.name?.split(' ')[0]}? Share your thoughts...`
             }
-            className="w-full bg-transparent border-none text-sm dark:text-white placeholder:text-gray-400 focus:outline-none resize-none"
+            className="w-full bg-transparent border-none text-base dark:text-white placeholder:text-gray-400 focus:outline-none resize-none leading-relaxed"
           />
         </div>
 
@@ -339,7 +339,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
             <button
               type="button"
               onClick={() => setImage('')}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
+              className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition cursor-pointer"
             >
               <Trash2 size={14} />
             </button>
@@ -347,14 +347,14 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
         )}
 
         {/* Photo Upload Attachment Bar */}
-        <div className="p-3 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+        <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
             Add to your post
           </span>
 
           <div className="flex items-center gap-1.5">
             <label className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#3a3b3c] text-emerald-500 cursor-pointer transition">
-              <ImageIcon size={18} />
+              <ImageIcon size={20} />
               <input
                 type="file"
                 accept="image/*"
@@ -363,7 +363,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
                 onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
               />
             </label>
-            {uploadingPhoto && <span className="text-[11px] text-gray-400">Uploading...</span>}
+            {uploadingPhoto && <span className="text-sm font-semibold text-gray-500">Uploading...</span>}
           </div>
         </div>
 
@@ -371,7 +371,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
         <Button
           type="submit"
           loading={loading || uploadingPhoto}
-          className="w-full py-2.5 text-xs font-bold rounded-xl shadow-xs"
+          className="w-full py-3.5 text-base font-bold rounded-xl shadow-xs"
         >
           <span>Post</span>
         </Button>

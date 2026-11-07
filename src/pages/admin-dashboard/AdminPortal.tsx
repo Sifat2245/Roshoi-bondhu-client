@@ -129,7 +129,7 @@ const AdminPortal = () => {
     <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
       <SocialHeader />
 
-      <div className="pt-14 w-full">
+      <div className="pt-[100px] md:pt-14 w-full">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-8 py-8 space-y-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

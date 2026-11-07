@@ -77,7 +77,7 @@ const GroupDetailPage = () => {
     return (
       <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
         <SocialHeader />
-        <div className="pt-14 w-full">
+        <div className="pt-[100px] md:pt-14 w-full">
           <GroupHeaderSkeleton />
           <div className="max-w-[1095px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <div className="flex flex-col lg:flex-row gap-6 items-start">
@@ -122,7 +122,7 @@ const GroupDetailPage = () => {
     <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
       <SocialHeader />
 
-      <div className="pt-14 w-full">
+      <div className="pt-[100px] md:pt-14 w-full">
         {/* Contained Group Banner & Header */}
         <GroupHeader
           group={group}

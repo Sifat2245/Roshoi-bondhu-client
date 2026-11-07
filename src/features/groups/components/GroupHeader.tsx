@@ -61,10 +61,10 @@ const GroupHeader = ({
 
   return (
     <div className="w-full bg-white dark:bg-[#242526] shadow-xs border-b border-gray-200 dark:border-gray-800">
-      {/* 1. Contained Cover Image Banner (Matching Image 3) */}
+      {/* 1. Contained Cover Image Banner */}
       <div className="w-full bg-gradient-to-b from-gray-200/50 via-gray-100/30 to-transparent dark:from-black/40 dark:via-[#18191a]/40 dark:to-transparent pt-0 sm:pt-4">
-        <div className="max-w-[1095px] mx-auto px-0 sm:px-4">
-          <div className="relative h-48 sm:h-72 md:h-80 w-full bg-gray-200 dark:bg-gray-800 relative sm:rounded-2xl overflow-hidden shadow-sm">
+        <div className="max-w-[1250px] mx-auto px-0 sm:px-4">
+          <div className="relative h-56 sm:h-72 md:h-84 w-full bg-gray-200 dark:bg-gray-800 relative sm:rounded-2xl overflow-hidden shadow-sm">
             {group.coverImage ? (
               <img
                 src={group.coverImage}
@@ -81,26 +81,26 @@ const GroupHeader = ({
       </div>
 
       {/* 2. Group Info, Member Avatar Cluster, Action Buttons */}
-      <div className="max-w-[1095px] mx-auto px-4 sm:px-8 py-5">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
-          <div className="space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+      <div className="max-w-[1250px] mx-auto px-4 sm:px-8 py-6">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="space-y-2.5">
+            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">
               {group.name}
             </h1>
 
             {/* Subtitle Line */}
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
-              <span className="flex items-center gap-1 font-semibold">
-                {group.privacy === 'PRIVATE' ? <Lock size={12} /> : <Globe size={12} />}
+            <div className="flex items-center gap-2.5 text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium">
+              <span className="flex items-center gap-1.5 font-bold">
+                {group.privacy === 'PRIVATE' ? <Lock size={15} /> : <Globe size={15} />}
                 {group.privacy === 'PRIVATE' ? 'Private group' : 'Public group'}
               </span>
               <span>•</span>
-              <span className="font-bold text-gray-700 dark:text-gray-300">
+              <span className="font-bold text-gray-800 dark:text-gray-200">
                 {group.membersCount || 1} members
               </span>
             </div>
 
-            {/* Facebook Member Avatars Cluster (Matching Image 3!) */}
+            {/* Member Avatars Cluster */}
             <div className="flex items-center gap-2 pt-1">
               <div className="flex -space-x-2 overflow-hidden py-1">
                 {avatarCluster.slice(0, 8).map((img, i) => (
@@ -108,21 +108,21 @@ const GroupHeader = ({
                     key={i}
                     src={img}
                     alt="Member"
-                    className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-[#242526] object-cover"
+                    className="inline-block h-9 w-9 rounded-full ring-2 ring-white dark:ring-[#242526] object-cover"
                   />
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Action Buttons (Matching Image 3: + Invite, Share, Joined ▾, ...) */}
-          <div className="flex items-center gap-2 flex-wrap">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2.5 flex-wrap">
             {isMember && (
               <Button
                 onClick={handleInvite}
-                className="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-4 py-2 text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5"
+                className="bg-[#e02f21] hover:bg-[#c92518] text-white px-5 py-2.5 text-sm font-bold rounded-xl shadow-xs flex items-center gap-2 cursor-pointer"
               >
-                <UserPlus size={15} />
+                <UserPlus size={17} />
                 <span>Invite</span>
               </Button>
             )}
@@ -130,9 +130,9 @@ const GroupHeader = ({
             <Button
               onClick={handleShare}
               variant="secondary"
-              className="px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5"
+              className="px-5 py-2.5 text-sm font-bold rounded-xl flex items-center gap-2 cursor-pointer"
             >
-              <Share2 size={15} />
+              <Share2 size={17} />
               <span>Share</span>
             </Button>
 
@@ -140,11 +140,11 @@ const GroupHeader = ({
               onClick={handleAction}
               loading={loading}
               variant={isMember ? 'secondary' : 'primary'}
-              className="px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5"
+              className="px-5 py-2.5 text-sm font-bold rounded-xl flex items-center gap-2 cursor-pointer"
             >
               {isMember ? (
                 <>
-                  <Check size={14} className="text-emerald-500" />
+                  <Check size={16} className="text-emerald-500" />
                   <span>Joined ▾</span>
                 </>
               ) : (
@@ -154,16 +154,16 @@ const GroupHeader = ({
 
             <button
               type="button"
-              className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition"
+              className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition cursor-pointer"
             >
-              <MoreHorizontal size={16} />
+              <MoreHorizontal size={18} />
             </button>
           </div>
         </div>
 
-        {/* 3. Navigation Tabs (Matching Image 3: About, Discussion, Featured, Recipes, Members, Media) */}
-        <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 mt-5 pt-1 text-xs font-bold overflow-x-auto">
-          <div className="flex items-center gap-1">
+        {/* 3. Navigation Tabs */}
+        <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 mt-6 pt-1 text-sm sm:text-base font-bold overflow-x-auto">
+          <div className="flex items-center gap-2">
             {[
               { id: 'DISCUSSION', label: 'Discussion' },
               { id: 'FEATURED', label: 'Featured' },
@@ -175,9 +175,9 @@ const GroupHeader = ({
                 key={tab.id}
                 type="button"
                 onClick={() => onSelectTab(tab.id)}
-                className={`px-4 py-3 border-b-3 transition cursor-pointer whitespace-nowrap ${
+                className={`px-4 py-3.5 border-b-3 transition cursor-pointer whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'border-[#6366f1] text-[#6366f1]'
+                    ? 'border-[#e02f21] text-[#e02f21]'
                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-t-lg'
                 }`}
               >
@@ -189,10 +189,10 @@ const GroupHeader = ({
           <div className="hidden sm:flex items-center gap-2">
             <button
               type="button"
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition cursor-pointer"
               title="Search this group"
             >
-              <Search size={16} />
+              <Search size={18} />
             </button>
           </div>
         </div>

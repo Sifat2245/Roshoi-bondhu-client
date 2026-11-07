@@ -15,7 +15,6 @@ import {
   Moon,
   LogOut,
   Shield,
-  Plus,
   Settings as SettingsIcon,
   ChefHat,
   MessageSquare,
@@ -25,20 +24,20 @@ import {
   UserCheck,
   Menu,
   SlidersHorizontal,
+  ArrowLeft,
+  Globe,
 } from 'lucide-react';
 
 const RECENT_SEARCHES_KEY = 'heshel_recent_searches';
 const DEFAULT_RECENT = ['#KacchiBiryani', 'Chef Rahima', 'Shahi Morog Polao', 'Ilish Bhuna', 'Desserts'];
 
 export interface SocialHeaderProps {
-  onOpenCreatePost?: () => void;
   onToggleLeftSidebar?: () => void;
   onToggleRightSidebar?: () => void;
   hasActiveFilters?: boolean;
 }
 
 const SocialHeader: React.FC<SocialHeaderProps> = ({
-  onOpenCreatePost,
   onToggleLeftSidebar,
   onToggleRightSidebar,
   hasActiveFilters = false,
@@ -52,13 +51,15 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
 
   const [search, setSearch] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
-  const searchContainerRef = useRef(null);
-  const notifContainerRef = useRef(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const notifContainerRef = useRef<HTMLDivElement>(null);
   const user = session?.user;
 
   // Fetch notifications for badge and dropdown
@@ -81,13 +82,13 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
     setNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })));
   };
 
-  const handleMarkRead = (id) => {
+  const handleMarkRead = (id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isUnread: false } : n))
     );
   };
 
-  const handleNotificationAction = (id) => {
+  const handleNotificationAction = (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
@@ -107,11 +108,11 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
 
   // Close search popover & notification popover on outside click
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
         setIsSearchOpen(false);
       }
-      if (notifContainerRef.current && !notifContainerRef.current.contains(e.target)) {
+      if (notifContainerRef.current && !notifContainerRef.current.contains(e.target as Node)) {
         setIsNotifOpen(false);
       }
     };
@@ -119,7 +120,7 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const saveSearchTerm = (term) => {
+  const saveSearchTerm = (term: string) => {
     if (!term.trim()) return;
     const clean = term.trim();
     const updated = [clean, ...recentSearches.filter((s) => s.toLowerCase() !== clean.toLowerCase())].slice(0, 8);
@@ -131,7 +132,7 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
     }
   };
 
-  const removeSearchTerm = (term, e) => {
+  const removeSearchTerm = (term: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const updated = recentSearches.filter((s) => s !== term);
     setRecentSearches(updated);
@@ -151,19 +152,21 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
     }
   };
 
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
       saveSearchTerm(search.trim());
       setIsSearchOpen(false);
+      setIsMobileSearchOpen(false);
       navigate(`/?search=${encodeURIComponent(search.trim())}`);
     }
   };
 
-  const handleSelectRecent = (term) => {
+  const handleSelectRecent = (term: string) => {
     setSearch(term);
     saveSearchTerm(term);
     setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
     navigate(`/?search=${encodeURIComponent(term)}`);
   };
 
@@ -183,320 +186,392 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
   const isThoughtsActive = currentPath === '/' && currentType === 'CASUAL';
   const isGroupsActive = currentPath.startsWith('/group');
 
-  const navTabClass = (isActive) =>
-    `h-14 px-4 sm:px-6 flex items-center justify-center border-b-3 transition duration-150 cursor-pointer ${
-      isActive
-        ? 'border-[#e02f21] text-[#e02f21]'
-        : 'border-transparent text-gray-500 hover:bg-gray-100/80 dark:hover:bg-gray-800'
-    }`;
+  const navTabs = [
+    { to: '/', label: 'Home (All Posts)', icon: Home, isActive: isHomeActive },
+    { to: '/friends', label: 'Friends', icon: UserCheck, isActive: isFriendsActive },
+    { to: '/?type=RECIPE', label: 'Recipes Only', icon: ChefHat, isActive: isRecipesActive },
+    { to: '/groups', label: 'Foodie Groups', icon: Users, isActive: isGroupsActive },
+    { to: '/?type=CASUAL', label: 'Foodie Thoughts', icon: MessageSquare, isActive: isThoughtsActive },
+  ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full h-14 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-gray-800 shadow-xs px-3 sm:px-4 flex items-center justify-between">
-      {/* Left: Brand Logo, Mobile Drawer Toggle & Interactive Search */}
-      <div ref={searchContainerRef} className="relative flex items-center gap-1.5 sm:gap-2.5 min-w-0 sm:min-w-[240px]">
-        {/* Mobile Left Sidebar Toggle Button */}
-        {onToggleLeftSidebar && (
-          <button
-            type="button"
-            onClick={onToggleLeftSidebar}
-            className="lg:hidden w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer shrink-0"
-            title="Open Menu"
-          >
-            <Menu size={18} />
-          </button>
-        )}
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-gray-800 shadow-xs select-none">
+      {/* 1. Main Header Bar (h-14) */}
+      <div className="relative h-14 px-3 sm:px-4 flex items-center justify-between">
+        {/* Left: Brand Logo, Mobile Drawer Toggle & Desktop Search */}
+        <div ref={searchContainerRef} className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Mobile Left Sidebar Toggle Button */}
+          {onToggleLeftSidebar && (
+            <button
+              type="button"
+              onClick={onToggleLeftSidebar}
+              className="lg:hidden w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer shrink-0"
+              title="Open Navigation Menu"
+            >
+              <Menu size={19} />
+            </button>
+          )}
 
-        <Link to="/" className="flex-shrink-0 flex items-center">
-          <img src={logo} alt="Heshel" className="h-8 sm:h-9 w-auto object-contain" />
-        </Link>
+          {/* Logo */}
+          <Link to="/" className="flex-shrink-0 flex items-center">
+            <img src={logo} alt="Heshel" className="h-8 sm:h-9 w-auto object-contain" />
+          </Link>
 
-        {/* Search Input Box */}
-        <div className="relative flex-1 max-w-[240px] sm:max-w-[260px]">
-          <form onSubmit={handleSearchSubmit}>
-            <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
-            <input
-              type="text"
-              value={search}
-              onFocus={() => setIsSearchOpen(true)}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search recipes, chefs..."
-              className="w-full pl-9 pr-3 py-2 bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200/70 rounded-full text-xs font-medium focus:bg-white dark:focus:bg-[#3a3b3c] focus:outline-none dark:text-white transition shadow-2xs"
-            />
-          </form>
+          {/* Desktop Search Input Box (Visible on md and larger screens) */}
+          <div className="hidden md:block relative w-60 lg:w-72">
+            <form onSubmit={handleSearchSubmit}>
+              <Search size={17} className="absolute left-3.5 top-2.5 text-gray-400" />
+              <input
+                type="text"
+                value={search}
+                onFocus={() => setIsSearchOpen(true)}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search recipes, chefs..."
+                className="w-full pl-10 pr-3.5 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200/70 rounded-full text-sm font-medium focus:bg-white dark:focus:bg-[#3a3b3c] focus:outline-none dark:text-white transition shadow-2xs"
+              />
+            </form>
 
-          {/* Facebook-style Recent Searches Dropdown */}
-          {isSearchOpen && (
-            <div className="absolute left-0 top-11 w-72 sm:w-80 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="flex items-center justify-between pb-2 px-1 border-b border-gray-100 dark:border-gray-800">
-                <span className="text-xs font-bold text-gray-900 dark:text-white">Recent searches</span>
-                {recentSearches.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={clearAllRecent}
-                    className="text-[11px] font-semibold text-[#e02f21] hover:underline cursor-pointer"
-                  >
-                    Clear all
-                  </button>
+            {/* Desktop Recent Searches Dropdown */}
+            {isSearchOpen && (
+              <div className="absolute left-0 top-12 w-80 sm:w-96 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="flex items-center justify-between pb-2.5 px-1.5 border-b border-gray-100 dark:border-gray-800">
+                  <span className="text-sm font-bold text-gray-900 dark:text-white">Recent searches</span>
+                  {recentSearches.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearAllRecent}
+                      className="text-xs sm:text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+
+                {recentSearches.length > 0 ? (
+                  <div className="divide-y divide-gray-50 dark:divide-gray-800/50 mt-1.5 max-h-72 overflow-y-auto">
+                    {recentSearches.map((term) => (
+                      <div
+                        key={term}
+                        onClick={() => handleSelectRecent(term)}
+                        className="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800/80 cursor-pointer transition group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Clock size={16} className="text-gray-400 group-hover:text-[#e02f21] shrink-0 transition" />
+                          <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
+                            {term}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => removeSearchTerm(term, e)}
+                          className="p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-sm text-gray-400">
+                    No recent searches
+                  </div>
                 )}
               </div>
+            )}
+          </div>
+        </div>
 
-              {recentSearches.length > 0 ? (
-                <div className="divide-y divide-gray-50 dark:divide-gray-800/50 mt-1 max-h-64 overflow-y-auto">
-                  {recentSearches.map((term) => (
-                    <div
-                      key={term}
-                      onClick={() => handleSelectRecent(term)}
-                      className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800/80 cursor-pointer transition group"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <Clock size={14} className="text-gray-400 group-hover:text-[#e02f21] shrink-0 transition" />
-                        <span className="text-xs font-medium text-gray-700 dark:text-gray-200 truncate">
-                          {term}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => removeSearchTerm(term, e)}
-                        className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-6 text-center text-xs text-gray-400">
-                  No recent searches
-                </div>
+        {/* Center: Facebook Central Tabs (Desktop Only: md:flex) */}
+        <nav className="hidden md:flex items-center justify-center flex-1 max-w-xl h-full mx-2">
+          {navTabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <Link
+                key={tab.to}
+                to={tab.to}
+                title={tab.label}
+                className={`h-14 px-4 sm:px-6 flex items-center justify-center border-b-3 transition duration-150 cursor-pointer ${
+                  tab.isActive
+                    ? 'border-[#e02f21] text-[#e02f21]'
+                    : 'border-transparent text-gray-500 hover:bg-gray-100/80 dark:hover:bg-gray-800'
+                }`}
+              >
+                <Icon size={22} />
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right: Action Controls (Mobile Search, Filters, Bell, Lang, Theme, Avatar) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-end">
+          {/* Mobile Search Toggle Button (Visible on screens < md) */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsMobileSearchOpen(true);
+              setIsSearchOpen(true);
+            }}
+            className="md:hidden w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer shrink-0"
+            title="Search recipes, chefs..."
+          >
+            <Search size={18} />
+          </button>
+
+          {/* Mobile Recipe Filter Toggle Button */}
+          {onToggleRightSidebar && (
+            <button
+              type="button"
+              onClick={onToggleRightSidebar}
+              className="xl:hidden relative w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer shrink-0"
+              title="Filter Recipes & Food"
+            >
+              <SlidersHorizontal size={18} />
+              {hasActiveFilters && (
+                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#e02f21] rounded-full ring-2 ring-white dark:ring-[#242526]" />
+              )}
+            </button>
+          )}
+
+          {/* Notification Bell Button & Popover */}
+          {user && (
+            <div ref={notifContainerRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                title="Notifications"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer relative shrink-0"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#e02f21] text-white text-xs font-black w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-[#242526]">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {isNotifOpen && (
+                <NotificationDropdown
+                  notifications={notifications}
+                  onClose={() => setIsNotifOpen(false)}
+                  onMarkAllRead={handleMarkAllRead}
+                  onMarkRead={handleMarkRead}
+                  onAction={handleNotificationAction}
+                />
               )}
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Middle: Facebook Central Tabs (Home, Friends, Recipes, Groups, Thoughts) */}
-      <nav className="flex items-center justify-center flex-1 max-w-xl h-full">
-        {/* 1. Home */}
-        <Link
-          to="/"
-          className={navTabClass(isHomeActive)}
-          title="Home (All Posts)"
-        >
-          <Home size={22} />
-        </Link>
-
-        {/* 2. Friends */}
-        <Link
-          to="/friends"
-          className={navTabClass(isFriendsActive)}
-          title="Friends"
-        >
-          <UserCheck size={22} />
-        </Link>
-
-        {/* 3. Recipes Only */}
-        <Link
-          to="/?type=RECIPE"
-          className={navTabClass(isRecipesActive)}
-          title="Recipes Only"
-        >
-          <ChefHat size={22} />
-        </Link>
-
-        {/* 4. Groups */}
-        <Link
-          to="/groups"
-          className={navTabClass(isGroupsActive)}
-          title="Foodie Groups"
-        >
-          <Users size={22} />
-        </Link>
-
-        {/* 5. Foodie Thoughts / Casual */}
-        <Link
-          to="/?type=CASUAL"
-          className={navTabClass(isThoughtsActive)}
-          title="Foodie Thoughts"
-        >
-          <MessageSquare size={22} />
-        </Link>
-      </nav>
-
-      {/* Right: Controls & User Profile */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-end">
-        {/* Mobile Recipe Filter Toggle Button */}
-        {onToggleRightSidebar && (
+          {/* Desktop Language Switcher (Visible on md and larger) */}
           <button
             type="button"
-            onClick={onToggleRightSidebar}
-            className="xl:hidden relative w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer shrink-0"
-            title="Filter Recipes & Food"
+            onClick={toggleLanguage}
+            title="Toggle Language"
+            className="hidden md:flex w-10 h-10 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center justify-center font-bold text-sm transition cursor-pointer shrink-0"
           >
-            <SlidersHorizontal size={17} />
-            {hasActiveFilters && (
-              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#e02f21] rounded-full ring-2 ring-white dark:ring-[#242526]" />
-            )}
+            {language === 'en' ? 'বাং' : 'EN'}
           </button>
-        )}
 
-        {/* Create Post Quick Button */}
-        {user && onOpenCreatePost && (
+          {/* Desktop Dark Mode Toggle (Visible on md and larger) */}
           <button
             type="button"
-            onClick={onOpenCreatePost}
-            className="hidden md:flex items-center gap-1.5 bg-[#e02f21] hover:bg-[#c22417] text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition shadow-xs cursor-pointer"
+            onClick={() => setDarkMode(!darkMode)}
+            title="Toggle Dark Mode"
+            className="hidden md:flex w-10 h-10 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center justify-center transition cursor-pointer shrink-0"
           >
-            <Plus size={16} />
-            <span>Create Post</span>
+            {darkMode ? <Sun size={19} className="text-amber-400" /> : <Moon size={19} />}
           </button>
-        )}
 
-        {/* Notification Bell Button & Popover */}
-        {user && (
-          <div ref={notifContainerRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setIsNotifOpen(!isNotifOpen)}
-              title="Notifications"
-              className="w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer relative"
-            >
-              <Bell size={18} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#e02f21] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-[#242526]">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+          {/* User Avatar Menu */}
+          {user ? (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer shrink-0"
+              >
+                <Avatar src={user.image} alt={user.name} size="md" />
+              </button>
 
-            {isNotifOpen && (
-              <NotificationDropdown
-                notifications={notifications}
-                onClose={() => setIsNotifOpen(false)}
-                onMarkAllRead={handleMarkAllRead}
-                onMarkRead={handleMarkRead}
-                onAction={handleNotificationAction}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Language Switcher */}
-        <button
-          type="button"
-          onClick={toggleLanguage}
-          title="Toggle Language"
-          className="w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center font-bold text-xs transition cursor-pointer"
-        >
-          {language === 'en' ? 'বাং' : 'EN'}
-        </button>
-
-        {/* Dark Mode Toggle */}
-        <button
-          type="button"
-          onClick={() => setDarkMode(!darkMode)}
-          title="Toggle Dark Mode"
-          className="w-9 h-9 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer"
-        >
-          {darkMode ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} />}
-        </button>
-
-        {/* User Avatar Menu */}
-        {user ? (
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
-            >
-              <Avatar src={user.image} alt={user.name} size="sm" />
-            </button>
-
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-2 z-50">
-                <Link
-                  to={`/profile/${user.id}`}
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition mb-1"
-                >
-                  <Avatar src={user.image} alt={user.name} size="md" />
-                  <div className="truncate">
-                    <p className="font-bold text-xs text-gray-900 dark:text-white truncate">{user.name}</p>
-                    <p className="text-[11px] text-gray-400">View your profile</p>
-                  </div>
-                </Link>
-
-                <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
-
-                <Link
-                  to="/friends"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                  <UserCheck size={17} />
-                  <span>Friends & Requests</span>
-                </Link>
-
-                <Link
-                  to="/groups"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                  <Users size={17} />
-                  <span>Your Groups</span>
-                </Link>
-
-                <Link
-                  to="/notifications"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                  <Bell size={17} />
-                  <span>Notifications</span>
-                </Link>
-
-                <Link
-                  to="/settings"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                  <SettingsIcon size={17} />
-                  <span>Settings & Privacy</span>
-                </Link>
-
-                {['ADMIN', 'MODERATOR'].includes(user.role) && (
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-2.5 z-50">
                   <Link
-                    to="/admin-portal"
+                    to={`/profile/${user.id}`}
                     onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition"
+                    className="flex items-center gap-3.5 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition mb-1"
                   >
-                    <Shield size={17} />
-                    <span>Admin Control Panel</span>
+                    <Avatar src={user.image} alt={user.name} size="md" />
+                    <div className="truncate">
+                      <p className="font-bold text-base text-gray-900 dark:text-white truncate">{user.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">View your profile</p>
+                    </div>
                   </Link>
-                )}
 
+                  {/* Mobile Quick Settings (Language & Appearance) */}
+                  <div className="md:hidden border-t border-gray-100 dark:border-gray-800 my-1 py-1">
+                    <button
+                      type="button"
+                      onClick={toggleLanguage}
+                      className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-base font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <Globe size={20} />
+                        <span>Language</span>
+                      </div>
+                      <span className="text-sm font-black px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] text-[#e02f21]">
+                        {language === 'en' ? 'বাংলা' : 'English'}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDarkMode(!darkMode)}
+                      className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-base font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        {darkMode ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} />}
+                        <span>Appearance</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-400">
+                        {darkMode ? 'Dark' : 'Light'}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
+
+                  <Link
+                    to="/friends"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-base font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <UserCheck size={20} />
+                    <span>Friends & Requests</span>
+                  </Link>
+
+                  <Link
+                    to="/groups"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-base font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <Users size={20} />
+                    <span>Your Groups</span>
+                  </Link>
+
+                  <Link
+                    to="/notifications"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-base font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <Bell size={20} />
+                    <span>Notifications</span>
+                  </Link>
+
+                  <Link
+                    to="/settings"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-base font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <SettingsIcon size={20} />
+                    <span>Settings & Privacy</span>
+                  </Link>
+
+                  {['ADMIN', 'MODERATOR'].includes(user.role) && (
+                    <Link
+                      to="/admin-portal"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-base font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition"
+                    >
+                      <Shield size={19} />
+                      <span>Admin Control Panel</span>
+                    </Link>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition text-left cursor-pointer"
+                  >
+                    <LogOut size={19} />
+                    <span>Log Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="bg-[#e02f21] hover:bg-[#c22417] text-white text-sm font-bold px-4 sm:px-5 py-2 rounded-full transition shadow-xs"
+            >
+              Log In
+            </Link>
+          )}
+        </div>
+
+        {/* 2. Mobile Full-Screen / Overlay Search Bar */}
+        {isMobileSearchOpen && (
+          <div
+            ref={mobileSearchRef}
+            className="absolute inset-0 bg-white dark:bg-[#242526] z-50 px-3 flex items-center gap-2 animate-in fade-in duration-100"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileSearchOpen(false);
+                setIsSearchOpen(false);
+              }}
+              className="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center transition cursor-pointer shrink-0"
+              title="Back"
+            >
+              <ArrowLeft size={20} />
+            </button>
+
+            <form onSubmit={handleSearchSubmit} className="flex-1 relative">
+              <Search size={18} className="absolute left-3.5 top-2.5 text-gray-400" />
+              <input
+                type="text"
+                autoFocus
+                value={search}
+                onFocus={() => setIsSearchOpen(true)}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search recipes, chefs..."
+                className="w-full pl-10 pr-9 py-2 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-full text-sm font-medium focus:outline-none dark:text-white"
+              />
+              {search && (
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition text-left cursor-pointer"
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
-                  <LogOut size={17} />
-                  <span>Log Out</span>
+                  <X size={16} />
                 </button>
-              </div>
-            )}
+              )}
+            </form>
           </div>
-        ) : (
-          <Link
-            to="/login"
-            className="bg-[#e02f21] hover:bg-[#c22417] text-white text-xs font-bold px-4 py-2 rounded-full transition shadow-xs"
-          >
-            Log In
-          </Link>
         )}
       </div>
+
+      {/* 3. Mobile Navigation Tab Bar (Second Row: h-11, Visible on screens < md) */}
+      <nav className="md:hidden flex items-center justify-around w-full h-11 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#242526] px-1">
+        {navTabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <Link
+              key={tab.to}
+              to={tab.to}
+              title={tab.label}
+              className={`flex-1 h-full flex items-center justify-center border-b-2 transition duration-150 cursor-pointer ${
+                tab.isActive
+                  ? 'border-[#e02f21] text-[#e02f21]'
+                  : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              <Icon size={22} />
+            </Link>
+          );
+        })}
+      </nav>
     </header>
   );
 };
 
 export default SocialHeader;
-

@@ -31,14 +31,14 @@ const FriendRequestCard = ({
         <div>
           <Link
             to={`/profile/${request.id}`}
-            className="font-bold text-sm text-gray-900 dark:text-white hover:underline truncate block"
+            className="font-bold text-base text-gray-900 dark:text-white hover:underline truncate block"
           >
             {request.name}
           </Link>
 
           {/* Mutual Friends indicator */}
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mt-1">
-            <Users size={12} className="text-gray-400 shrink-0" />
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <Users size={14} className="text-gray-400 shrink-0" />
             <span className="truncate">
               {request.mutualCount || 2} mutual {request.mutualCount === 1 ? 'friend' : 'friends'}
             </span>
@@ -46,12 +46,12 @@ const FriendRequestCard = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-1.5 pt-1">
+        <div className="space-y-2 pt-1">
           <Button
             type="button"
             onClick={() => onConfirm(request.id)}
             disabled={isProcessing}
-            className="w-full py-2 bg-[#1877f2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold shadow-xs transition"
+            className="w-full py-2.5 bg-[#e02f21] hover:bg-[#c92518] text-white rounded-xl text-sm font-bold shadow-xs transition cursor-pointer"
           >
             Confirm
           </Button>
@@ -61,7 +61,7 @@ const FriendRequestCard = ({
             variant="secondary"
             onClick={() => onDelete(request.id)}
             disabled={isProcessing}
-            className="w-full py-2 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-xs font-bold transition"
+            className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-sm font-bold transition cursor-pointer"
           >
             Delete
           </Button>

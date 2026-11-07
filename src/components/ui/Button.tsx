@@ -36,9 +36,9 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const sizes = {
-    sm: 'text-xs px-3 py-1.5 gap-1.5',
-    md: 'text-xs sm:text-sm px-4 py-2.5 gap-2',
-    lg: 'text-sm sm:text-base px-6 py-3 gap-2.5',
+    sm: 'text-sm px-3.5 py-2 gap-1.5',
+    md: 'text-sm sm:text-base px-5 py-2.5 gap-2',
+    lg: 'text-base sm:text-lg px-6 py-3.5 gap-2.5',
   };
 
   return (
@@ -56,7 +56,7 @@ export const Button: React.FC<ButtonProps> = ({
         </>
       ) : (
         <>
-          {Icon && <Icon size={size === 'sm' ? 14 : size === 'lg' ? 18 : 16} className="flex-shrink-0" />}
+          {Icon && <Icon size={size === 'sm' ? 16 : size === 'lg' ? 20 : 18} className="flex-shrink-0" />}
           {children}
         </>
       )}

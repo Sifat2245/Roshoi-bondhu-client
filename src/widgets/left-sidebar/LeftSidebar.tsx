@@ -38,29 +38,29 @@ const LeftSidebar = () => {
   }, [session]);
 
   const navRowClass = ({ isActive }) =>
-    `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer ${
+    `flex items-center gap-3 px-3.5 py-3 rounded-xl text-base font-bold transition cursor-pointer ${
       isActive
-        ? 'bg-gray-200/80 dark:bg-[#3a3b3c] text-[#e02f21] font-bold'
+        ? 'bg-gray-200/80 dark:bg-[#3a3b3c] text-[#e02f21]'
         : 'text-gray-800 dark:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c]'
     }`;
 
   return (
-    <aside className="w-full space-y-1 select-none">
+    <aside className="w-full space-y-1.5 select-none">
       {/* 1. User Profile Row */}
       {user ? (
         <Link
           to={`/profile/${user.id}`}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] transition text-sm font-semibold text-gray-900 dark:text-white"
+          className="flex items-center gap-3.5 px-3.5 py-3 rounded-xl hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] transition text-base font-bold text-gray-900 dark:text-white"
         >
-          <Avatar src={user.image} alt={user.name} size="sm" />
+          <Avatar src={user.image} alt={user.name} size="md" />
           <span className="truncate">{user.name}</span>
         </Link>
       ) : (
         <Link
           to="/login"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] transition text-sm font-semibold text-gray-900 dark:text-white"
+          className="flex items-center gap-3.5 px-3.5 py-3 rounded-xl hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] transition text-base font-bold text-gray-900 dark:text-white"
         >
-          <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-950 text-[#e02f21] flex items-center justify-center font-bold text-xs">
+          <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-950 text-[#e02f21] flex items-center justify-center font-bold text-sm">
             H
           </div>
           <span className="truncate">Sign In to Heshel</span>
@@ -69,24 +69,24 @@ const LeftSidebar = () => {
 
       {/* 2. Feed / Home */}
       <NavLink to="/" end className={navRowClass}>
-        <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-950/60 text-[#e02f21] flex items-center justify-center shrink-0">
-          <Home size={18} />
+        <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-950/60 text-[#e02f21] flex items-center justify-center shrink-0">
+          <Home size={20} />
         </div>
         <span>{t('feed')}</span>
       </NavLink>
 
       {/* 3. Friends */}
       <NavLink to="/friends" className={navRowClass}>
-        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center shrink-0">
-          <UserCheck size={18} />
+        <div className="w-9 h-9 rounded-full bg-red-50 dark:bg-red-950/40 text-[#e02f21] flex items-center justify-center shrink-0">
+          <UserCheck size={20} />
         </div>
         <span>Friends</span>
       </NavLink>
 
       {/* 4. Groups */}
       <NavLink to="/groups" className={navRowClass}>
-        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center shrink-0">
-          <Users size={18} />
+        <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center shrink-0">
+          <Users size={20} />
         </div>
         <span>{t('groups')}</span>
       </NavLink>
@@ -94,8 +94,8 @@ const LeftSidebar = () => {
       {/* Settings & Account */}
       {user && (
         <NavLink to="/settings" className={navRowClass}>
-          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
-            <SettingsIcon size={18} />
+          <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
+            <SettingsIcon size={20} />
           </div>
           <span>Settings</span>
         </NavLink>
@@ -106,43 +106,43 @@ const LeftSidebar = () => {
         <NavLink
           to="/admin-portal"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer ${
+            `flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-base font-bold transition cursor-pointer ${
               isActive
-                ? 'bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-bold'
+                ? 'bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300'
                 : 'text-amber-800 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30'
             }`
           }
         >
-          <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center shrink-0">
-            <Shield size={18} />
+          <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center shrink-0">
+            <Shield size={20} />
           </div>
           <span>{t('adminPortal')}</span>
         </NavLink>
       )}
 
       {/* Divider */}
-      <div className="border-t border-gray-200 dark:border-gray-800 my-2 pt-1"></div>
+      <div className="border-t border-gray-200 dark:border-gray-800 my-2.5 pt-1"></div>
 
       {/* "Your shortcuts" / Groups List Section */}
-      <div className="space-y-1">
-        <div className="px-3 py-1 flex items-center justify-between">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+      <div className="space-y-1.5">
+        <div className="px-3.5 py-1.5 flex items-center justify-between">
+          <span className="text-sm font-black text-gray-500 uppercase tracking-wider">
             Your shortcuts
           </span>
           <Link
             to="/groups"
-            className="text-[11px] font-semibold text-[#e02f21] hover:underline"
+            className="text-sm font-bold text-[#e02f21] hover:underline"
           >
             See all
           </Link>
         </div>
 
         {loadingGroups ? (
-          <div className="px-3 py-2 space-y-2">
+          <div className="px-3.5 py-2 space-y-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-3 animate-pulse">
-                <div className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-800 shrink-0"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-800 shrink-0"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
               </div>
             ))}
           </div>
@@ -151,7 +151,7 @@ const LeftSidebar = () => {
             <Link
               key={g.id}
               to={`/group/${g.slug}`}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] transition text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 group"
+              className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] transition text-base font-bold text-gray-800 dark:text-gray-200 group"
             >
               <img
                 src={
@@ -159,7 +159,7 @@ const LeftSidebar = () => {
                   'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100'
                 }
                 alt={g.name}
-                className="w-8 h-8 rounded-lg object-cover shrink-0 border border-gray-200 dark:border-gray-700"
+                className="w-10 h-10 rounded-xl object-cover shrink-0 border border-gray-200 dark:border-gray-700 shadow-2xs"
               />
               <span className="truncate group-hover:text-[#e02f21] transition">
                 {g.name}
@@ -167,9 +167,9 @@ const LeftSidebar = () => {
             </Link>
           ))
         ) : (
-          <div className="px-3 py-2 text-xs text-gray-400">
+          <div className="px-3.5 py-2 text-base text-gray-400">
             No groups yet.{' '}
-            <Link to="/groups" className="text-[#e02f21] underline">
+            <Link to="/groups/create" className="text-[#e02f21] underline font-bold">
               Create one!
             </Link>
           </div>
@@ -177,7 +177,7 @@ const LeftSidebar = () => {
       </div>
 
       {/* Mini Footer */}
-      <div className="px-3 pt-4 text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed">
+      <div className="px-3.5 pt-4 text-sm text-gray-400 dark:text-gray-500 leading-relaxed">
         <p>Heshel © 2026 • Bengali Culinary Network</p>
         <p className="mt-0.5">Privacy • Terms • Multilingual EN & বাং</p>
       </div>

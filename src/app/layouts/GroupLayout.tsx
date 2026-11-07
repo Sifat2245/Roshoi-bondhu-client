@@ -19,7 +19,7 @@ export const GroupLayout: React.FC<GroupLayoutProps> = ({
       <SocialHeader />
 
       {/* Main Container */}
-      <div className="flex-1 mt-14 flex overflow-hidden">
+      <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
         {showSidebar && (
           <aside className="hidden lg:block w-[320px] xl:w-[340px] h-full shrink-0 overflow-y-auto no-scrollbar">
             <LeftSidebar />

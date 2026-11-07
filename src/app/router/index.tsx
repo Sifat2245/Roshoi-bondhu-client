@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import SocialFeed from '../../pages/feed/SocialFeed';
 import GroupsPage from '../../pages/group/GroupsPage';
+import CreateGroupPage from '../../pages/group/CreateGroupPage';
 import GroupDetailPage from '../../pages/group/GroupDetailPage';
 import UserProfilePage from '../../pages/profile/UserProfilePage';
 import FriendsPage from '../../pages/friends/FriendsPage';
@@ -45,6 +46,15 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <GroupsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/groups/create',
+    errorElement: <NotFound />,
+    element: (
+      <PrivateRoute>
+        <CreateGroupPage />
       </PrivateRoute>
     ),
   },

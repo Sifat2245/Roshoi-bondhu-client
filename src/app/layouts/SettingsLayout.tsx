@@ -13,7 +13,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({ sidebar, childre
       <SocialHeader />
 
       {/* Main Settings Container */}
-      <div className="pt-14 w-full">
+      <div className="pt-[100px] md:pt-14 w-full">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-8">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
             {/* Left Sidebar with subtle border */}

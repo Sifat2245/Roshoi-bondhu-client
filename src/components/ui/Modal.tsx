@@ -63,15 +63,15 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {(title || showClose) && (
-          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
+          <div className="px-6 py-4.5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
             <div>
               {title && (
-                <h3 className="font-black text-base sm:text-lg text-gray-900 dark:text-white">
+                <h3 className="font-black text-lg sm:text-xl text-gray-900 dark:text-white">
                   {title}
                 </h3>
               )}
               {subtitle && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   {subtitle}
                 </p>
               )}
@@ -81,10 +81,10 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center transition cursor-pointer shrink-0 ml-auto"
+                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center transition cursor-pointer shrink-0 ml-auto"
                 title="Close"
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             )}
           </div>

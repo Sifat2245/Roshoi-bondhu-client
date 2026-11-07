@@ -72,8 +72,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
       {/* Header & Reset Button */}
       <div className="flex items-center justify-between px-2 pt-1">
         <div className="flex items-center gap-2">
-          <Filter size={16} className="text-[#e02f21]" />
-          <h3 className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          <Filter size={18} className="text-[#e02f21]" />
+          <h3 className="font-black text-sm uppercase tracking-wider text-gray-600 dark:text-gray-300">
             Filter Recipes & Food
           </h3>
         </div>
@@ -82,9 +82,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
           <button
             type="button"
             onClick={onResetFilters}
-            className="flex items-center gap-1 text-[11px] font-bold text-[#e02f21] hover:underline cursor-pointer"
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
           >
-            <RotateCcw size={12} />
+            <RotateCcw size={14} />
             <span>Reset</span>
           </button>
         )}
@@ -92,44 +92,44 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 
       {/* Active Filters Summary Pill (if any active) */}
       {hasActiveFilters && (
-        <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 text-xs space-y-1.5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400">
+        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 text-sm space-y-1.5">
+          <p className="text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400">
             Active Filters
           </p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {activeCuisine && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#e02f21] text-white text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#e02f21] text-white text-xs sm:text-sm font-bold">
                 {activeCuisine}
                 <button
                   type="button"
                   onClick={() => onSelectCuisine('')}
                   className="hover:text-black cursor-pointer"
                 >
-                  <X size={11} />
+                  <X size={13} />
                 </button>
               </span>
             )}
             {activeTag && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-600 text-white text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-600 text-white text-xs sm:text-sm font-bold">
                 {activeTag}
                 <button
                   type="button"
                   onClick={() => onSelectTag('')}
                   className="hover:text-black cursor-pointer"
                 >
-                  <X size={11} />
+                  <X size={13} />
                 </button>
               </span>
             )}
             {activeMaxTime && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-600 text-white text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-600 text-white text-xs sm:text-sm font-bold">
                 ≤ {activeMaxTime}m
                 <button
                   type="button"
                   onClick={() => onSelectMaxTime('')}
                   className="hover:text-black cursor-pointer"
                 >
-                  <X size={11} />
+                  <X size={13} />
                 </button>
               </span>
             )}
@@ -138,9 +138,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
       )}
 
       {/* 1. Cuisines Section */}
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5 px-2 text-xs font-bold text-gray-700 dark:text-gray-300">
-          <Flame size={14} className="text-orange-500" />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-2 text-base font-bold text-gray-800 dark:text-gray-200">
+          <Flame size={18} className="text-orange-500" />
           <span>Cuisines</span>
         </div>
 
@@ -153,9 +153,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                 key={c.id}
                 type="button"
                 onClick={() => onSelectCuisine(isSelected ? '' : c.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer text-left ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-base font-bold transition cursor-pointer text-left ${
                   isSelected
-                    ? 'bg-[#e02f21] text-white shadow-xs font-bold'
+                    ? 'bg-[#e02f21] text-white shadow-xs'
                     : 'hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] text-gray-800 dark:text-gray-200'
                 }`}
               >
@@ -167,12 +167,12 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                     }`}
                   >
-                    <Icon size={15} />
+                    <Icon size={18} />
                   </div>
                   <div className="truncate">
-                    <p className="truncate leading-tight">{c.label}</p>
+                    <p className="truncate leading-tight font-bold">{c.label}</p>
                     <p
-                      className={`text-[10px] ${
+                      className={`text-sm ${
                         isSelected ? 'text-red-100' : 'text-gray-400'
                       }`}
                     >
@@ -181,7 +181,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                   </div>
                 </div>
 
-                {isSelected && <Check size={14} className="shrink-0" />}
+                {isSelected && <Check size={18} className="shrink-0" />}
               </button>
             );
           })}
@@ -191,9 +191,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
       <div className="border-t border-gray-200 dark:border-gray-800 my-2"></div>
 
       {/* 2. Cooking Time Filter */}
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5 px-2 text-xs font-bold text-gray-700 dark:text-gray-300">
-          <Clock size={14} className="text-blue-500" />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-2 text-base font-bold text-gray-800 dark:text-gray-200">
+          <Clock size={18} className="text-blue-500" />
           <span>Prep & Cooking Time</span>
         </div>
 
@@ -206,9 +206,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                 key={item.value}
                 type="button"
                 onClick={() => onSelectMaxTime(isSelected ? '' : item.value)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer text-left ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-base font-bold transition cursor-pointer text-left ${
                   isSelected
-                    ? 'bg-amber-600 text-white shadow-xs font-bold'
+                    ? 'bg-amber-600 text-white shadow-xs'
                     : 'hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] text-gray-800 dark:text-gray-200'
                 }`}
               >
@@ -220,11 +220,11 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                     }`}
                   >
-                    <Icon size={14} />
+                    <Icon size={18} />
                   </div>
                   <span>{item.label}</span>
                 </div>
-                {isSelected && <Check size={14} className="shrink-0" />}
+                {isSelected && <Check size={18} className="shrink-0" />}
               </button>
             );
           })}
@@ -235,12 +235,12 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 
       {/* 3. Popular Food Tags */}
       <div className="space-y-2">
-        <div className="flex items-center gap-1.5 px-2 text-xs font-bold text-gray-700 dark:text-gray-300">
-          <Tag size={14} className="text-emerald-500" />
+        <div className="flex items-center gap-2 px-2 text-base font-bold text-gray-800 dark:text-gray-200">
+          <Tag size={18} className="text-emerald-500" />
           <span>Popular Food Tags</span>
         </div>
 
-        <div className="flex flex-wrap gap-1.5 px-1">
+        <div className="flex flex-wrap gap-2 px-1">
           {popularTags.map((tag) => {
             const cleanTag = tag.replace('#', '');
             const isSelected =
@@ -252,9 +252,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                 key={tag}
                 type="button"
                 onClick={() => onSelectTag(isSelected ? '' : cleanTag)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-sm font-bold transition cursor-pointer ${
                   isSelected
-                    ? 'bg-blue-600 text-white shadow-xs font-bold'
+                    ? 'bg-[#e02f21] text-white shadow-xs'
                     : 'bg-gray-200/70 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 hover:bg-gray-300/80 dark:hover:bg-gray-700'
                 }`}
               >

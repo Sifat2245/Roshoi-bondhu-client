@@ -29,11 +29,11 @@ export const Alert: React.FC<AlertProps> = ({
   };
 
   return (
-    <div className={`p-4 rounded-2xl border flex items-start gap-3 text-xs ${bgStyles[type]} ${className}`}>
+    <div className={`p-4.5 rounded-2xl border flex items-start gap-3.5 text-sm ${bgStyles[type]} ${className}`}>
       {icons[type]}
       <div>
-        {title && <p className="font-bold">{title}</p>}
-        <p className="mt-0.5 opacity-90">{message}</p>
+        {title && <p className="font-bold text-base">{title}</p>}
+        <p className="mt-0.5 opacity-90 leading-relaxed">{message}</p>
       </div>
     </div>
   );

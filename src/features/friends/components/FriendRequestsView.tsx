@@ -33,7 +33,7 @@ const FriendRequestsView: React.FC<FriendRequestsViewProps> = ({
           <button
             type="button"
             onClick={onSeeAll}
-            className="text-sm font-semibold text-[#1877f2] hover:underline cursor-pointer"
+            className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
           >
             See all
           </button>

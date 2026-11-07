@@ -60,13 +60,13 @@ const FriendSuggestionsView = ({
                 <div>
                   <Link
                     to={`/profile/${person.id}`}
-                    className="font-bold text-sm text-gray-900 dark:text-white hover:underline truncate block"
+                    className="font-black text-base text-gray-900 dark:text-white hover:underline truncate block"
                   >
                     {person.name}
                   </Link>
 
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    <Users size={12} className="text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <Users size={14} className="text-gray-400 shrink-0" />
                     <span className="truncate">
                       {person.mutualCount || 3} mutual friends
                     </span>
@@ -74,13 +74,13 @@ const FriendSuggestionsView = ({
                 </div>
 
                 {/* Actions */}
-                <div className="space-y-1.5 pt-1">
+                <div className="space-y-2 pt-1">
                   <Button
                     type="button"
                     onClick={() => onAddFriend(person.id)}
-                    className="w-full py-2 bg-[#1877f2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1"
+                    className="w-full py-2.5 bg-[#e02f21] hover:bg-[#c92518] text-white rounded-xl text-sm font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <UserPlus size={14} />
+                    <UserPlus size={16} />
                     <span>Add Friend</span>
                   </Button>
 
@@ -88,7 +88,7 @@ const FriendSuggestionsView = ({
                     type="button"
                     variant="secondary"
                     onClick={() => onRemoveSuggestion(person.id)}
-                    className="w-full py-2 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-xs font-bold transition"
+                    className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-sm font-bold transition cursor-pointer"
                   >
                     Remove
                   </Button>
@@ -100,10 +100,10 @@ const FriendSuggestionsView = ({
       ) : (
         <div className="bg-white dark:bg-[#242526] rounded-2xl p-12 text-center border border-gray-100 dark:border-gray-800 shadow-xs space-y-2">
           <UserPlus size={36} className="mx-auto text-gray-400" />
-          <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+          <h3 className="font-black text-base sm:text-lg text-gray-900 dark:text-white">
             No New Suggestions
           </h3>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-500">
             Check back soon as more food lovers join Heshel!
           </p>
         </div>

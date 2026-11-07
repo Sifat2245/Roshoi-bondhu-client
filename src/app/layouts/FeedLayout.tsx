@@ -36,14 +36,13 @@ export const FeedLayout: React.FC<FeedLayoutProps> = ({
     <div className="h-screen flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden select-none">
       {/* Fixed Topbar with Responsive Menu & Filter Actions */}
       <SocialHeader
-        onOpenCreatePost={onOpenCreatePost}
         onToggleLeftSidebar={() => setIsMobileMenuOpen((prev) => !prev)}
         onToggleRightSidebar={() => setIsMobileFilterOpen((prev) => !prev)}
         hasActiveFilters={hasActiveFilters}
       />
 
       {/* Main 3-Column Layout: Left Sidebar + Central Feed + Right Sidebar */}
-      <div className="flex-1 mt-14 flex overflow-hidden">
+      <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
         {/* Left Sticky Sidebar with generous top gap and breathing room */}
         <aside className="hidden lg:block w-[300px] xl:w-[320px] 2xl:w-[340px] h-full shrink-0 overflow-y-auto no-scrollbar pt-4 pb-6 px-3">
           <LeftSidebar />

@@ -30,7 +30,7 @@ const ProfilePhotosCard: React.FC<ProfilePhotosCardProps> = ({ posts = [] }) => 
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">Photos</h2>
-          <p className="text-xs text-gray-500 font-medium">{displayImages.length} photos</p>
+          <p className="text-sm text-gray-500 font-medium">{displayImages.length} photos</p>
         </div>
       </div>
 
@@ -39,7 +39,7 @@ const ProfilePhotosCard: React.FC<ProfilePhotosCardProps> = ({ posts = [] }) => 
         <button
           type="button"
           onClick={() => setSubTab('PHOTOS_OF_YOU')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer ${
             subTab === 'PHOTOS_OF_YOU'
               ? 'bg-red-50 dark:bg-red-950/40 text-[#e02f21]'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -50,7 +50,7 @@ const ProfilePhotosCard: React.FC<ProfilePhotosCardProps> = ({ posts = [] }) => 
         <button
           type="button"
           onClick={() => setSubTab('UPLOADS')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer ${
             subTab === 'UPLOADS'
               ? 'bg-red-50 dark:bg-red-950/40 text-[#e02f21]'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -61,7 +61,7 @@ const ProfilePhotosCard: React.FC<ProfilePhotosCardProps> = ({ posts = [] }) => 
         <button
           type="button"
           onClick={() => setSubTab('ALBUMS')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer ${
             subTab === 'ALBUMS'
               ? 'bg-red-50 dark:bg-red-950/40 text-[#e02f21]'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'

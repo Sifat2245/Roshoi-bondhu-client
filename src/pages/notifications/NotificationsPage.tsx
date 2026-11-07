@@ -63,7 +63,7 @@ const NotificationsPage = () => {
     <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
       <SocialHeader />
 
-      <div className="pt-14 w-full">
+      <div className="pt-[100px] md:pt-14 w-full">
         <div className="max-w-[800px] mx-auto px-4 py-8 space-y-5">
           {/* Header Card */}
           <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">

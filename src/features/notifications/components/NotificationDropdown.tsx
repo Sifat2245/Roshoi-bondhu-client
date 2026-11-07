@@ -50,9 +50,9 @@ const NotificationDropdown = ({
         <button
           type="button"
           onClick={() => setFilter('ALL')}
-          className={`px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-full text-sm font-bold transition cursor-pointer ${
             filter === 'ALL'
-              ? 'bg-[#1877f2]/10 text-[#1877f2] dark:bg-blue-950/60'
+              ? 'bg-red-50 text-[#e02f21] dark:bg-red-950/60'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
           }`}
         >
@@ -61,9 +61,9 @@ const NotificationDropdown = ({
         <button
           type="button"
           onClick={() => setFilter('UNREAD')}
-          className={`px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-full text-sm font-bold transition cursor-pointer ${
             filter === 'UNREAD'
-              ? 'bg-[#1877f2]/10 text-[#1877f2] dark:bg-blue-950/60'
+              ? 'bg-red-50 text-[#e02f21] dark:bg-red-950/60'
               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
           }`}
         >
@@ -84,7 +84,7 @@ const NotificationDropdown = ({
             />
           ))
         ) : (
-          <div className="py-10 text-center text-xs text-gray-400">
+          <div className="py-10 text-center text-sm text-gray-400">
             No {filter === 'UNREAD' ? 'unread ' : ''}notifications
           </div>
         )}
@@ -95,7 +95,7 @@ const NotificationDropdown = ({
         <Link
           to="/notifications"
           onClick={onClose}
-          className="text-xs font-bold text-[#1877f2] hover:underline block py-1.5"
+          className="text-sm font-bold text-[#e02f21] hover:underline block py-1.5"
         >
           See previous notifications
         </Link>
