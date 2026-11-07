@@ -6,6 +6,8 @@ import { useDarkMode } from '../../context/ThemeContext';
 import Avatar from '../../components/ui/Avatar';
 import logo from '../../assets/logo.png';
 import NotificationDropdown from '../../features/notifications/components/NotificationDropdown';
+import MessengerDropdown from '../../features/messenger/components/MessengerDropdown';
+import FloatingChatDock from '../../features/messenger/components/FloatingChatDock';
 import notificationsApi from '../../features/notifications/api/notifications.api';
 import {
   Home,
@@ -18,6 +20,7 @@ import {
   Settings as SettingsIcon,
   ChefHat,
   MessageSquare,
+  MessageCircle,
   Clock,
   X,
   Bell,
@@ -55,11 +58,13 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const notifContainerRef = useRef<HTMLDivElement>(null);
+  const messengerContainerRef = useRef<HTMLDivElement>(null);
   const user = session?.user;
 
   // Fetch notifications for badge and dropdown
@@ -114,6 +119,9 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
       }
       if (notifContainerRef.current && !notifContainerRef.current.contains(e.target as Node)) {
         setIsNotifOpen(false);
+      }
+      if (messengerContainerRef.current && !messengerContainerRef.current.contains(e.target as Node)) {
+        setIsMessengerOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -195,7 +203,8 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-gray-800 shadow-xs select-none">
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-gray-800 shadow-xs select-none">
       {/* 1. Main Header Bar (h-14) */}
       <div className="relative h-14 px-3 sm:px-4 flex items-center justify-between">
         {/* Left: Brand Logo, Mobile Drawer Toggle & Desktop Search */}
@@ -332,12 +341,45 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
             </button>
           )}
 
+          {/* Messenger Chat Button & Popover (matching Arrow 1 in Image 3 & Image 4) */}
+          {user && (
+            <div ref={messengerContainerRef} className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMessengerOpen(!isMessengerOpen);
+                  setIsNotifOpen(false);
+                }}
+                title="Messenger"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer relative shrink-0"
+              >
+                <MessageCircle size={20} />
+                <span className="absolute -top-1 -right-1 bg-[#e02f21] text-white text-xs font-black w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-[#242526]">
+                  2
+                </span>
+              </button>
+
+              {isMessengerOpen && (
+                <MessengerDropdown
+                  onClose={() => setIsMessengerOpen(false)}
+                  onOpenFullChat={() => {
+                    setIsMessengerOpen(false);
+                    navigate('/messages');
+                  }}
+                />
+              )}
+            </div>
+          )}
+
           {/* Notification Bell Button & Popover */}
           {user && (
             <div ref={notifContainerRef} className="relative">
               <button
                 type="button"
-                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                onClick={() => {
+                  setIsNotifOpen(!isNotifOpen);
+                  setIsMessengerOpen(false);
+                }}
                 title="Notifications"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition cursor-pointer relative shrink-0"
               >
@@ -571,6 +613,10 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
         })}
       </nav>
     </header>
+
+    {/* Floating Bottom-Right Chat Popup / Dock (Matching user's Image 1 & 2) */}
+    <FloatingChatDock />
+  </>
   );
 };
 

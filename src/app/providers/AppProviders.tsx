@@ -4,6 +4,7 @@ import AuthProvider from './AuthProvider';
 import { ThemeProvider } from '../../context/ThemeContext';
 import { LanguageProvider } from '../../context/LanguageContext';
 import { ToastProvider } from '../../context/ToastContext';
+import { ChatDockProvider } from '../../context/ChatDockContext';
 
 export interface AppProvidersProps {
   children: React.ReactNode;
@@ -16,7 +17,9 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
         <LanguageProvider>
           <ThemeProvider>
             <ToastProvider>
-              {children}
+              <ChatDockProvider>
+                {children}
+              </ChatDockProvider>
             </ToastProvider>
           </ThemeProvider>
         </LanguageProvider>

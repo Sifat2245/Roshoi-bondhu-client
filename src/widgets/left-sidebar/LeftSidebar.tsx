@@ -8,6 +8,7 @@ import {
   Home,
   Users,
   UserCheck,
+  MessageCircle,
   Shield,
   Settings as SettingsIcon,
 } from 'lucide-react';
@@ -89,6 +90,14 @@ const LeftSidebar = () => {
           <Users size={20} />
         </div>
         <span>{t('groups')}</span>
+      </NavLink>
+
+      {/* 5. Messenger (matching user arrow in Image 3) */}
+      <NavLink to="/messages" className={navRowClass}>
+        <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center shrink-0">
+          <MessageCircle size={20} />
+        </div>
+        <span>Messenger</span>
       </NavLink>
 
       {/* Settings & Account */}

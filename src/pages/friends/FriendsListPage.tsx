@@ -8,6 +8,7 @@ import PostCard from '../../features/posts/components/PostCard';
 import { friendsApi } from '../../features/friends/api/friends.api';
 import { profileApi } from '../../features/profile/api/profile.api';
 import { postsApi } from '../../features/posts/api/posts.api';
+import { useChatDock } from '../../context/ChatDockContext';
 import {
   ArrowLeft,
   Search,
@@ -25,6 +26,7 @@ import {
 
 export const FriendsListPage = () => {
   const { data: session } = useSession();
+  const { openChat } = useChatDock();
   const token = session?.session?.token;
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -133,7 +135,11 @@ export const FriendsListPage = () => {
       {/* 2. Main 2-Column Container */}
       <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
         {/* Left Sidebar: All Friends List (matching Facebook Screenshot 5) */}
-        <aside className="w-full md:w-[340px] lg:w-[360px] h-full shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex flex-col shadow-xs">
+        <aside
+          className={`w-full md:w-[340px] lg:w-[360px] h-full shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex-col shadow-xs ${
+            selectedFriendId ? 'hidden md:flex' : 'flex'
+          }`}
+        >
           {/* Header with Back Arrow to /friends */}
           <div className="p-3 pb-2 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-2 mb-2">
@@ -231,7 +237,26 @@ export const FriendsListPage = () => {
         </aside>
 
         {/* Right / Main Area: Preview Profile OR Empty State (matching Facebook Screenshot 5) */}
-        <main className="flex-1 h-full overflow-y-auto no-scrollbar">
+        <main
+          className={`flex-1 h-full overflow-y-auto no-scrollbar ${
+            selectedFriendId ? 'block' : 'hidden md:block'
+          }`}
+        >
+          {selectedFriend && (
+            <div className="md:hidden p-3 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedFriendId(null);
+                  setSearchParams({});
+                }}
+                className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 hover:text-[#e02f21] cursor-pointer"
+              >
+                <ArrowLeft size={18} />
+                <span>Back to all friends</span>
+              </button>
+            </div>
+          )}
           {!selectedFriend ? (
             /* Empty State: exactly matching Facebook Screenshot 5 */
             <div className="h-full flex flex-col items-center justify-center p-6 text-center">
@@ -318,6 +343,7 @@ export const FriendsListPage = () => {
 
                       <Button
                         variant="secondary"
+                        onClick={() => openChat('c-saba')}
                         className="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer"
                       >
                         <MessageCircle size={16} />

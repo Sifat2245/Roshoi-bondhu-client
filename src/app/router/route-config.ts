@@ -10,6 +10,7 @@ export const ROUTES = {
   USER_PROFILE: (id: string) => `/profile/${id}`,
   FRIENDS: '/friends',
   FRIENDS_LIST: '/friends/list',
+  MESSAGES: '/messages',
   NOTIFICATIONS: '/notifications',
   SETTINGS: '/settings',
   ADMIN_PORTAL: '/admin-portal',

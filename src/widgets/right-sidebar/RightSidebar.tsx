@@ -69,26 +69,19 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 
   return (
     <aside className="w-full space-y-4 select-none pb-8 text-gray-800 dark:text-gray-200">
-      {/* Header & Reset Button */}
-      <div className="flex items-center justify-between px-2 pt-1">
-        <div className="flex items-center gap-2">
-          <Filter size={18} className="text-[#e02f21]" />
-          <h3 className="font-black text-sm uppercase tracking-wider text-gray-600 dark:text-gray-300">
-            Filter Recipes & Food
-          </h3>
-        </div>
-
-        {hasActiveFilters && (
+      {/* Reset Button (Visible only when filters are active) */}
+      {hasActiveFilters && (
+        <div className="flex items-center justify-end px-2 pt-1">
           <button
             type="button"
             onClick={onResetFilters}
             className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
           >
             <RotateCcw size={14} />
-            <span>Reset</span>
+            <span>Reset filters</span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Active Filters Summary Pill (if any active) */}
       {hasActiveFilters && (

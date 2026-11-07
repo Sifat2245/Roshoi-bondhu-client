@@ -14,13 +14,13 @@ export const FriendsLayout: React.FC<FriendsLayoutProps> = ({ children, sidebar 
 
       {/* Main 2-Column Split Layout */}
       <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
-        {/* Left Sidebar (320px-360px) */}
-        <aside className="w-full sm:w-[320px] md:w-[340px] xl:w-[360px] h-full shrink-0 overflow-y-auto no-scrollbar">
+        {/* Left Sidebar: Visible on desktop (lg: and up) */}
+        <aside className="hidden lg:block w-[320px] md:w-[340px] xl:w-[360px] h-full shrink-0 overflow-y-auto no-scrollbar border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#242526]">
           {sidebar}
         </aside>
 
-        {/* Right Main Content View */}
-        <main className="hidden sm:block flex-1 h-full overflow-y-auto no-scrollbar p-6">
+        {/* Right Main Content View: Full width on mobile/tablet, flex-1 on desktop */}
+        <main className="flex-1 w-full h-full overflow-y-auto no-scrollbar p-3.5 sm:p-5 lg:p-6">
           <div className="max-w-[1200px] mx-auto">
             {children}
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router';
+import { useSearchParams, useNavigate } from 'react-router';
 import { useSession } from '../../lib/auth-client';
 import { FriendsLayout } from '../../app/layouts/FriendsLayout';
 import FriendsSidebar from '../../features/friends/components/FriendsSidebar';
@@ -14,6 +14,7 @@ import { friendsApi } from '../../features/friends/api/friends.api';
 const FriendsPage = () => {
   const { data: session } = useSession();
   const { notify } = useToast();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tabParam = searchParams.get('tab') || 'home';
@@ -25,6 +26,15 @@ const FriendsPage = () => {
   const [loading, setLoading] = useState(true);
 
   const token = session?.session?.token;
+
+  const mobileNavTabs = [
+    { id: 'home', label: 'Home', badge: 0 },
+    { id: 'requests', label: 'Friend requests', badge: requests.length },
+    { id: 'suggestions', label: 'Suggestions', badge: 0 },
+    { id: 'all', label: 'All friends', badge: 0 },
+    { id: 'birthdays', label: 'Birthdays', badge: 0 },
+    { id: 'custom', label: 'Custom lists', badge: 0 },
+  ];
 
   useEffect(() => {
     setActiveSection(tabParam);
@@ -97,6 +107,37 @@ const FriendsPage = () => {
       }
     >
       <div className="max-w-[1280px] mx-auto pb-12">
+        {/* Mobile Horizontal Navigation Tabs (< lg screens) */}
+        <div className="lg:hidden mb-5 overflow-x-auto no-scrollbar flex items-center gap-2 pb-1">
+          {mobileNavTabs.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                if (item.id === 'all') navigate('/friends/list');
+                else handleSelectSection(item.id);
+              }}
+              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                activeSection === item.id
+                  ? 'bg-[#e02f21] text-white shadow-xs'
+                  : 'bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800'
+              }`}
+            >
+              <span>{item.label}</span>
+              {item.badge > 0 && (
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-xs font-bold ${
+                    activeSection === item.id
+                      ? 'bg-white text-[#e02f21]'
+                      : 'bg-[#e02f21] text-white'
+                  }`}
+                >
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
             {activeSection === 'home' && (
               <div className="space-y-8">
                 <FriendRequestsView

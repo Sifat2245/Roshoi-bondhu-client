@@ -78,7 +78,7 @@ const FriendSuggestionsView = ({
                   <Button
                     type="button"
                     onClick={() => onAddFriend(person.id)}
-                    className="w-full py-2.5 bg-[#e02f21] hover:bg-[#c92518] text-white rounded-xl text-sm font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 bg-[#e02f21] hover:bg-[#c92518] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                   >
                     <UserPlus size={16} />
                     <span>Add Friend</span>
@@ -88,7 +88,7 @@ const FriendSuggestionsView = ({
                     type="button"
                     variant="secondary"
                     onClick={() => onRemoveSuggestion(person.id)}
-                    className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-sm font-bold transition cursor-pointer"
+                    className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer whitespace-nowrap"
                   >
                     Remove
                   </Button>

@@ -191,10 +191,14 @@ const PostCard: React.FC<PostCardProps> = ({
   const isAuthor = user?.id === post.author?.id || user?.role === 'ADMIN';
 
   return (
-    <article className="bg-white dark:bg-[#242526] rounded-2xl shadow-xs border border-gray-100 dark:border-gray-800 overflow-hidden relative">
+    <article
+      className={`bg-white dark:bg-[#242526] rounded-2xl shadow-xs border border-gray-100 dark:border-gray-800 relative transition-shadow ${
+        isMenuOpen ? 'z-30' : 'z-10'
+      }`}
+    >
       {/* Pinned Badge if pinned */}
       {isPinned && (
-        <div className="bg-red-50/60 dark:bg-red-950/20 px-4 py-1.5 border-b border-red-100 dark:border-red-900/30 flex items-center justify-between">
+        <div className="bg-red-50/60 dark:bg-red-950/20 px-4 py-1.5 border-b border-red-100 dark:border-red-900/30 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-1.5 text-xs font-bold text-[#e02f21]">
             <Pin size={13} className="fill-[#e02f21]" />
             <span>Pinned post</span>
@@ -210,7 +214,7 @@ const PostCard: React.FC<PostCardProps> = ({
       )}
 
       {/* Header: Author Info + 3-dots Menu */}
-      <div className="p-3.5 sm:p-4 flex items-center justify-between">
+      <div className="p-3.5 sm:p-4 flex items-center justify-between rounded-t-2xl">
         <div className="flex items-center gap-2.5">
           <Link to={`/profile/${post.author?.id}`}>
             <Avatar src={post.author?.image} alt={post.author?.name} size="md" />
@@ -266,7 +270,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
           {/* Action Menu Dropdown */}
           {isMenuOpen && (
-            <div className="absolute right-0 top-10 w-64 bg-white dark:bg-[#242526] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 py-2 z-40 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute right-0 top-10 w-64 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
               {/* 1. Pin / Unpin Post */}
               <button
                 type="button"
@@ -474,7 +478,7 @@ const PostCard: React.FC<PostCardProps> = ({
       </div>
 
       {/* Facebook Action Row */}
-      <div className="px-2 py-1.5 grid grid-cols-3 text-sm font-bold text-gray-600 dark:text-gray-300">
+      <div className="px-2 py-1.5 grid grid-cols-3 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-b-2xl">
         <button
           type="button"
           onClick={handleLike}

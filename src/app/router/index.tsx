@@ -6,6 +6,7 @@ import GroupDetailPage from '../../pages/group/GroupDetailPage';
 import UserProfilePage from '../../pages/profile/UserProfilePage';
 import FriendsPage from '../../pages/friends/FriendsPage';
 import FriendsListPage from '../../pages/friends/FriendsListPage';
+import MessagesPage from '../../pages/messages/MessagesPage';
 import NotificationsPage from '../../pages/notifications/NotificationsPage';
 import AdminPortal from '../../pages/admin-dashboard/AdminPortal';
 import LoginPage from '../../pages/auth/LoginPage';
@@ -100,6 +101,15 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <FriendsListPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/messages',
+    errorElement: <NotFound />,
+    element: (
+      <PrivateRoute>
+        <MessagesPage />
       </PrivateRoute>
     ),
   },

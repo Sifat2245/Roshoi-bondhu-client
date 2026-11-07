@@ -51,7 +51,7 @@ const FriendRequestCard = ({
             type="button"
             onClick={() => onConfirm(request.id)}
             disabled={isProcessing}
-            className="w-full py-2.5 bg-[#e02f21] hover:bg-[#c92518] text-white rounded-xl text-sm font-bold shadow-xs transition cursor-pointer"
+            className="w-full py-2.5 bg-[#e02f21] hover:bg-[#c92518] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition cursor-pointer whitespace-nowrap"
           >
             Confirm
           </Button>
@@ -61,7 +61,7 @@ const FriendRequestCard = ({
             variant="secondary"
             onClick={() => onDelete(request.id)}
             disabled={isProcessing}
-            className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-sm font-bold transition cursor-pointer"
+            className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer whitespace-nowrap"
           >
             Delete
           </Button>

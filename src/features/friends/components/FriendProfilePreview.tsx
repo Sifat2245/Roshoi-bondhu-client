@@ -14,10 +14,12 @@ import {
 import Button from '../../../components/ui/Button';
 import Avatar from '../../../components/ui/Avatar';
 import PostCard from '../../posts/components/PostCard';
+import { useChatDock } from '../../../context/ChatDockContext';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const FriendProfilePreview = ({ friend, token }) => {
+  const { openChat } = useChatDock();
   const [profileData, setProfileData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -112,6 +114,7 @@ const FriendProfilePreview = ({ friend, token }) => {
 
             <Button
               variant="secondary"
+              onClick={() => openChat('c-saba')}
               className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
               <MessageCircle size={14} />

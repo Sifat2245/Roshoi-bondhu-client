@@ -204,8 +204,8 @@ const GroupsPage: React.FC = () => {
 
       {/* 2. Main 2-Column Facebook Groups Body */}
       <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
-        {/* LEFT COLUMN: Facebook Groups Sidebar (Matching Image 2) */}
-        <aside className="w-full lg:w-[360px] xl:w-[380px] shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex flex-col h-full shadow-xs">
+        {/* LEFT COLUMN: Facebook Groups Sidebar (Visible on desktop lg: and up) */}
+        <aside className="hidden lg:flex lg:w-[360px] xl:w-[380px] shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex-col h-full shadow-xs">
           {/* Top Title & Settings */}
           <div className="p-4 pb-2 flex items-center justify-between">
             <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -405,8 +405,57 @@ const GroupsPage: React.FC = () => {
           </div>
         </aside>
 
-        {/* CENTER / MAIN CONTENT (Feed or Discover) */}
-        <main className="flex-1 h-full overflow-y-auto no-scrollbar py-6 px-4 sm:px-6 lg:px-8">
+        {/* CENTER / MAIN CONTENT (Feed, Discover, or Your Groups) */}
+        <main className="flex-1 w-full h-full overflow-y-auto no-scrollbar py-4 sm:py-6 px-3.5 sm:px-6 lg:px-8">
+          {/* Mobile Horizontal Navigation Tabs (< lg screens) */}
+          <div className="lg:hidden mb-5 overflow-x-auto no-scrollbar flex items-center gap-2 pb-1">
+            <button
+              type="button"
+              onClick={() => handleSelectView('FEED')}
+              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-2 shrink-0 ${
+                activeView === 'FEED'
+                  ? 'bg-[#e02f21] text-white shadow-xs'
+                  : 'bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800'
+              }`}
+            >
+              <Rss size={16} />
+              <span>Your feed</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSelectView('DISCOVER')}
+              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-2 shrink-0 ${
+                activeView === 'DISCOVER'
+                  ? 'bg-[#e02f21] text-white shadow-xs'
+                  : 'bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800'
+              }`}
+            >
+              <Compass size={16} />
+              <span>Discover</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSelectView('YOUR_GROUPS')}
+              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-2 shrink-0 ${
+                activeView === 'YOUR_GROUPS'
+                  ? 'bg-[#e02f21] text-white shadow-xs'
+                  : 'bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800'
+              }`}
+            >
+              <Users size={16} />
+              <span>Your groups</span>
+            </button>
+
+            <Link
+              to="/groups/create"
+              className="px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap bg-red-50 text-[#e02f21] dark:bg-red-950/60 hover:bg-red-100 transition flex items-center gap-1.5 shrink-0"
+            >
+              <Plus size={16} />
+              <span>Create group</span>
+            </Link>
+          </div>
           {/* VIEW 1: All Posts from All Groups (Requirement 3 - Image 2) */}
           {activeView === 'FEED' && (
             <div className="max-w-[700px] xl:max-w-[740px] mx-auto space-y-4">
