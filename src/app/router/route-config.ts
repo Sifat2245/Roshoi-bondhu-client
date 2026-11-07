@@ -13,7 +13,6 @@ export const ROUTES = {
   MESSAGES: '/messages',
   NOTIFICATIONS: '/notifications',
   SETTINGS: '/settings',
-  ADMIN_PORTAL: '/admin-portal',
 } as const;
 
 export type AppRoutes = typeof ROUTES;

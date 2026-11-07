@@ -16,7 +16,6 @@ import {
   Sun,
   Moon,
   LogOut,
-  Shield,
   Settings as SettingsIcon,
   ChefHat,
   MessageSquare,
@@ -516,17 +515,6 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
                     <SettingsIcon size={20} />
                     <span>Settings & Privacy</span>
                   </Link>
-
-                  {['ADMIN', 'MODERATOR'].includes(user.role) && (
-                    <Link
-                      to="/admin-portal"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-base font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition"
-                    >
-                      <Shield size={19} />
-                      <span>Admin Control Panel</span>
-                    </Link>
-                  )}
 
                   <button
                     type="button"

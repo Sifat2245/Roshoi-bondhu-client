@@ -9,7 +9,6 @@ import {
   Users,
   UserCheck,
   MessageCircle,
-  Shield,
   Settings as SettingsIcon,
 } from 'lucide-react';
 
@@ -107,25 +106,6 @@ const LeftSidebar = () => {
             <SettingsIcon size={20} />
           </div>
           <span>Settings</span>
-        </NavLink>
-      )}
-
-      {/* 5. Admin & Moderator Control Panel (Staff only) */}
-      {user && ['ADMIN', 'MODERATOR'].includes(user.role) && (
-        <NavLink
-          to="/admin-portal"
-          className={({ isActive }) =>
-            `flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-base font-bold transition cursor-pointer ${
-              isActive
-                ? 'bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300'
-                : 'text-amber-800 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30'
-            }`
-          }
-        >
-          <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center shrink-0">
-            <Shield size={20} />
-          </div>
-          <span>{t('adminPortal')}</span>
         </NavLink>
       )}
 

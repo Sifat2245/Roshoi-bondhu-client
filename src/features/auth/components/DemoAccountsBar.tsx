@@ -1,31 +1,15 @@
 import React from 'react';
-import { Shield, UserCheck, Sparkles } from 'lucide-react';
+import { ChefHat, Sparkles } from 'lucide-react';
 
 const DemoAccountsBar = ({ onSelectAccount }) => {
   const accounts = [
     {
-      role: 'ADMIN',
-      label: 'Admin',
-      email: 'admin@heshel.com',
-      pass: 'AdminPassword123!',
-      color: 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300',
-      icon: Shield,
-    },
-    {
-      role: 'MODERATOR',
-      label: 'Moderator',
-      email: 'moderator@heshel.com',
-      pass: 'ModPassword123!',
-      color: 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
-      icon: Shield,
-    },
-    {
       role: 'FOODIE',
-      label: 'Foodie Chef',
+      label: 'Demo Chef (Rahima)',
       email: 'chef.rahima@heshel.com',
       pass: 'UserPassword123!',
-      color: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
-      icon: UserCheck,
+      color: 'bg-red-50 text-[#e02f21] dark:bg-red-950/40 dark:text-red-300 border border-red-100 dark:border-red-900/40',
+      icon: ChefHat,
     },
   ];
 
@@ -35,7 +19,7 @@ const DemoAccountsBar = ({ onSelectAccount }) => {
         <Sparkles size={14} className="text-amber-500" />
         <span>Quick Demo Access (1-Click Fill):</span>
       </div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="w-full">
         {accounts.map((acc) => {
           const Icon = acc.icon;
           return (
@@ -43,10 +27,10 @@ const DemoAccountsBar = ({ onSelectAccount }) => {
               key={acc.role}
               type="button"
               onClick={() => onSelectAccount(acc.email, acc.pass)}
-              className={`p-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 active:scale-95 ${acc.color}`}
+              className={`w-full py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 active:scale-95 ${acc.color}`}
             >
-              <Icon size={13} />
-              <span>{acc.label}</span>
+              <Icon size={16} />
+              <span>Sign in as {acc.label}</span>
             </button>
           );
         })}

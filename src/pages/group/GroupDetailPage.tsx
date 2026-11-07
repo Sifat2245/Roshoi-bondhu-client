@@ -107,7 +107,7 @@ const GroupDetailPage = () => {
   }
 
   const isMember = group.isMember || false;
-  const isAdmin = group.membershipRole === 'ADMIN' || user?.role === 'ADMIN';
+  const isAdmin = group.membershipRole === 'ADMIN';
 
   // Sample media photos for the "Recent media" widget matching Image 3
   const groupMediaPhotos = posts.map((p) => p.image).filter(Boolean);

@@ -188,7 +188,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const isRecipe = post.postType === 'RECIPE';
   const isRepost = post.postType === 'REPOST';
-  const isAuthor = user?.id === post.author?.id || user?.role === 'ADMIN';
+  const isAuthor = user?.id === post.author?.id;
 
   return (
     <article
@@ -227,11 +227,6 @@ const PostCard: React.FC<PostCardProps> = ({
               >
                 {post.author?.name}
               </Link>
-              {post.author?.role && post.author.role !== 'USER' && (
-                <span className="text-[10px] uppercase px-1.5 py-0.2 rounded font-black bg-red-100 dark:bg-red-950 text-[#e02f21]">
-                  {post.author.role}
-                </span>
-              )}
               {post.group && (
                 <span className="text-xs sm:text-sm text-gray-500">
                   in{' '}
@@ -286,7 +281,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 </div>
               </button>
 
-              {/* 2. Edit Post (for author/admin) */}
+              {/* 2. Edit Post (for author) */}
               {isAuthor && (
                 <button
                   type="button"

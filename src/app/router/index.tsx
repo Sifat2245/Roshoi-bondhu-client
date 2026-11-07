@@ -8,7 +8,6 @@ import FriendsPage from '../../pages/friends/FriendsPage';
 import FriendsListPage from '../../pages/friends/FriendsListPage';
 import MessagesPage from '../../pages/messages/MessagesPage';
 import NotificationsPage from '../../pages/notifications/NotificationsPage';
-import AdminPortal from '../../pages/admin-dashboard/AdminPortal';
 import LoginPage from '../../pages/auth/LoginPage';
 import RegisterPage from '../../pages/auth/RegisterPage';
 import ForgotPasswordPage from '../../pages/auth/ForgotPasswordPage';
@@ -128,15 +127,6 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <SettingsPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/admin-portal',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <AdminPortal />
       </PrivateRoute>
     ),
   },
