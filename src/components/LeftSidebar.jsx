@@ -8,6 +8,7 @@ import {
   Users,
   UserCheck,
   Shield,
+  Settings as SettingsIcon,
   ChevronDown,
   Sparkles,
   PlusCircle,
@@ -111,6 +112,16 @@ const LeftSidebar = () => {
         </div>
         <span>{t('groups')}</span>
       </NavLink>
+
+      {/* Settings & Account */}
+      {user && (
+        <NavLink to="/settings" className={navRowClass}>
+          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
+            <SettingsIcon size={18} />
+          </div>
+          <span>Settings</span>
+        </NavLink>
+      )}
 
       {/* 5. Admin & Moderator Control Panel (Staff only) */}
       {user && ['ADMIN', 'MODERATOR'].includes(user.role) && (

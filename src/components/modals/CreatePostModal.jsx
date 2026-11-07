@@ -13,6 +13,10 @@ import {
   Plus,
   Trash2,
   Sparkles,
+  Smile,
+  MapPin,
+  Flag,
+  MoreHorizontal,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -302,11 +306,16 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
             </div>
           )}
 
-          {/* Facebook "Add to your post" Box */}
-          <div className="p-3 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Add to your post</span>
-            <div className="flex items-center gap-1">
-              <label className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-emerald-500 cursor-pointer transition">
+          {/* Facebook "Add to your post" Bar (Matching Image 3) */}
+          <div className="p-3 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center justify-between shadow-2xs">
+            <span className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+              Add to your post
+            </span>
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <label
+                title="Photo / Video"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-emerald-500 cursor-pointer transition"
+              >
                 <ImageIcon size={20} />
                 <input
                   type="file"
@@ -320,11 +329,43 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated, initialMode = 'CASUAL
                 type="button"
                 onClick={() => setMode(mode === 'RECIPE' ? 'CASUAL' : 'RECIPE')}
                 className={`p-2 rounded-full transition ${
-                  mode === 'RECIPE' ? 'bg-red-50 text-[#e02f21]' : 'hover:bg-gray-100 text-[#e02f21]'
+                  mode === 'RECIPE' ? 'bg-red-50 text-[#e02f21]' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#e02f21]'
                 }`}
-                title="Toggle Recipe Inputs"
+                title="Structured Recipe Fields"
               >
                 <ChefHat size={20} />
+              </button>
+
+              <button
+                type="button"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-blue-500 transition hidden sm:inline-flex"
+                title="Tag Foodies"
+              >
+                <Users size={20} />
+              </button>
+
+              <button
+                type="button"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-amber-500 transition hidden sm:inline-flex"
+                title="Feeling / Craving"
+              >
+                <Smile size={20} />
+              </button>
+
+              <button
+                type="button"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-rose-500 transition hidden sm:inline-flex"
+                title="Location / Restaurant"
+              >
+                <MapPin size={20} />
+              </button>
+
+              <button
+                type="button"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition"
+                title="More"
+              >
+                <MoreHorizontal size={20} />
               </button>
             </div>
           </div>

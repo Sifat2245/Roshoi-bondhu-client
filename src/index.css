@@ -9,11 +9,14 @@ html, body {
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Hide scrollbars for clean Facebook-style sticky panels */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* Hide scrollbar globally across Chrome, Safari, Opera, Edge and Firefox */
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+
+* {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }
