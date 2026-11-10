@@ -1,50 +1,52 @@
 import React from "react";
-import { useNavigate } from "react-router";
-import { startDemo } from "../../../lib/demo/demo-store";
+import { Sparkles } from "lucide-react";
 
-const DemoAccountsBar = ({ onSelectAccount }) => {
-  const navigate = useNavigate();
-  const accounts = [
-    {
-      role: "FOODIE",
-      label: "Demo Chef (Rahima)",
-      email: "chef.rahima@heshel.com",
-      pass: "UserPassword123!",
-      color:
-        "bg-red-50 text-[#e02f21] dark:bg-red-950/40 dark:text-red-300 border border-red-100 dark:border-red-900/40",
-    },
-  ];
+interface DemoAccountsBarProps {
+  onSelectAccount: (email: string, pass: string) => void;
+}
+
+const DemoAccountsBar: React.FC<DemoAccountsBarProps> = ({ onSelectAccount }) => {
+  const seedChef = {
+    name: "Chef Rahima Sultana",
+    email: "chef.rahima@heshel.com",
+    pass: "UserPassword123!",
+  };
 
   return (
     <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-      <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
-        <span>Quick Demo Access (1-Click Fill):</span>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+          Quick Demo Login
+        </span>
+        <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+          Verified User
+        </span>
       </div>
+
       <button
         type="button"
-        onClick={() => {
-          startDemo();
-          navigate("/");
-        }}
-        className="mt-3 w-full rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+        onClick={() => onSelectAccount(seedChef.email, seedChef.pass)}
+        className="w-full py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-between cursor-pointer bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/20 text-[#e02f21] dark:text-red-300 border border-red-200/80 dark:border-red-900/50 hover:border-[#e02f21] hover:shadow-sm active:scale-[0.99]"
       >
-        Explore interactive demo
+        <div className="flex items-center gap-2 text-left">
+          <div className="w-7 h-7 rounded-lg bg-[#e02f21] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
+            👩‍🍳
+          </div>
+          <div className="leading-tight">
+            <div className="font-extrabold text-xs text-gray-900 dark:text-white">
+              {seedChef.name}
+            </div>
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">
+              {seedChef.email}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 text-[11px] font-bold bg-[#e02f21] text-white px-2.5 py-1 rounded-lg shrink-0">
+          <Sparkles size={12} />
+          <span>1-Click Fill</span>
+        </div>
       </button>
-      <p className="mt-2 text-center text-[11px] text-gray-500">
-        Try the community with sample data. No account needed.
-      </p>
-      <div className="w-full">
-        {accounts.map((acc) => (
-          <button
-            key={acc.role}
-            type="button"
-            onClick={() => onSelectAccount(acc.email, acc.pass)}
-            className={`w-full py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 active:scale-95 ${acc.color}`}
-          >
-            <span>Sign in as {acc.label}</span>
-          </button>
-        ))}
-      </div>
     </div>
   );
 };

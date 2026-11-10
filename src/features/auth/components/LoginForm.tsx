@@ -16,8 +16,9 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (user) {
-      const from = (location.state as any)?.from?.pathname || "/";
-      navigate(from, { replace: true });
+      const from = (location.state as any)?.from?.pathname;
+      const target = from && from !== "/login" && from !== "/register" ? from : "/";
+      navigate(target, { replace: true });
     }
   }, [user, navigate, location]);
 
@@ -46,8 +47,9 @@ const LoginForm = () => {
       }
 
       notify.success("Logged in successfully!", "Welcome Back");
-      const from = (location.state as any)?.from?.pathname || "/";
-      navigate(from, { replace: true });
+      const from = (location.state as any)?.from?.pathname;
+      const target = from && from !== "/login" && from !== "/register" ? from : "/";
+      navigate(target, { replace: true });
     } catch (err: any) {
       notify.error(err.message || "Invalid email or password.", "Login Failed");
     } finally {
