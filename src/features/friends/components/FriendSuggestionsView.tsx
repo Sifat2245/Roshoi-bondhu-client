@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router";
 import { UserPlus, X, Users } from "lucide-react";
 import Button from "../../../components/ui/Button";
+import defaultUserAvatar from "../../../assets/user-image.png";
 
 const FriendSuggestionsView = ({
   suggestions = [],
@@ -46,10 +47,7 @@ const FriendSuggestionsView = ({
                 className="block aspect-square w-full bg-gray-100 dark:bg-gray-800 relative overflow-hidden group"
               >
                 <img
-                  src={
-                    person.image ||
-                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400"
-                  }
+                  src={person.image || defaultUserAvatar}
                   alt={person.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                 />

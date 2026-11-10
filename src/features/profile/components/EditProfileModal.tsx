@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../../../components/ui/Modal";
+import defaultUserAvatar from "../../../assets/user-image.png";
 import { useToast } from "../../../context/ToastContext";
 import {
   X,
@@ -146,7 +147,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                       src={
                         imagePreview ||
                         profile?.image ||
-                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
+                        defaultUserAvatar
                       }
                       alt={profile?.name}
                       className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700 shadow-sm"

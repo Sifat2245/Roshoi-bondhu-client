@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import defaultUserAvatar from '../../assets/user-image.png';
 
 export interface AvatarProps {
   src?: string | null;
@@ -23,25 +24,24 @@ export const Avatar: React.FC<AvatarProps> = ({
   };
 
   const [failedSource, setFailedSource] = useState<string | null>(null);
-  const initials = (alt || 'Cook').split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+  const imageSource = src && failedSource !== src ? src : defaultUserAvatar;
 
   return (
     <div
-      className={`relative inline-block rounded-full overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 ${
+      className={`relative inline-block rounded-full overflow-hidden shrink-0 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 ${
         sizes[size] || sizes.md
       } ${className}`}
     >
-      {src && failedSource !== src ? <img
-        src={src}
+      <img
+        src={imageSource}
         alt={alt}
         className="w-full h-full object-cover"
         onError={() => {
-          setFailedSource(src);
+          if (src) setFailedSource(src);
         }}
-      /> : <span role="img" aria-label={alt || 'Cook'} className="flex h-full w-full items-center justify-center bg-red-50 text-[#b72b20] dark:bg-red-950/40 dark:text-red-300 font-bold">{initials || 'H'}</span>}
+      />
     </div>
   );
 };
 
 export default Avatar;
-

@@ -1,4 +1,5 @@
 import { useSocial } from '../../features/community/model/useSocial';
+import { useAuth } from '../../context/AuthContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
 import { Utensils } from 'lucide-react';
@@ -27,7 +28,8 @@ import { postsApi } from '../../features/posts/api/posts.api';
 
 const UserProfilePage = () => {
   const { id } = useParams();
-  const { data: session } = useSession();
+  const { data: session, refetch } = useSession();
+  const { updateUser, refetchUser } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
   const { user: currentUser, state: social } = useSocial();
@@ -115,6 +117,9 @@ const UserProfilePage = () => {
 
       await profileApi.updateProfile({ coverImage: upData.data.url }, token);
       setProfile((prev) => ({ ...prev, coverImage: upData.data.url }));
+      if (updateUser) updateUser({ coverImage: upData.data.url });
+      if (refetchUser) refetchUser();
+      if (refetch) refetch();
       notify.success('Cover photo updated');
     } catch (err) {
       notify.error(err.message || 'Failed to update cover');
@@ -132,6 +137,9 @@ const UserProfilePage = () => {
 
       await profileApi.updateProfile({ image: upData.data.url }, token);
       setProfile((prev) => ({ ...prev, image: upData.data.url }));
+      if (updateUser) updateUser({ image: upData.data.url });
+      if (refetchUser) refetchUser();
+      if (refetch) refetch();
       notify.success('Profile picture updated');
     } catch (err) {
       notify.error(err.message || 'Failed to update avatar');
@@ -143,7 +151,7 @@ const UserProfilePage = () => {
   const handleSaveProfile = async (formData, avatarFile) => {
     setSavingProfile(true);
     try {
-      let imageUrl = profile.image;
+      let imageUrl = profile?.image;
       if (avatarFile) {
         const upData = await profileApi.uploadImage(avatarFile, token);
         if (upData.data?.url) {
@@ -178,6 +186,21 @@ const UserProfilePage = () => {
         gender: formData.gender,
         image: imageUrl,
       }));
+      if (updateUser) {
+        updateUser({
+          name: formData.name,
+          username: formData.username,
+          bio: formData.bio,
+          city: formData.city,
+          work: formData.work,
+          education: formData.education,
+          phone: formData.phone,
+          gender: formData.gender,
+          image: imageUrl,
+        });
+      }
+      if (refetchUser) refetchUser();
+      if (refetch) refetch();
       setIsEditModalOpen(false);
       notify.success('Profile updated');
     } catch (err) {
@@ -273,6 +296,14 @@ const UserProfilePage = () => {
                 profile={profile}
                 isOwnProfile={isOwnProfile}
                 onOpenEditModal={() => setIsEditModalOpen(true)}
+                onProfileUpdated={(updated) => {
+                  if (updated) {
+                    setProfile((prev: any) => ({ ...prev, ...updated }));
+                    if (updateUser) updateUser(updated);
+                  } else {
+                    fetchProfile(targetId);
+                  }
+                }}
               />
               <ProfileFriendsCard
                 profile={profile}

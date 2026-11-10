@@ -3,18 +3,17 @@ import Avatar from '../../../components/ui/Avatar';
 import Button from '../../../components/ui/Button';
 import Modal from '../../../components/ui/Modal';
 import { useToast } from '../../../context/ToastContext';
-import { signOut } from '../../../lib/auth-client';
-import { useSession } from '../../../lib/auth-client';
-import { isDemoMode } from '../../../lib/demo/demo-store';
+import { useSession, signOut, authApi } from '../../../lib/auth-client';
+import { useAuth } from '../../../context/AuthContext';
 import { profileApi } from '../../profile/api/profile.api';
 import {
   ChevronRight,
-  Plus,
   AlertTriangle,
   Trash2,
   UserX,
   ShieldAlert,
   Lock,
+  Clock,
 } from 'lucide-react';
 
 export interface SettingsManageAccountTabProps {
@@ -23,11 +22,14 @@ export interface SettingsManageAccountTabProps {
 
 export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> = ({ user }) => {
   const { notify } = useToast();
+  const { logoutUser, updateUser } = useAuth();
   const { data: session } = useSession();
+  const token = session?.session?.token;
 
   // Deactivation / Deletion flow state
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [actionType, setActionType] = useState<'DEACTIVATE' | 'DELETE'>('DEACTIVATE');
+  const [durationDays, setDurationDays] = useState<number>(0); // 0 = manual (reactivate on login)
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isConfirmStep, setIsConfirmStep] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -35,9 +37,11 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
   // Edit profile info modal
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [displayName, setDisplayName] = useState(user?.name || '');
+  const [savingDisplayName, setSavingDisplayName] = useState(false);
 
   const handleOpenDeactivateModal = () => {
     setActionType('DEACTIVATE');
+    setDurationDays(0);
     setIsConfirmStep(false);
     setConfirmPassword('');
     setIsDeactivateModalOpen(true);
@@ -55,44 +59,52 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
     }
 
     setProcessing(true);
-    setTimeout(async () => {
-      setProcessing(false);
+    try {
+      if (actionType === 'DEACTIVATE') {
+        const res = await authApi.deactivateAccount(
+          {
+            password: confirmPassword,
+            durationDays: durationDays > 0 ? durationDays : null,
+          },
+          token
+        );
+        notify.success(res.message || 'Account deactivated. You can log in anytime to reactivate.');
+      } else {
+        const res = await authApi.deleteAccount(
+          { password: confirmPassword },
+          token
+        );
+        notify.success(res.message || 'Account deleted successfully.');
+      }
+
       setIsDeactivateModalOpen(false);
 
-      notify.info('Preview complete. Your actual account has not been deactivated or deleted.');
-      if (isDemoMode()) { await signOut(); window.location.assign('/login'); }
-    }, 1200);
+      if (logoutUser) {
+        await logoutUser();
+      } else {
+        await signOut();
+      }
+      window.location.assign('/login');
+    } catch (err: any) {
+      notify.error(err.message || 'Action failed. Please verify your password and try again.');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
     <div className="space-y-7 animate-in fade-in duration-150 select-none">
-      <p className="rounded-xl border border-gray-200 dark:border-gray-700 p-3 text-xs text-gray-500">Deactivation and deletion are preview flows. They do not remove your actual account.</p>
-      {/* 1. Header matching Screenshot 3 */}
+      {/* 1. Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
           Manage account
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-          Control which profiles and devices are in this Heshel Account.{' '}
-          <span className="text-[#e02f21] hover:underline cursor-pointer font-medium">
-            Learn more
-          </span>
+          Control your Heshel Account profiles and settings.
         </p>
       </div>
 
-      {/* 2. Add Profiles and Devices Card matching Screenshot 3 */}
-      <button
-        type="button"
-        onClick={() => notify.info('Device linking is available in the mobile app.')}
-        className="w-full bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-4.5 border border-gray-200/90 dark:border-gray-800 shadow-2xs flex items-center justify-between hover:bg-gray-50/70 dark:hover:bg-[#2c2d2e] transition cursor-pointer text-left"
-      >
-        <span className="text-sm font-bold text-[#e02f21]">
-          Add profiles and devices
-        </span>
-        <Plus size={18} className="text-[#e02f21]" />
-      </button>
-
-      {/* 3. Connected Accounts Card matching Screenshot 3 */}
+      {/* 2. Connected Accounts Card */}
       <div className="space-y-3">
         <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200/90 dark:border-gray-800 shadow-2xs overflow-hidden">
           <div className="flex items-center justify-between p-4 sm:p-4.5 border-b border-gray-100 dark:border-gray-800">
@@ -122,7 +134,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
         </div>
       </div>
 
-      {/* 4. Account Ownership and Control (Deactivate / Delete) */}
+      {/* 3. Account Ownership and Control (Deactivate / Delete) */}
       <div className="space-y-2 pt-2">
         <h3 className="font-bold text-base text-gray-900 dark:text-white">
           Account ownership and control
@@ -145,8 +157,8 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
                 <p className="font-bold text-base text-gray-900 dark:text-white">
                   Deactivation or deletion
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  Temporarily deactivate or permanently delete your account and profiles
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                  Temporarily deactivate or permanently delete your account
                 </p>
               </div>
             </div>
@@ -166,13 +178,17 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
             ? 'Confirm Account Deactivation'
             : 'Confirm Permanent Account Deletion'
         }
-        subtitle="Preview only. Your actual account is not changed."
+        subtitle={
+          actionType === 'DEACTIVATE'
+            ? 'Take a temporary break from Heshel'
+            : 'Permanently close your Heshel account'
+        }
         maxWidth="max-w-md"
       >
         {!isConfirmStep ? (
           <div className="space-y-5 p-5 sm:p-6">
             <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Choose a temporary break or permanently remove your account and data.
+              Choose whether you want to take a temporary break or permanently delete your account access.
             </p>
 
             <fieldset className="space-y-3">
@@ -201,10 +217,35 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
                     </p>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                    Temporarily hide your profile and recipes. Log back in whenever you're ready to return.
+                    Temporarily hide your profile and recipes. Logging back in will automatically reactivate your account.
                   </p>
                 </div>
               </label>
+
+              {/* Duration Selector when Deactivate is chosen */}
+              {actionType === 'DEACTIVATE' && (
+                <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#2c2d2e] border border-gray-200 dark:border-gray-700 space-y-2.5">
+                  <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-gray-300">
+                    <Clock size={15} className="text-[#e02f21]" />
+                    <span>Deactivation Duration</span>
+                  </div>
+                  <select
+                    value={durationDays}
+                    onChange={(e) => setDurationDays(Number(e.target.value))}
+                    className="w-full p-2.5 bg-white dark:bg-[#3a3b3c] border border-gray-200 dark:border-gray-700 rounded-xl text-xs sm:text-sm font-semibold dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21]"
+                  >
+                    <option value={0}>Manual — Reactivate when I log back in</option>
+                    <option value={1}>1 Day timer (or reactivate on login)</option>
+                    <option value={3}>3 Days timer (or reactivate on login)</option>
+                    <option value={7}>7 Days timer (or reactivate on login)</option>
+                    <option value={14}>14 Days timer (or reactivate on login)</option>
+                    <option value={30}>30 Days timer (or reactivate on login)</option>
+                  </select>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                    💡 <b>Reactivation rule:</b> When you try to log in yourself with your email and password, your account will immediately reactivate.
+                  </p>
+                </div>
+              )}
 
               {/* Option 2: Delete Account */}
               <label
@@ -230,10 +271,22 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
                     </p>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                    Permanently remove your account, recipes, reviews, and followers. This cannot be undone.
+                    Permanently delete your account access instantly. You will immediately lose access and will not be able to log in again.
                   </p>
                 </div>
               </label>
+
+              {/* Information when Delete is chosen */}
+              {actionType === 'DELETE' && (
+                <div className="p-4 rounded-xl bg-red-50/60 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 space-y-1.5">
+                  <p className="text-xs font-bold text-[#e02f21] flex items-center gap-1.5">
+                    <AlertTriangle size={15} /> Immediate and Permanent
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Your access will be revoked immediately. The account records remain safely archived in the database, but access is permanently disabled.
+                  </p>
+                </div>
+              )}
             </fieldset>
 
             <div className="flex flex-wrap justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
@@ -258,11 +311,22 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
         ) : (
           /* Password Confirmation Step */
           <form onSubmit={handleExecuteAction} className="space-y-5 p-5 sm:p-6">
-            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3">
-              <ShieldAlert size={22} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
-                For your security, please enter your password to confirm you want to{' '}
-                <b>{actionType === 'DEACTIVATE' ? 'deactivate' : 'permanently delete'}</b> your Heshel account.
+            <div className={`p-4 rounded-xl border flex items-start gap-3 ${
+              actionType === 'DELETE'
+                ? 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/40'
+                : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/40'
+            }`}>
+              <ShieldAlert size={22} className={`shrink-0 mt-0.5 ${actionType === 'DELETE' ? 'text-[#e02f21]' : 'text-amber-600 dark:text-amber-400'}`} />
+              <p className={`text-sm leading-relaxed ${actionType === 'DELETE' ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                {actionType === 'DELETE' ? (
+                  <>
+                    Please enter your password to confirm that you want to <b>permanently delete your account access instantly</b>.
+                  </>
+                ) : (
+                  <>
+                    Please enter your password to confirm <b>deactivating your account</b>. {durationDays > 0 ? `Set for ${durationDays} days.` : 'Manual reactivation on login.'}
+                  </>
+                )}
               </p>
             </div>
 
@@ -288,7 +352,8 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
               <Button
                 type="button"
                 variant="secondary"
-                size="sm"
+                size="md"
+                disabled={processing}
                 onClick={() => setIsConfirmStep(false)}
                 className="cursor-pointer"
               >
@@ -297,11 +362,12 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
               <Button
                 type="submit"
                 loading={processing}
-                variant="primary"
-                size="sm"
-                className="bg-[#e02f21] hover:bg-[#c22417] cursor-pointer"
+                disabled={processing}
+                variant={actionType === 'DELETE' ? 'danger' : 'primary'}
+                size="md"
+                className="cursor-pointer"
               >
-                Confirm {actionType === 'DEACTIVATE' ? 'Deactivation' : 'Deletion'}
+                {actionType === 'DEACTIVATE' ? 'Deactivate Account' : 'Delete Account Instantly'}
               </Button>
             </div>
           </form>
@@ -315,7 +381,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
         title="Manage Heshel Profile"
         maxWidth="max-w-md"
       >
-        <div className="space-y-4 p-4 sm:p-5">
+        <div className="space-y-4 p-5 sm:p-6">
           <div className="flex items-center gap-3.5 p-3 rounded-xl bg-gray-50 dark:bg-[#343536]">
             <Avatar src={user?.image} alt={user?.name} size="md" />
             <div>
@@ -332,7 +398,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#f0f2f5] dark:bg-[#343536] rounded-xl text-xs dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21]"
+              className="w-full px-3.5 py-2.5 bg-[#f0f2f5] dark:bg-[#343536] rounded-xl text-xs sm:text-sm dark:text-white focus:outline-none focus:ring-1 focus:ring-[#e02f21]"
             />
           </div>
 
@@ -340,6 +406,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
             <Button
               variant="secondary"
               size="sm"
+              disabled={savingDisplayName}
               onClick={() => setIsEditProfileOpen(false)}
               className="cursor-pointer"
             >
@@ -348,9 +415,24 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
             <Button
               variant="primary"
               size="sm"
+              loading={savingDisplayName}
+              disabled={savingDisplayName}
               onClick={async () => {
-                if (!displayName.trim()) { notify.error('Enter your display name.'); return; }
-                try { await profileApi.updateProfile({ name: displayName.trim() }, session?.session?.token); notify.success('Display name updated.'); setIsEditProfileOpen(false); } catch (error: any) { notify.error(error.message); }
+                if (!displayName.trim()) {
+                  notify.error('Enter your display name.');
+                  return;
+                }
+                setSavingDisplayName(true);
+                try {
+                  await profileApi.updateProfile({ name: displayName.trim() }, token);
+                  if (updateUser) updateUser({ name: displayName.trim() });
+                  notify.success('Display name updated successfully.');
+                  setIsEditProfileOpen(false);
+                } catch (err: any) {
+                  notify.error(err.message || 'Could not update display name.');
+                } finally {
+                  setSavingDisplayName(false);
+                }
               }}
               className="cursor-pointer"
             >

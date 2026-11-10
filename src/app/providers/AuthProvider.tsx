@@ -85,6 +85,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);
 
+  const refetchUser = async () => {
+    try {
+      const freshUser = await authApi.getMe();
+      if (freshUser) setCurrentUser(freshUser);
+    } catch {
+      // Ignore background refetch failure when unauthenticated
+    }
+    if (refetch) await refetch();
+  };
+
+  const updateUser = (partial: any) => {
+    setCurrentUser((prev: any) => (prev ? { ...prev, ...partial } : partial));
+  };
+
   const resolvedUser = currentUser || session?.user || null;
   const isLoading = checkingAuth && !resolvedUser;
 
@@ -105,6 +119,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsAuthModalOpen,
     openAuthModal,
     closeAuthModal,
+    refetchUser,
+    updateUser,
   };
 
   return (

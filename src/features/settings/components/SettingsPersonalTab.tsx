@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../../../components/ui/Button';
 import Avatar from '../../../components/ui/Avatar';
 import { User, AtSign, Mail, Phone, MapPin, Briefcase, GraduationCap, Camera } from 'lucide-react';
 import { useToast } from '../../../context/ToastContext';
 import { useSession } from '../../../lib/auth-client';
+import { useAuth } from '../../../context/AuthContext';
 import { profileApi } from '../../profile/api/profile.api';
 
 const SettingsPersonalTab = ({ user, onUserUpdated }) => {
   const { notify } = useToast();
   const { data: session } = useSession();
+  const { updateUser, refetchUser } = useAuth();
   const token = session?.session?.token;
 
   const [name, setName] = useState(user?.name || '');
@@ -20,14 +22,39 @@ const SettingsPersonalTab = ({ user, onUserUpdated }) => {
   const [bio, setBio] = useState(user?.bio || '');
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    let isMounted = true;
+    profileApi
+      .getUserProfile('me', token)
+      .then((data: any) => {
+        if (isMounted && data) {
+          if (data.name) setName(data.name);
+          if (data.username) setUsername(data.username.replace(/^@/, ''));
+          if (data.phone) setPhone(data.phone);
+          if (data.city || data.hometown) setCity(data.city || data.hometown);
+          if (data.work) setWork(data.work);
+          if (data.education) setEducation(data.education);
+          if (data.bio) setBio(data.bio);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load detailed profile for prefill:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [token]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await profileApi.updateBio(
+      const cleanUname = username.trim().replace(/^@/, '');
+      await profileApi.updateProfile(
         {
           name: name.trim(),
-          username: username.trim(),
+          username: cleanUname,
           phone: phone.trim(),
           city: city.trim(),
           work: work.trim(),
@@ -37,9 +64,21 @@ const SettingsPersonalTab = ({ user, onUserUpdated }) => {
         token
       );
 
-      notify.success('Personal details saved');
+      if (updateUser) {
+        updateUser({
+          name: name.trim(),
+          username: cleanUname,
+          phone: phone.trim(),
+          city: city.trim(),
+          work: work.trim(),
+          education: education.trim(),
+          bio: bio.trim(),
+        });
+      }
+      if (refetchUser) refetchUser();
+      notify.success('Personal details saved successfully');
       if (onUserUpdated) onUserUpdated();
-    } catch (err) {
+    } catch (err: any) {
       notify.error(err.message || 'Failed to update details');
     } finally {
       setSaving(false);

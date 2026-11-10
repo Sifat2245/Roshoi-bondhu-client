@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router";
 import Avatar from "../../../components/ui/Avatar";
 import Button from "../../../components/ui/Button";
+import defaultUserAvatar from "../../../assets/user-image.png";
 import {
   Camera,
   Edit3,
@@ -71,11 +72,13 @@ const ProfileHeader = ({
             {/* Avatar with Camera Button - Negative margin ONLY on Avatar to overlap cover photo */}
             <div className="relative self-center sm:self-auto inline-block -mt-16 sm:-mt-24 md:-mt-28 shrink-0">
               <img
-                src={
-                  profile.image ||
-                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200"
-                }
+                src={profile.image || defaultUserAvatar}
                 alt={profile.name}
+                onError={(e) => {
+                  if (e.currentTarget.src !== defaultUserAvatar) {
+                    e.currentTarget.src = defaultUserAvatar;
+                  }
+                }}
                 className="w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full object-cover ring-4 sm:ring-[6px] ring-white dark:ring-[#242526] shadow-xl bg-white"
               />
 

@@ -138,4 +138,91 @@ export const authApi = {
     if (!res.ok) throw new Error(json.message || 'Failed to load user details.');
     return json.data;
   },
+
+  changePassword: async (payload: { currentPassword: string; newPassword: string }, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to change password.');
+    return json;
+  },
+
+  getSessions: async (token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/sessions`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to load active sessions.');
+    return json.data || [];
+  },
+
+  revokeOtherSessions: async (token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/sessions/revoke-others`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to revoke other sessions.');
+    return json;
+  },
+
+  revokeSession: async (sessionId: string, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/sessions/${sessionId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to revoke session.');
+    return json.data || json;
+  },
+
+  deactivateAccount: async (payload: { password: string; durationDays?: number | null }, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/deactivate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to deactivate account.');
+    return json;
+  },
+
+  deleteAccount: async (payload: { password: string }, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/delete-account`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to delete account.');
+    return json;
+  },
 };

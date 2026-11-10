@@ -14,6 +14,14 @@ export interface User {
   education?: string;
   phone?: string;
   gender?: string;
+  hometown?: string;
+  languages?: string;
+  expertise?: string;
+  hobbies?: string;
+  interests?: string;
+  website?: string;
+  socialLinks?: string;
+  birthDate?: string | null;
   coverImage?: string;
   createdAt?: string;
   updatedAt?: string;

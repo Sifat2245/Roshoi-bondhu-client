@@ -33,7 +33,10 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true },
+        {
+          allowConstantExport: true,
+          allowExportNames: ['useChatDock', 'useLanguage', 'useTheme', 'useDarkMode', 'useToast', 'useAuth'],
+        },
       ],
     },
   },
