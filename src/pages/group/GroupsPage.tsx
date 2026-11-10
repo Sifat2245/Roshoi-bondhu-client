@@ -1,3 +1,5 @@
+import { useSocial } from '../../features/community/model/useSocial';
+import { resolveGroup } from '../../features/community/model/community-domain';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useSession } from '../../lib/auth-client';
@@ -18,7 +20,6 @@ import {
   Lock,
   Utensils,
   ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 
 type GroupView = 'FEED' | 'DISCOVER' | 'YOUR_GROUPS';
@@ -88,14 +89,15 @@ const GroupsPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { notify } = useToast();
-  const user = session?.user;
+  const { user, state: social } = useSocial();
   const token = session?.session?.token;
 
   // View state: 'FEED' | 'DISCOVER' | 'YOUR_GROUPS'
   const initialView = (searchParams.get('tab') as GroupView) || 'FEED';
   const [activeView, setActiveView] = useState<GroupView>(initialView);
 
-  const [groups, setGroups] = useState<any[]>([]);
+  const [baseGroups, setGroups] = useState<any[]>([]);
+  const groups = baseGroups.map((group) => resolveGroup(group, social.members[group.id], user?.id));
   const [groupPosts, setGroupPosts] = useState<any[]>([]);
   const [loadingGroups, setLoadingGroups] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
@@ -123,7 +125,7 @@ const GroupsPage: React.FC = () => {
   const fetchGroupPosts = useCallback(async () => {
     setLoadingPosts(true);
     try {
-      const data = await postsApi.getPosts({ limit: 50 }, token);
+      const data = await postsApi.getPosts({ limit: 50 }, token, user?.id);
       if (data) {
         // Show all posts, giving priority to posts with groups
         const groupTagged = data.filter((p: any) => p.group || p.groupId);
@@ -143,7 +145,7 @@ const GroupsPage: React.FC = () => {
     } finally {
       setLoadingPosts(false);
     }
-  }, [token]);
+  }, [token, user?.id]);
 
   useEffect(() => {
     fetchGroups();
@@ -194,16 +196,17 @@ const GroupsPage: React.FC = () => {
   const joinedGroups = groups.filter((g) => g.isMember);
   // Filtered groups by search
   const filteredGroups = groups.filter((g) =>
-    g.name.toLowerCase().includes(groupSearch.toLowerCase())
+    g.name.toLowerCase().includes(groupSearch.toLowerCase()) && (selectedCategory === 'All' || g.category === selectedCategory || `${g.name} ${g.description}`.toLowerCase().includes(selectedCategory.split(' & ')[0].toLowerCase()))
   );
+  useEffect(() => { const tab = searchParams.get('tab'); setActiveView(tab === 'DISCOVER' || tab === 'YOUR_GROUPS' ? tab : 'FEED'); }, [searchParams]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden">
+    <div className="h-dvh flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden">
       {/* 1. Fixed Topbar */}
       <SocialHeader />
 
       {/* 2. Main 2-Column Facebook Groups Body */}
-      <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
+      <div className="flex-1 min-h-0 mt-[100px] md:mt-14 flex overflow-hidden">
         {/* LEFT COLUMN: Facebook Groups Sidebar (Visible on desktop lg: and up) */}
         <aside className="hidden lg:flex lg:w-[360px] xl:w-[380px] shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex-col h-full shadow-xs">
           {/* Top Title & Settings */}
@@ -406,7 +409,7 @@ const GroupsPage: React.FC = () => {
         </aside>
 
         {/* CENTER / MAIN CONTENT (Feed, Discover, or Your Groups) */}
-        <main className="flex-1 w-full h-full overflow-y-auto no-scrollbar py-4 sm:py-6 px-3.5 sm:px-6 lg:px-8">
+        <main className="flex-1 min-w-0 min-h-0 w-full h-full overflow-y-auto no-scrollbar py-4 sm:py-6 px-3.5 sm:px-6 lg:px-8">
           {/* Mobile Horizontal Navigation Tabs (< lg screens) */}
           <div className="lg:hidden mb-5 overflow-x-auto no-scrollbar flex items-center gap-2 pb-1">
             <button
@@ -477,8 +480,8 @@ const GroupsPage: React.FC = () => {
                   <PostCard
                     key={post.id}
                     post={post}
-                    onOpenComments={() => {}}
-                    onOpenShare={() => {}}
+                    onOpenComments={(post) => navigate(`/post/${post.id}`)}
+                    onOpenShare={async (post) => { try { await postsApi.sharePost(post.id, '', token, user); notify.success('Post shared to your feed'); } catch (error: any) { notify.error(error.message); } }}
                     onRequireAuth={() => navigate('/login')}
                     onDeletePost={(deletedId) =>
                       setGroupPosts((prev) => prev.filter((p) => p.id !== deletedId))
@@ -520,7 +523,6 @@ const GroupsPage: React.FC = () => {
               <div className="bg-white dark:bg-[#242526] rounded-2xl p-6 sm:p-8 border border-gray-100 dark:border-gray-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-xs font-bold text-[#e02f21] uppercase tracking-wider">
-                    <Sparkles size={14} />
                     <span>Suggested for you</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -563,7 +565,8 @@ const GroupsPage: React.FC = () => {
 
               {/* Groups Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredGroups.map((group) => (
+                {!loadingGroups && !filteredGroups.length && <div className="col-span-full rounded-2xl bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-800 p-8 text-center"><h3 className="font-bold">No groups match your search</h3><p className="mt-2 text-sm text-gray-500">Try another topic or explore all cooking communities.</p><button type="button" onClick={() => { setGroupSearch(''); setSelectedCategory('All'); }} className="mt-4 text-sm font-bold text-[#e02f21]">Clear search & filters</button></div>}
+                {loadingGroups ? [1, 2, 3].map((index) => <GroupCardSkeleton key={index} />) : filteredGroups.map((group) => (
                   <div
                     key={group.id}
                     className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs overflow-hidden flex flex-col hover:shadow-md transition group"

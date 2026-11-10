@@ -1,19 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { AuthLayout } from '../../app/layouts/AuthLayout';
 import LoginHero from '../../features/auth/components/LoginHero';
 import LoginForm from '../../features/auth/components/LoginForm';
+import { useAuth } from '../../context/AuthContext';
+import { useSession } from '../../lib/auth-client';
 
 const LoginPage = () => {
+  const { user: authUser } = useAuth();
+  const { data: session } = useSession();
+  const navigate = useNavigate();
+
+  const user = session?.user || authUser;
+
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
+
   return (
-    <AuthLayout maxWidth="max-w-[1280px]">
-      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-        {/* Left Column: Storytelling / Hero (Desktop only, hidden on responsive mobile/tablet) */}
-        <div className="hidden lg:flex lg:col-span-7 justify-center lg:justify-start">
+    <AuthLayout maxWidth="max-w-[1800px]" py="py-10 sm:py-14 lg:py-20" mainClassName="lg:min-h-dvh">
+      <div className="login-page-grid">
+        {/* Keep a compact introduction above the form on smaller screens. */}
+        <div className="login-page-story w-full max-w-[440px] lg:max-w-none mx-auto">
           <LoginHero />
         </div>
 
         {/* Right Column: Login Form */}
-        <div className="lg:col-span-5 w-full flex justify-center lg:justify-start lg:border-l border-gray-100 dark:border-gray-800 lg:pl-12">
+        <div className="login-page-form w-full flex justify-center">
           <LoginForm />
         </div>
       </div>

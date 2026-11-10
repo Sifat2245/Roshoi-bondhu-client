@@ -1,6 +1,9 @@
-import { User } from '../../auth/types/auth.types';
+import { User } from "../../auth/types/auth.types";
+import type { Poll } from "../../community/model/community-domain";
 
-export type PostType = 'CASUAL' | 'RECIPE';
+import type { PostAudience } from "../model/post-policy";
+
+export type PostType = "CASUAL" | "RECIPE" | "POLL" | "REPOST";
 
 export interface Comment {
   id: string;
@@ -21,8 +24,10 @@ export interface Post {
   id: string;
   authorId: string;
   author?: User;
+  audience?: PostAudience;
   groupId?: string | null;
   postType: PostType;
+  poll?: Poll;
   title?: string;
   content: string;
   image?: string | null;
@@ -43,6 +48,12 @@ export interface Post {
 }
 
 export interface CreatePostPayload {
+  poll?: {
+    question: string;
+    options: string[];
+    multiple: boolean;
+    expiresAt?: string;
+  };
   title?: string;
   content?: string;
   caption?: string;
@@ -55,6 +66,7 @@ export interface CreatePostPayload {
   ingredients?: any;
   instructions?: any;
   tags?: string[];
+  audience?: PostAudience;
   groupId?: string | null;
 }
 

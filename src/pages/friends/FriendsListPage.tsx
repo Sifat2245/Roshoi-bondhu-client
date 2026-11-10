@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { Link, useSearchParams, useNavigate } from 'react-router';
 import { useSession } from '../../lib/auth-client';
 import SocialHeader from '../../widgets/navbar/SocialHeader';
 import Avatar from '../../components/ui/Avatar';
@@ -9,6 +9,10 @@ import { friendsApi } from '../../features/friends/api/friends.api';
 import { profileApi } from '../../features/profile/api/profile.api';
 import { postsApi } from '../../features/posts/api/posts.api';
 import { useChatDock } from '../../context/ChatDockContext';
+import { useToast } from '../../context/ToastContext';
+import ProfilePhotosCard from '../../features/profile/components/ProfilePhotosCard';
+import ProfileFriendsCard from '../../features/profile/components/ProfileFriendsCard';
+import ProfileAboutCard from '../../features/profile/components/ProfileAboutCard';
 import {
   ArrowLeft,
   Search,
@@ -25,8 +29,10 @@ import {
 } from 'lucide-react';
 
 export const FriendsListPage = () => {
+  const navigate = useNavigate();
+  const { notify } = useToast();
   const { data: session } = useSession();
-  const { openChat } = useChatDock();
+  const { startConversation } = useChatDock();
   const token = session?.session?.token;
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -85,7 +91,7 @@ export const FriendsListPage = () => {
       try {
         const [profileData, postsData] = await Promise.all([
           profileApi.getUserProfile(friendId, token),
-          postsApi.getPosts({ authorId: friendId }, token),
+          postsApi.getPosts({ authorId: friendId }, token, session?.user?.id),
         ]);
         setFriendProfile(profileData);
         setFriendPosts(postsData || []);
@@ -95,7 +101,7 @@ export const FriendsListPage = () => {
         setLoadingProfile(false);
       }
     },
-    [token]
+    [token, session?.user?.id]
   );
 
   useEffect(() => {
@@ -128,12 +134,12 @@ export const FriendsListPage = () => {
   }, [friendPosts, activeTab]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden select-none">
+    <div className="h-dvh flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden">
       {/* 1. Fixed Topbar */}
       <SocialHeader />
 
       {/* 2. Main 2-Column Container */}
-      <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
+      <div className="flex-1 min-h-0 mt-[100px] md:mt-14 flex overflow-hidden">
         {/* Left Sidebar: All Friends List (matching Facebook Screenshot 5) */}
         <aside
           className={`w-full md:w-[340px] lg:w-[360px] h-full shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex-col shadow-xs ${
@@ -216,14 +222,6 @@ export const FriendsListPage = () => {
                         </p>
                       </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition cursor-pointer"
-                    >
-                      <MoreHorizontal size={18} />
-                    </button>
                   </div>
                 );
               })
@@ -238,7 +236,7 @@ export const FriendsListPage = () => {
 
         {/* Right / Main Area: Preview Profile OR Empty State (matching Facebook Screenshot 5) */}
         <main
-          className={`flex-1 h-full overflow-y-auto no-scrollbar ${
+          className={`flex-1 min-w-0 min-h-0 h-full overflow-y-auto no-scrollbar ${
             selectedFriendId ? 'block' : 'hidden md:block'
           }`}
         >
@@ -307,10 +305,10 @@ export const FriendsListPage = () => {
 
                 {/* Profile Identity Bar */}
                 <div className="max-w-[1095px] mx-auto px-4 sm:px-8 pb-4">
-                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-16 sm:-mt-20 mb-3">
+                  <div className="relative flex flex-col xl:flex-row xl:items-end justify-between gap-4 mt-4 mb-3">
                     <div className="flex flex-col sm:flex-row sm:items-end gap-4">
                       {/* Avatar */}
-                      <div className="relative self-center sm:self-auto">
+                      <div className="relative self-center sm:self-auto -mt-20 sm:-mt-24 shrink-0">
                         <Avatar
                           src={friendProfile?.image || selectedFriend?.image}
                           alt={selectedFriend.name}
@@ -335,6 +333,7 @@ export const FriendsListPage = () => {
                     <div className="flex items-center gap-2.5 self-center sm:self-end flex-wrap justify-center">
                       <Button
                         variant="secondary"
+                        onClick={() => navigate(`/profile/${selectedFriend.id}`)}
                         className="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer"
                       >
                         <UserCheck size={16} className="text-[#e02f21]" />
@@ -343,7 +342,7 @@ export const FriendsListPage = () => {
 
                       <Button
                         variant="secondary"
-                        onClick={() => openChat('c-saba')}
+                        onClick={() => startConversation(friendProfile || selectedFriend)}
                         className="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer"
                       >
                         <MessageCircle size={16} />
@@ -397,9 +396,10 @@ export const FriendsListPage = () => {
 
               {/* Main Content Area: Intro Card + Posts Stream */}
               <div className="max-w-[1095px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
-                <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
+                {activeTab === 'ABOUT' ? <ProfileAboutCard profile={friendProfile || selectedFriend} isOwnProfile={false} onOpenEditModal={() => {}} /> : activeTab === 'FRIENDS' ? <ProfileFriendsCard profile={friendProfile || selectedFriend} /> : activeTab === 'PHOTOS' ? <ProfilePhotosCard posts={friendPosts} /> : (
+                <div className="flex flex-col 2xl:flex-row gap-6 sm:gap-8 items-start">
                   {/* Left Column: Personal Details Card */}
-                  <div className="w-full lg:w-[360px] shrink-0 bg-white dark:bg-[#242526] rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-xs space-y-4">
+                  <div className="w-full 2xl:w-[320px] shrink-0 bg-white dark:bg-[#242526] rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-xs space-y-4">
                     <h3 className="font-bold text-sm text-gray-900 dark:text-white">
                       Personal details
                     </h3>
@@ -464,9 +464,9 @@ export const FriendsListPage = () => {
                         <PostCard
                           key={post.id}
                           post={post}
-                          onOpenComments={() => {}}
-                          onOpenShare={() => {}}
-                          onRequireAuth={() => {}}
+                          onOpenComments={(selected) => navigate(`/post/${selected.id}`)}
+                          onOpenShare={async (selected) => { try { await postsApi.sharePost(selected.id, '', token, session?.user); notify.success('Post shared to your feed'); } catch (error: any) { notify.error(error.message); } }}
+                          onRequireAuth={() => navigate('/login')}
                         />
                       ))
                     ) : (
@@ -482,6 +482,7 @@ export const FriendsListPage = () => {
                     )}
                   </div>
                 </div>
+                )}
               </div>
             </div>
           )}

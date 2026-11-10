@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router';
-import { UserPlus, X, Users } from 'lucide-react';
-import Button from '../../../components/ui/Button';
+import React from "react";
+import { Link } from "react-router";
+import { UserPlus, X, Users } from "lucide-react";
+import Button from "../../../components/ui/Button";
 
 const FriendSuggestionsView = ({
   suggestions = [],
@@ -48,7 +48,7 @@ const FriendSuggestionsView = ({
                 <img
                   src={
                     person.image ||
-                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400'
+                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400"
                   }
                   alt={person.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
@@ -113,4 +113,3 @@ const FriendSuggestionsView = ({
 };
 
 export default FriendSuggestionsView;
-

@@ -10,6 +10,7 @@ import BirthdaysView from '../../features/friends/components/BirthdaysView';
 import CustomListsView from '../../features/friends/components/CustomListsView';
 import { useToast } from '../../context/ToastContext';
 import { friendsApi } from '../../features/friends/api/friends.api';
+import { isDemoMode, readDemo, writeDemo } from '../../lib/demo/demo-store';
 
 const FriendsPage = () => {
   const { data: session } = useSession();
@@ -56,7 +57,7 @@ const FriendsPage = () => {
       if (friendsData) {
         setFriends(friendsData);
         // Put half into requests to demonstrate the interactive friend requests grid matching user's Image 1
-        setRequests(friendsData.slice(0, 8));
+        setRequests(isDemoMode() ? readDemo().users.filter((person) => readDemo().requests.includes(person.id)) : []);
       }
       if (suggData) {
         setSuggestions(suggData);
@@ -73,11 +74,13 @@ const FriendsPage = () => {
   }, [fetchFriendsData]);
 
   const handleConfirmRequest = (userId) => {
+    if (isDemoMode()) { const state = readDemo(); state.requests = state.requests.filter((id) => id !== userId); if (!state.friends.includes(userId)) state.friends.push(userId); writeDemo(state); setFriends(state.users.filter((person) => state.friends.includes(person.id))); }
     setRequests((prev) => prev.filter((r) => r.id !== userId));
     notify.success('Friend request confirmed');
   };
 
   const handleDeleteRequest = (userId) => {
+    if (isDemoMode()) { const state = readDemo(); state.requests = state.requests.filter((id) => id !== userId); writeDemo(state); }
     setRequests((prev) => prev.filter((r) => r.id !== userId));
     notify.info('Friend request removed');
   };
@@ -93,6 +96,7 @@ const FriendsPage = () => {
   };
 
   const handleRemoveSuggestion = (userId) => {
+    if (isDemoMode()) { const state = readDemo(); state.settings.hiddenSuggestions = [...(state.settings.hiddenSuggestions || []), userId]; writeDemo(state); }
     setSuggestions((prev) => prev.filter((s) => s.id !== userId));
   };
 
@@ -190,7 +194,7 @@ const FriendsPage = () => {
             )}
 
             {activeSection === 'custom' && (
-              <CustomListsView />
+              <CustomListsView friends={friends} />
             )}
           </div>
     </FriendsLayout>

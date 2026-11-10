@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSession } from '../../lib/auth-client';
 import { SettingsLayout } from '../../app/layouts/SettingsLayout';
 import SettingsSidebar from '../../features/settings/components/SettingsSidebar';
 import SettingsHomeTab from '../../features/settings/components/SettingsHomeTab';
 import SettingsSecurityTab from '../../features/settings/components/SettingsSecurityTab';
 import SettingsManageAccountTab from '../../features/settings/components/SettingsManageAccountTab';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
+import SettingsPersonalTab from '../../features/settings/components/SettingsPersonalTab';
+import SettingsPreferences from '../../features/settings/components/SettingsPreferences';
 
 const SettingsPage = () => {
-  const { data: session } = useSession();
+  const { data: session, refetch } = useSession();
   const user = session?.user;
 
-  const [activeTab, setActiveTab] = useState('HOME'); // 'HOME', 'SECURITY', 'MANAGE'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab') || 'HOME';
+  const activeTab = ['HOME', 'PERSONAL', 'SECURITY', 'MANAGE'].includes(requestedTab) ? requestedTab : 'HOME';
+  const setActiveTab = (tab: string) => setSearchParams(tab === 'HOME' ? {} : { tab });
 
   if (!user) {
     return (
@@ -42,11 +47,15 @@ const SettingsPage = () => {
       }
     >
       {activeTab === 'HOME' && (
+        <div className="space-y-6">
         <SettingsHomeTab
           user={user}
           onNavigateTab={setActiveTab}
         />
+        <SettingsPreferences />
+        </div>
       )}
+      {activeTab === 'PERSONAL' && <SettingsPersonalTab user={user} onUserUpdated={() => refetch?.()} />}
 
       {activeTab === 'SECURITY' && (
         <SettingsSecurityTab

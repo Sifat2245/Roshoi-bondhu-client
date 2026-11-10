@@ -4,6 +4,7 @@ export interface ChatMessage {
   senderName: string;
   senderAvatar?: string;
   text: string;
+  image?: string;
   timestamp: string;
   isMine: boolean;
   status?: 'sent' | 'delivered' | 'seen';

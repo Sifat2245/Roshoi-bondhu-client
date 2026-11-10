@@ -1,11 +1,11 @@
-import { User } from '../../auth/types/auth.types';
+import { User } from "../../auth/types/auth.types";
 
 export type NotificationType =
-  | 'LIKE'
-  | 'COMMENT'
-  | 'FOLLOW'
-  | 'GROUP_INVITE'
-  | 'SYSTEM';
+  | "LIKE"
+  | "COMMENT"
+  | "FOLLOW"
+  | "GROUP_INVITE"
+  | "SYSTEM";
 
 export interface Notification {
   id: string;
@@ -19,4 +19,3 @@ export interface Notification {
   isUnread?: boolean;
   createdAt: string;
 }
-

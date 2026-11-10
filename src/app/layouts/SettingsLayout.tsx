@@ -1,12 +1,15 @@
-import React from 'react';
-import SocialHeader from '../../widgets/navbar/SocialHeader';
+import React from "react";
+import SocialHeader from "../../widgets/navbar/SocialHeader";
 
 export interface SettingsLayoutProps {
   sidebar: React.ReactNode;
   children: React.ReactNode;
 }
 
-export const SettingsLayout: React.FC<SettingsLayoutProps> = ({ sidebar, children }) => {
+export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
+  sidebar,
+  children,
+}) => {
   return (
     <div className="min-h-screen bg-white dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
       {/* Fixed Topbar */}
@@ -22,9 +25,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({ sidebar, childre
             </div>
 
             {/* Right Content Area */}
-            <main className="flex-1 w-full max-w-[680px]">
-              {children}
-            </main>
+            <main className="flex-1 w-full max-w-[680px]">{children}</main>
           </div>
         </div>
       </div>
@@ -33,4 +34,3 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({ sidebar, childre
 };
 
 export default SettingsLayout;
-

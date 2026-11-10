@@ -84,7 +84,7 @@ const CreateGroupPage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col md:flex-row bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 overflow-hidden font-sans">
+    <div className="h-dvh w-full flex flex-col md:flex-row bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 overflow-hidden font-sans">
       {/* LEFT COLUMN: Sidebar Form (Matching Image 3) */}
       <aside className="w-full md:w-[380px] lg:w-[420px] shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex flex-col h-full shadow-lg z-20">
         {/* Top Header Row with Close & Heshel Logo */}
@@ -147,6 +147,7 @@ const CreateGroupPage: React.FC = () => {
             />
           </div>
 
+          <label className="block text-sm font-bold text-gray-800 dark:text-gray-200">Description<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} placeholder="What will your cooking community share?" className="mt-2 w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent px-4 py-3 text-sm font-normal resize-y" /></label>
           {/* Field 2: Privacy Dropdown */}
           <div className="space-y-1.5">
             <label className="block text-sm font-bold text-gray-800 dark:text-gray-200">
@@ -182,6 +183,7 @@ const CreateGroupPage: React.FC = () => {
               type="text"
               value={friendInput}
               onChange={(e) => setFriendInput(e.target.value)}
+              onKeyDown={(event) => { if (event.key === 'Enter' && friendInput.trim()) { event.preventDefault(); handleAddFriend(friendInput.trim()); setFriendInput(''); } }}
               placeholder="Type a friend's name to invite..."
               className="w-full px-4 py-3.5 bg-white dark:bg-[#18191a] border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e02f21] transition"
             />
@@ -241,7 +243,7 @@ const CreateGroupPage: React.FC = () => {
       </aside>
 
       {/* RIGHT COLUMN: Interactive Live Preview (Matching Image 3) */}
-      <main className="flex-1 bg-[#f0f2f5] dark:bg-[#18191a] h-full overflow-y-auto p-4 sm:p-8 flex flex-col items-center">
+      <main className="hidden md:flex min-w-0 flex-1 bg-[#f0f2f5] dark:bg-[#18191a] h-full overflow-y-auto p-4 sm:p-8 flex-col items-center">
         {/* Device Switcher Header */}
         <div className="w-full max-w-[940px] flex items-center justify-between mb-4">
           <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
@@ -373,7 +375,7 @@ const CreateGroupPage: React.FC = () => {
                 <div className="pt-2 text-xs font-semibold text-gray-600 dark:text-gray-300 space-y-2">
                   <div className="flex items-center gap-2">
                     <Globe size={15} />
-                    <span>Public</span>
+                    <span>{privacy === 'PUBLIC' ? 'Public' : 'Private'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users size={15} />

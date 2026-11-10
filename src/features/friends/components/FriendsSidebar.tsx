@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router';
+import React from "react";
+import { useNavigate } from "react-router";
 import {
   Users,
   UserCheck,
@@ -9,7 +9,7 @@ import {
   ListFilter,
   Settings,
   ChevronRight,
-} from 'lucide-react';
+} from "lucide-react";
 
 const FriendsSidebar = ({
   activeSection,
@@ -20,43 +20,43 @@ const FriendsSidebar = ({
 
   const menuItems = [
     {
-      id: 'home',
-      label: 'Home',
+      id: "home",
+      label: "Home",
       icon: Users,
       badge: 0,
       hasChevron: false,
     },
     {
-      id: 'requests',
-      label: 'Friend requests',
+      id: "requests",
+      label: "Friend requests",
       icon: UserCheck,
       badge: requestCount,
       hasChevron: true,
     },
     {
-      id: 'suggestions',
-      label: 'Suggestions',
+      id: "suggestions",
+      label: "Suggestions",
       icon: UserPlus,
       badge: 0,
       hasChevron: true,
     },
     {
-      id: 'all',
-      label: 'All friends',
+      id: "all",
+      label: "All friends",
       icon: Users2,
       badge: 0,
       hasChevron: true,
     },
     {
-      id: 'birthdays',
-      label: 'Birthdays',
+      id: "birthdays",
+      label: "Birthdays",
       icon: Gift,
       badge: 0,
       hasChevron: false,
     },
     {
-      id: 'custom',
-      label: 'Custom lists',
+      id: "custom",
+      label: "Custom lists",
       icon: ListFilter,
       badge: 0,
       hasChevron: true,
@@ -64,8 +64,8 @@ const FriendsSidebar = ({
   ];
 
   const handleItemClick = (id) => {
-    if (id === 'all') {
-      navigate('/friends/list');
+    if (id === "all") {
+      navigate("/friends/list");
     } else {
       onSelectSection(id);
     }
@@ -81,6 +81,7 @@ const FriendsSidebar = ({
         <button
           type="button"
           className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition cursor-pointer"
+          onClick={() => navigate("/settings")}
           title="Friend Settings"
         >
           <Settings size={18} />
@@ -100,16 +101,16 @@ const FriendsSidebar = ({
               onClick={() => handleItemClick(item.id)}
               className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-base font-bold transition cursor-pointer ${
                 isActive
-                  ? 'bg-gray-100 dark:bg-[#3a3b3c] text-gray-900 dark:text-white shadow-xs'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/70 dark:hover:bg-[#3a3b3c]/60'
+                  ? "bg-gray-100 dark:bg-[#3a3b3c] text-gray-900 dark:text-white shadow-xs"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100/70 dark:hover:bg-[#3a3b3c]/60"
               }`}
             >
               <div className="flex items-center gap-3.5">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                     isActive
-                      ? 'bg-[#e02f21] text-white shadow-xs'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
+                      ? "bg-[#e02f21] text-white shadow-xs"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
                   }`}
                 >
                   <Icon size={19} />
@@ -136,4 +137,3 @@ const FriendsSidebar = ({
 };
 
 export default FriendsSidebar;
-

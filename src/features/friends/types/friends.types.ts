@@ -1,4 +1,4 @@
-import { User } from '../../auth/types/auth.types';
+import { User } from "../../auth/types/auth.types";
 
 export interface Friend extends User {
   mutualCount?: number;
@@ -12,4 +12,3 @@ export interface FriendRequest extends User {
   mutualFriends?: number;
   requestedAt?: string;
 }
-

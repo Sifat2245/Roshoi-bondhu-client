@@ -1,47 +1,87 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router';
-import { useSession } from '../../lib/auth-client';
-import { useLanguage } from '../../context/LanguageContext';
-import Avatar from '../../components/ui/Avatar';
-import groupsApi from '../../features/groups/api/groups.api';
+import { useAuth } from "../../context/AuthContext";
+import React, { useState, useEffect } from "react";
+import { NavLink, Link } from "react-router";
+import { useSession } from "../../lib/auth-client";
+import { useLanguage } from "../../context/LanguageContext";
+import Avatar from "../../components/ui/Avatar";
+import groupsApi from "../../features/groups/api/groups.api";
 import {
   Home,
   Users,
   UserCheck,
   MessageCircle,
   Settings as SettingsIcon,
-} from 'lucide-react';
+  BookOpen,
+  Carrot,
+  CalendarDays,
+  FilePenLine,
+} from "lucide-react";
 
-const LeftSidebar = () => {
+const LeftSidebar = ({ compact = false }: { compact?: boolean }) => {
   const { data: session } = useSession();
   const { t } = useLanguage();
-  const user = session?.user;
+  const { user: authUser } = useAuth();
+  const user = session?.user || authUser;
 
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
 
   // Fetch groups for "Your shortcuts"
   useEffect(() => {
+    if (compact) return;
     const fetchShortcuts = async () => {
       setLoadingGroups(true);
       try {
-        const data = await groupsApi.getGroups({ limit: 8 }, session?.session?.token);
+        const data = await groupsApi.getGroups(
+          { limit: 8 },
+          session?.session?.token,
+        );
         setGroups(data);
       } catch (err) {
-        console.error('Failed to load shortcuts', err);
+        console.error("Failed to load shortcuts", err);
       } finally {
         setLoadingGroups(false);
       }
     };
 
     fetchShortcuts();
-  }, [session]);
+  }, [session, compact]);
+
+  if (compact)
+    return (
+      <nav aria-label="Sidebar navigation" className="space-y-2">
+        {[
+          { to: "/", label: "Feed", icon: Home },
+          { to: "/friends", label: "Friends", icon: UserCheck },
+          { to: "/groups", label: "Groups", icon: Users },
+          { to: "/messages", label: "Messenger", icon: MessageCircle },
+          { to: "/cookbook", label: "Cookbooks", icon: BookOpen },
+          { to: "/pantry", label: "My pantry", icon: Carrot },
+          { to: "/meal-planner", label: "Meal planner", icon: CalendarDays },
+          { to: "/drafts", label: "Recipe drafts", icon: FilePenLine },
+          { to: "/settings", label: "Settings", icon: SettingsIcon },
+        ].map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            end={to === "/"}
+            to={to}
+            title={label}
+            aria-label={label}
+            className={({ isActive }) =>
+              `h-11 w-11 flex items-center justify-center rounded-xl ${isActive ? "bg-gray-200 dark:bg-[#3a3b3c] text-[#e02f21]" : "text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#3a3b3c]"}`
+            }
+          >
+            <Icon size={21} />
+          </NavLink>
+        ))}
+      </nav>
+    );
 
   const navRowClass = ({ isActive }) =>
     `flex items-center gap-3 px-3.5 py-3 rounded-xl text-base font-bold transition cursor-pointer ${
       isActive
-        ? 'bg-gray-200/80 dark:bg-[#3a3b3c] text-[#e02f21]'
-        : 'text-gray-800 dark:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c]'
+        ? "bg-gray-200/80 dark:bg-[#3a3b3c] text-[#e02f21]"
+        : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c]"
     }`;
 
   return (
@@ -72,7 +112,7 @@ const LeftSidebar = () => {
         <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-950/60 text-[#e02f21] flex items-center justify-center shrink-0">
           <Home size={20} />
         </div>
-        <span>{t('feed')}</span>
+        <span>{t("feed")}</span>
       </NavLink>
 
       {/* 3. Friends */}
@@ -88,7 +128,7 @@ const LeftSidebar = () => {
         <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center shrink-0">
           <Users size={20} />
         </div>
-        <span>{t('groups')}</span>
+        <span>{t("groups")}</span>
       </NavLink>
 
       {/* 5. Messenger (matching user arrow in Image 3) */}
@@ -98,6 +138,48 @@ const LeftSidebar = () => {
         </div>
         <span>Messenger</span>
       </NavLink>
+
+      <div className="px-3.5 pt-4 pb-1 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        My kitchen
+      </div>
+      {[
+        {
+          to: "/cookbook",
+          label: "Cookbooks",
+          icon: BookOpen,
+          color:
+            "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400",
+        },
+        {
+          to: "/pantry",
+          label: "My pantry",
+          icon: Carrot,
+          color: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600",
+        },
+        {
+          to: "/meal-planner",
+          label: "Meal planner",
+          icon: CalendarDays,
+          color:
+            "bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+        },
+        {
+          to: "/drafts",
+          label: "Recipe drafts",
+          icon: FilePenLine,
+          color:
+            "bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
+        },
+      ].map(({ to, label, icon: Icon, color }) => (
+        <NavLink key={to} to={to} className={navRowClass}>
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${color}`}
+          >
+            <Icon size={20} />
+          </div>
+          <span>{label}</span>
+        </NavLink>
+      ))}
 
       {/* Settings & Account */}
       {user && (
@@ -145,7 +227,7 @@ const LeftSidebar = () => {
               <img
                 src={
                   g.coverImage ||
-                  'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100'
+                  "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100"
                 }
                 alt={g.name}
                 className="w-10 h-10 rounded-xl object-cover shrink-0 border border-gray-200 dark:border-gray-700 shadow-2xs"
@@ -157,8 +239,11 @@ const LeftSidebar = () => {
           ))
         ) : (
           <div className="px-3.5 py-2 text-base text-gray-400">
-            No groups yet.{' '}
-            <Link to="/groups/create" className="text-[#e02f21] underline font-bold">
+            No groups yet.{" "}
+            <Link
+              to="/groups/create"
+              className="text-[#e02f21] underline font-bold"
+            >
               Create one!
             </Link>
           </div>
@@ -175,4 +260,3 @@ const LeftSidebar = () => {
 };
 
 export default LeftSidebar;
-

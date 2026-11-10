@@ -1,9 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router';
-import { useSession } from '../../../lib/auth-client';
-import Avatar from '../../../components/ui/Avatar';
-import postsApi from '../api/posts.api';
-import { useToast } from '../../../context/ToastContext';
+import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router";
+import { useSession } from "../../../lib/auth-client";
+import PostIdentity from "./PostIdentity";
+import SharedPostPreview from "./SharedPostPreview";
+import PostPoll from "../../community/components/PostPoll";
+import Avatar from "../../../components/ui/Avatar";
+import postsApi from "../api/posts.api";
+import LikeButton from "./LikeButton";
+import { usePostLike } from "../model/usePostLike";
+import { useToast } from "../../../context/ToastContext";
+import Modal from "../../../components/ui/Modal";
+import { pinnedIn, canSharePost, type PinContext } from "../model/post-policy";
+import SaveRecipeModal from "../../kitchen/components/SaveRecipeModal";
+import { useKitchen } from "../../kitchen/model/kitchen-store";
+import { useSocial } from "../../community/model/useSocial";
 import {
   Heart,
   MessageCircle,
@@ -20,7 +30,8 @@ import {
   Check,
   X,
   AlertTriangle,
-} from 'lucide-react';
+  Bookmark,
+} from "lucide-react";
 
 interface PostCardProps {
   post: any;
@@ -29,7 +40,9 @@ interface PostCardProps {
   onRequireAuth?: () => void;
   onDeletePost?: (postId: string) => void;
   onUpdatePost?: (updatedPost: any) => void;
-  onPinPost?: (postId: string, isPinned: boolean) => void;
+  pinContext?: PinContext;
+  canManageGroupPins?: boolean;
+  showPinBadge?: boolean;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -39,24 +52,38 @@ const PostCard: React.FC<PostCardProps> = ({
   onRequireAuth,
   onDeletePost,
   onUpdatePost,
-  onPinPost,
+  pinContext,
+  canManageGroupPins = false,
+  showPinBadge = true,
 }) => {
   const { data: session } = useSession();
-  const user = session?.user;
+  const { user, state: social, update: updateSocial } = useSocial();
   const { notify } = useToast();
+  const { state: kitchen } = useKitchen();
+  const [showSave, setShowSave] = useState(false);
+  const isRecipeSaved = kitchen.collections.some((collection) =>
+    collection.recipeIds.includes(post.id),
+  );
 
-  const [hasLiked, setHasLiked] = useState(post.hasLiked || false);
-  const [likeCount, setLikeCount] = useState(post.likeCount || 0);
+  const { hasLiked, likeCount, handleLike } = usePostLike(post, onRequireAuth);
 
   // Post Actions Menu State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isPinned, setIsPinned] = useState(Boolean(post.isPinned));
+  const isPinned = pinnedIn(post, social.pins, pinContext);
+  const canPin =
+    pinContext?.type === "profile"
+      ? user?.id === (post.authorId || post.author?.id)
+      : Boolean(
+          pinContext?.type === "group" &&
+          canManageGroupPins &&
+          post.groupId === pinContext.groupId,
+        );
   const [isDeleted, setIsDeleted] = useState(false);
 
   // Edit State
   const [isEditing, setIsEditing] = useState(false);
-  const [caption, setCaption] = useState(post.caption || '');
-  const [title, setTitle] = useState(post.title || '');
+  const [caption, setCaption] = useState(post.caption || "");
+  const [title, setTitle] = useState(post.title || "");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Trash / Delete Modal
@@ -72,48 +99,39 @@ const PostCard: React.FC<PostCardProps> = ({
         setIsMenuOpen(false);
       }
     };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+    document.addEventListener("keydown", escape);
     if (isMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", escape);
     };
   }, [isMenuOpen]);
 
-  // Like toggle - instant toggle, NO spinner per user instructions
-  const handleLike = async () => {
-    if (!user) {
-      if (onRequireAuth) onRequireAuth();
-      return;
-    }
-
-    const prevLiked = hasLiked;
-    const prevCount = likeCount;
-
-    setHasLiked(!prevLiked);
-    setLikeCount(prevLiked ? prevCount - 1 : prevCount + 1);
-
-    try {
-      const res = await postsApi.toggleLikePost(post.id, session?.session?.token);
-      if (res?.data) {
-        setHasLiked(res.data.liked);
-        setLikeCount(res.data.likeCount);
-      }
-    } catch {
-      setHasLiked(prevLiked);
-      setLikeCount(prevCount);
-    }
-  };
-
-  // Pin Toggle
   const handleTogglePin = () => {
+    if (!canPin || !pinContext) return;
     const nextState = !isPinned;
-    setIsPinned(nextState);
-    setIsMenuOpen(false);
-    if (onPinPost) {
-      onPinPost(post.id, nextState);
+    try {
+      updateSocial((state) => {
+        const saved = (state.pins[post.id] ||= {});
+        if (pinContext.type === "profile") saved.profile = nextState;
+        else (saved.groups ||= {})[pinContext.groupId] = nextState;
+      });
+      setIsMenuOpen(false);
+      notify.success(
+        nextState
+          ? pinContext.type === "group"
+            ? "Post pinned in this group's Featured section"
+            : "Post pinned to your profile"
+          : "Post unpinned",
+      );
+    } catch {
+      notify.error("Could not save this pin on your device. Please try again.");
     }
-    notify.success(nextState ? 'Post pinned to your profile' : 'Post unpinned from your profile');
   };
 
   // Copy Link
@@ -121,13 +139,17 @@ const PostCard: React.FC<PostCardProps> = ({
     const postUrl = `${window.location.origin}/post/${post.id}`;
     navigator.clipboard.writeText(postUrl).then(
       () => {
-        notify.success('Link copied to clipboard');
+        notify.success(
+          post.id.startsWith("local-post-")
+            ? "Preview link copied. It works on this device."
+            : "Link copied to clipboard",
+        );
         setIsMenuOpen(false);
       },
       () => {
-        notify.error('Failed to copy link');
+        notify.error("Failed to copy link");
         setIsMenuOpen(false);
-      }
+      },
     );
   };
 
@@ -147,17 +169,16 @@ const PostCard: React.FC<PostCardProps> = ({
           caption: caption.trim(),
           title: title.trim(),
         },
-        session?.session?.token
+        session?.session?.token,
+        user?.id,
       );
-      post.caption = caption.trim();
-      if (title.trim()) post.title = title.trim();
       if (onUpdatePost) {
         onUpdatePost({ ...post, caption: caption.trim(), title: title.trim() });
       }
-      notify.success('Post updated successfully');
+      notify.success("Post updated successfully");
       setIsEditing(false);
     } catch (err: any) {
-      notify.error(err.message || 'Failed to update post');
+      notify.error(err.message || "Failed to update post");
     } finally {
       setIsSavingEdit(false);
     }
@@ -167,16 +188,16 @@ const PostCard: React.FC<PostCardProps> = ({
   const handleConfirmTrash = async () => {
     setIsDeleting(true);
     try {
-      await postsApi.deletePost(post.id, session?.session?.token);
+      await postsApi.deletePost(post.id, session?.session?.token, user?.id);
       setIsDeleted(true);
       setShowTrashConfirm(false);
       setIsMenuOpen(false);
       if (onDeletePost) {
         onDeletePost(post.id);
       }
-      notify.success('Post moved to trash');
+      notify.success("Post moved to trash");
     } catch (err: any) {
-      notify.error(err.message || 'Failed to move post to trash');
+      notify.error(err.message || "Failed to move post to trash");
     } finally {
       setIsDeleting(false);
     }
@@ -186,74 +207,46 @@ const PostCard: React.FC<PostCardProps> = ({
     return null;
   }
 
-  const isRecipe = post.postType === 'RECIPE';
-  const isRepost = post.postType === 'REPOST';
+  const isRecipe = post.postType === "RECIPE";
+  const isRepost = post.postType === "REPOST";
   const isAuthor = user?.id === post.author?.id;
 
   return (
     <article
-      className={`bg-white dark:bg-[#242526] rounded-2xl shadow-xs border border-gray-100 dark:border-gray-800 relative transition-shadow ${
-        isMenuOpen ? 'z-30' : 'z-10'
+      data-post-id={post.id}
+      className={`bg-white dark:bg-[#242526] text-gray-900 dark:text-gray-100 rounded-2xl shadow-xs border border-gray-100 dark:border-gray-800 relative transition-shadow ${
+        isMenuOpen ? "z-30" : "z-10"
       }`}
     >
       {/* Pinned Badge if pinned */}
-      {isPinned && (
+      {showPinBadge && isPinned && (
         <div className="bg-red-50/60 dark:bg-red-950/20 px-4 py-1.5 border-b border-red-100 dark:border-red-900/30 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-1.5 text-xs font-bold text-[#e02f21]">
             <Pin size={13} className="fill-[#e02f21]" />
-            <span>Pinned post</span>
+            <span>
+              {pinContext?.type === "group"
+                ? "Pinned in this group"
+                : "Pinned to profile"}
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={handleTogglePin}
-            className="text-[11px] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-medium cursor-pointer"
-          >
-            Unpin
-          </button>
+          {canPin && (
+            <button
+              type="button"
+              onClick={handleTogglePin}
+              className="text-[11px] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-medium cursor-pointer"
+            >
+              Unpin
+            </button>
+          )}
         </div>
       )}
 
       {/* Header: Author Info + 3-dots Menu */}
       <div className="p-3.5 sm:p-4 flex items-center justify-between rounded-t-2xl">
-        <div className="flex items-center gap-2.5">
-          <Link to={`/profile/${post.author?.id}`}>
-            <Avatar src={post.author?.image} alt={post.author?.name} size="md" />
-          </Link>
-          <div>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Link
-                to={`/profile/${post.author?.id}`}
-                className="font-bold text-sm sm:text-base text-gray-900 dark:text-white hover:underline"
-              >
-                {post.author?.name}
-              </Link>
-              {post.group && (
-                <span className="text-xs sm:text-sm text-gray-500">
-                  in{' '}
-                  <Link
-                    to={`/group/${post.group.slug}`}
-                    className="font-bold text-gray-800 dark:text-gray-200 hover:underline"
-                  >
-                    {post.group.name}
-                  </Link>
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              <span>
-                {new Date(post.createdAt).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </span>
-              <span>•</span>
-              <Globe size={14} />
-            </div>
-          </div>
-        </div>
+        <PostIdentity post={post} />
 
         {/* 3-Dots Action Menu Container */}
-        <div className="relative" ref={menuRef}>
+        <div className="relative shrink-0" ref={menuRef}>
           <button
             type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -266,20 +259,56 @@ const PostCard: React.FC<PostCardProps> = ({
           {/* Action Menu Dropdown */}
           {isMenuOpen && (
             <div className="absolute right-0 top-10 w-64 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-              {/* 1. Pin / Unpin Post */}
-              <button
-                type="button"
-                onClick={handleTogglePin}
-                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
-              >
-                <Pin size={18} className={isPinned ? 'text-[#e02f21]' : 'text-gray-500'} />
-                <div>
-                  <p className="font-bold text-sm text-gray-900 dark:text-white">{isPinned ? 'Unpin post' : 'Pin post'}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                    {isPinned ? 'Remove from top' : 'Keep at the top of your profile'}
-                  </p>
-                </div>
-              </button>
+              {isRecipe && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setShowSave(true);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3"
+                >
+                  <Bookmark
+                    size={18}
+                    className="text-[#e02f21]"
+                    fill={isRecipeSaved ? "currentColor" : "none"}
+                  />
+                  <span>
+                    {isRecipeSaved
+                      ? "Manage saved recipe"
+                      : "Save recipe to a cookbook"}
+                  </span>
+                </button>
+              )}
+              {/* Pins belong to the profile or group currently being viewed. */}
+              {canPin && (
+                <button
+                  type="button"
+                  onClick={handleTogglePin}
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
+                >
+                  <Pin
+                    size={18}
+                    className={isPinned ? "text-[#e02f21]" : "text-gray-500"}
+                  />
+                  <div>
+                    <p className="font-bold text-sm text-gray-900 dark:text-white">
+                      {isPinned
+                        ? "Unpin post"
+                        : pinContext?.type === "group"
+                          ? "Pin in group"
+                          : "Pin to profile"}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                      {isPinned
+                        ? "Remove from top"
+                        : pinContext?.type === "group"
+                          ? "Show in this group’s Featured section"
+                          : "Keep at the top of your profile"}
+                    </p>
+                  </div>
+                </button>
+              )}
 
               {/* 2. Edit Post (for author) */}
               {isAuthor && (
@@ -290,8 +319,14 @@ const PostCard: React.FC<PostCardProps> = ({
                 >
                   <Edit3 size={18} className="text-gray-500" />
                   <div>
-                    <p className="font-bold text-sm text-gray-900 dark:text-white">Edit post</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">Update title or description</p>
+                    <p className="font-bold text-sm text-gray-900 dark:text-white">
+                      {post.postType === "POLL" ? "Edit caption" : "Edit post"}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                      {post.postType === "POLL"
+                        ? "Update the text above this poll"
+                        : "Update title or description"}
+                    </p>
                   </div>
                 </button>
               )}
@@ -304,8 +339,12 @@ const PostCard: React.FC<PostCardProps> = ({
               >
                 <Copy size={18} className="text-gray-500" />
                 <div>
-                  <p className="font-bold text-sm text-gray-900 dark:text-white">Copy link</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">Copy post link to clipboard</p>
+                  <p className="font-bold text-sm text-gray-900 dark:text-white">
+                    Copy link
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                    Copy post link to clipboard
+                  </p>
                 </div>
               </button>
 
@@ -323,8 +362,12 @@ const PostCard: React.FC<PostCardProps> = ({
                   >
                     <Trash2 size={18} className="text-[#e02f21]" />
                     <div>
-                      <p className="font-bold text-sm text-[#e02f21]">Move to trash</p>
-                      <p className="text-xs text-red-500/80 dark:text-red-400 font-normal">Items in trash are removed</p>
+                      <p className="font-bold text-sm text-[#e02f21]">
+                        Move to trash
+                      </p>
+                      <p className="text-xs text-red-500/80 dark:text-red-400 font-normal">
+                        Items in trash are removed
+                      </p>
                     </div>
                   </button>
                 </>
@@ -375,7 +418,7 @@ const PostCard: React.FC<PostCardProps> = ({
               onClick={handleSaveEdit}
               className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-[#e02f21] hover:bg-[#c92518] transition cursor-pointer disabled:opacity-50"
             >
-              {isSavingEdit ? 'Saving...' : 'Save changes'}
+              {isSavingEdit ? "Saving..." : "Save changes"}
             </button>
           </div>
         </div>
@@ -393,7 +436,29 @@ const PostCard: React.FC<PostCardProps> = ({
       {/* Recipe Header (if RECIPE) */}
       {isRecipe && (
         <div className="mx-4 mb-3.5 p-4 rounded-2xl bg-red-50/60 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40">
-          <h3 className="font-black text-base sm:text-lg text-[#e02f21] mb-2">{title || post.title}</h3>
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <h3 className="font-black text-base sm:text-lg text-[#e02f21]">
+              <button
+                type="button"
+                className="text-left hover:underline"
+                onClick={() => onOpenComments?.(post)}
+              >
+                {title || post.title}
+              </button>
+            </h3>
+            <button
+              type="button"
+              aria-label={isRecipeSaved ? "Manage saved recipe" : "Save recipe"}
+              aria-pressed={isRecipeSaved}
+              onClick={() => setShowSave(true)}
+              className="p-1.5 -mt-1 -mr-1 rounded-lg text-[#e02f21] hover:bg-red-100 dark:hover:bg-red-950/40 shrink-0"
+            >
+              <Bookmark
+                size={19}
+                fill={isRecipeSaved ? "currentColor" : "none"}
+              />
+            </button>
+          </div>
           <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
             {post.cuisine && (
               <span className="px-3 py-1 rounded-lg bg-white dark:bg-gray-800 font-bold text-gray-800 dark:text-gray-200 shadow-xs flex items-center gap-1.5">
@@ -414,45 +479,38 @@ const PostCard: React.FC<PostCardProps> = ({
         </div>
       )}
 
-      {/* Repost Embedded Card */}
-      {isRepost && post.originalPost && (
-        <div className="mx-4 mb-3 p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 mb-1.5">
-            <Avatar src={post.originalPost.author?.image} alt="" size="xs" />
-            <span className="font-bold text-xs text-gray-800 dark:text-gray-200">
-              {post.originalPost.author?.name}
-            </span>
-          </div>
-          {post.originalPost.title && (
-            <h4 className="font-bold text-xs text-[#e02f21]">{post.originalPost.title}</h4>
-          )}
-          {post.originalPost.caption && (
-            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-0.5">
-              {post.originalPost.caption}
-            </p>
-          )}
-          {post.originalPost.image && (
-            <img
-              src={post.originalPost.image}
-              alt=""
-              className="mt-2 rounded-xl h-44 w-full object-cover"
-            />
-          )}
+      {post.postType === "POLL" && (
+        <div className="mx-4 mb-4">
+          <PostPoll post={post} onRequireAuth={onRequireAuth} />
+        </div>
+      )}
+      {isRepost && (
+        <div className="mx-4 mb-4">
+          <SharedPostPreview post={post} />
         </div>
       )}
 
       {/* Media Photo */}
       {post.image && !isRepost && (
-        <div
+        <button
+          type="button"
+          aria-label={`View ${post.title || "post from " + post.author?.name}`}
           onClick={() => onOpenComments && onOpenComments(post)}
-          className="cursor-pointer max-h-[460px] overflow-hidden bg-black/5"
+          className="block w-full cursor-pointer max-h-[460px] overflow-hidden bg-black/5"
         >
           <img
             src={post.image}
-            alt=""
-            className="w-full h-full object-cover hover:opacity-95 transition"
+            alt={
+              post.title || "A kitchen moment shared by " + post.author?.name
+            }
+            loading="lazy"
+            className="w-full max-h-[460px] object-cover hover:opacity-95 transition"
           />
-        </div>
+        </button>
+      )}
+
+      {showSave && (
+        <SaveRecipeModal recipe={post} onClose={() => setShowSave(false)} />
       )}
 
       {/* Metrics Row */}
@@ -474,16 +532,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
       {/* Facebook Action Row */}
       <div className="px-2 py-1.5 grid grid-cols-3 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-b-2xl">
-        <button
-          type="button"
-          onClick={handleLike}
-          className={`py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer ${
-            hasLiked ? 'text-[#e02f21]' : ''
-          }`}
-        >
-          <Heart size={19} fill={hasLiked ? '#e02f21' : 'none'} />
-          <span>Like</span>
-        </button>
+        <LikeButton liked={hasLiked} onClick={handleLike} />
 
         {/* Comment Button opens Modal per user requirement */}
         <button
@@ -498,7 +547,13 @@ const PostCard: React.FC<PostCardProps> = ({
         <button
           type="button"
           onClick={() => onOpenShare && onOpenShare(post)}
-          className="py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
+          disabled={!canSharePost(post)}
+          title={
+            canSharePost(post)
+              ? "Share post"
+              : "Sharing is unavailable for this audience"
+          }
+          className="py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Share2 size={19} />
           <span>Share</span>
@@ -506,43 +561,36 @@ const PostCard: React.FC<PostCardProps> = ({
       </div>
 
       {/* Move to Trash Confirmation Dialog */}
-      {showTrashConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#242526] rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 space-y-4">
-            <div className="flex items-center gap-3.5 text-[#e02f21]">
-              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/60 flex items-center justify-center shrink-0">
-                <Trash2 size={24} />
-              </div>
-              <div>
-                <h3 className="font-black text-lg text-gray-900 dark:text-white">Move to trash?</h3>
-                <p className="text-sm text-gray-500">This post will be deleted from your feed.</p>
-              </div>
-            </div>
-
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-              Are you sure you want to move this post to trash? You can create a new post or recipe at any time.
-            </p>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowTrashConfirm(false)}
-                className="px-4 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={handleConfirmTrash}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#e02f21] hover:bg-[#c92518] transition cursor-pointer disabled:opacity-50"
-              >
-                {isDeleting ? 'Moving to trash...' : 'Move to trash'}
-              </button>
-            </div>
+      <Modal
+        isOpen={showTrashConfirm}
+        onClose={() => setShowTrashConfirm(false)}
+        title="Delete this post?"
+        maxWidth="max-w-sm"
+      >
+        <div className="p-5 space-y-5">
+          <p className="text-sm text-gray-500">
+            This removes the post and its conversation. This action cannot be
+            undone.
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setShowTrashConfirm(false)}
+              className="px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={handleConfirmTrash}
+              className="px-4 py-2.5 rounded-xl bg-[#e02f21] text-white text-sm font-bold disabled:opacity-50"
+            >
+              {isDeleting ? "Deleting…" : "Delete post"}
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
     </article>
   );
 };

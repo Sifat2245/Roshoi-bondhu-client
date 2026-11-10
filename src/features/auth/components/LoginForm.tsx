@@ -1,44 +1,61 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
-import { signIn } from '../../../lib/auth-client';
-import Button from '../../../components/ui/Button';
-import DemoAccountsBar from './DemoAccountsBar';
-import { useToast } from '../../../context/ToastContext';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router";
+import { useAuth } from "../../../context/AuthContext";
+import Button from "../../../components/ui/Button";
+import DemoAccountsBar from "./DemoAccountsBar";
+import { useToast } from "../../../context/ToastContext";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { notify } = useToast();
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
+  const { loginUser, user } = useAuth();
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  useEffect(() => {
+    if (user) {
+      const from = (location.state as any)?.from?.pathname || "/";
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, location]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier.trim() || !password) {
-      return notify.error('Please fill in both email and password.', 'Required Fields');
+      return notify.error(
+        "Please fill in both email and password.",
+        "Required Fields",
+      );
     }
 
     setLoading(true);
     try {
-      const res = await signIn.email({
-        email: identifier.trim(),
-        password,
-      });
+      const cleanEmail = identifier.trim().toLowerCase();
+      const res = await loginUser(cleanEmail, password);
 
-      if (res.error) {
-        throw new Error(res.error.message || 'Invalid email or password.');
+      if (res?.data?.requiresVerification || res?.requiresVerification) {
+        notify.warning(
+          res.message || "Please verify your email to continue.",
+          "Verification Required",
+        );
+        return navigate(
+          `/verify-email?email=${encodeURIComponent(cleanEmail)}`,
+        );
       }
 
-      // No annoying "logged in successful" popup - seamless redirect!
-      navigate('/');
-    } catch (err) {
-      notify.error(err.message || 'Invalid credentials', 'Login Failed');
+      notify.success("Logged in successfully!", "Welcome Back");
+      const from = (location.state as any)?.from?.pathname || "/";
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      notify.error(err.message || "Invalid email or password.", "Login Failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFillDemo = (email, pass) => {
+  const handleFillDemo = (email: string, pass: string) => {
     setIdentifier(email);
     setPassword(pass);
   };
@@ -55,28 +72,34 @@ const LoginForm = () => {
       </div>
 
       <form onSubmit={handleLogin} className="space-y-3.5">
-        {/* Email or Mobile Number Input */}
+        {/* Email Address Input */}
         <div>
-          <input
-            type="text"
-            required
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="Email address or mobile number"
-            className="w-full px-4 py-3.5 bg-white dark:bg-[#242526] border border-gray-300 dark:border-gray-700 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#e02f21] focus:ring-1 focus:ring-[#e02f21] transition"
-          />
+          <div className="relative">
+            <input
+              type="email"
+              required
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="Email address"
+              aria-label="Email address"
+              className="w-full px-4 py-3.5 bg-white dark:bg-[#242526] border border-gray-300 dark:border-gray-700 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#e02f21] focus:ring-1 focus:ring-[#e02f21] transition"
+            />
+          </div>
         </div>
 
         {/* Password Input */}
         <div>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full px-4 py-3.5 bg-white dark:bg-[#242526] border border-gray-300 dark:border-gray-700 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#e02f21] focus:ring-1 focus:ring-[#e02f21] transition"
-          />
+          <div className="relative">
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              aria-label="Password"
+              className="w-full px-4 py-3.5 bg-white dark:bg-[#242526] border border-gray-300 dark:border-gray-700 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#e02f21] focus:ring-1 focus:ring-[#e02f21] transition"
+            />
+          </div>
         </div>
 
         {/* Action Button with Loading Spinner */}

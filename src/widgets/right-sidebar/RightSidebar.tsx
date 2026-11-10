@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Flame,
   Tag,
@@ -15,7 +15,7 @@ import {
   ChefHat,
   Salad,
   Pizza,
-} from 'lucide-react';
+} from "lucide-react";
 
 export interface RightSidebarProps {
   activeCuisine?: string;
@@ -28,41 +28,66 @@ export interface RightSidebarProps {
 }
 
 const RightSidebar: React.FC<RightSidebarProps> = ({
-  activeCuisine = '',
+  activeCuisine = "",
   onSelectCuisine,
-  activeTag = '',
+  activeTag = "",
   onSelectTag,
-  activeMaxTime = '',
+  activeMaxTime = "",
   onSelectMaxTime,
   onResetFilters,
 }) => {
   const cuisines = [
-    { id: 'Bangladeshi', label: 'Bangladeshi', native: 'বাঙালি রান্না', Icon: ChefHat },
-    { id: 'Indian', label: 'Indian Curries', native: 'ভারতীয় কারি', Icon: Soup },
-    { id: 'Mughlai', label: 'Mughlai & Biryani', native: 'মোগলাই ও বিরিয়ানি', Icon: Utensils },
-    { id: 'Desserts', label: 'Desserts & Sweets', native: 'মিষ্টি ও ডেজার্ট', Icon: Cookie },
-    { id: 'Chinese', label: 'Desi Chinese', native: 'চাইনিজ', Icon: Salad },
-    { id: 'Street Food', label: 'Street Food', native: 'স্ট্রিট ফুড', Icon: Pizza },
+    {
+      id: "Bangladeshi",
+      label: "Bangladeshi",
+      native: "বাঙালি রান্না",
+      Icon: ChefHat,
+    },
+    {
+      id: "Indian",
+      label: "Indian Curries",
+      native: "ভারতীয় কারি",
+      Icon: Soup,
+    },
+    {
+      id: "Mughlai",
+      label: "Mughlai & Biryani",
+      native: "মোগলাই ও বিরিয়ানি",
+      Icon: Utensils,
+    },
+    {
+      id: "Desserts",
+      label: "Desserts & Sweets",
+      native: "মিষ্টি ও ডেজার্ট",
+      Icon: Cookie,
+    },
+    { id: "Chinese", label: "Desi Chinese", native: "চাইনিজ", Icon: Salad },
+    {
+      id: "Street Food",
+      label: "Street Food",
+      native: "স্ট্রিট ফুড",
+      Icon: Pizza,
+    },
   ];
 
   const popularTags = [
-    '#KacchiBiryani',
-    '#Ilish',
-    '#BeefBhuna',
-    '#QuickMeal',
-    '#ChickenRoast',
-    '#Sweets',
-    '#HealthyDiet',
-    '#Spicy',
-    '#TeaTimeSnacks',
-    '#Pitha',
-    '#Khichuri',
+    "#KacchiBiryani",
+    "#Ilish",
+    "#BeefBhuna",
+    "#QuickMeal",
+    "#ChickenRoast",
+    "#Sweets",
+    "#HealthyDiet",
+    "#Spicy",
+    "#TeaTimeSnacks",
+    "#Pitha",
+    "#Khichuri",
   ];
 
   const cookingTimes = [
-    { label: 'Under 15 mins', value: '15', Icon: Zap },
-    { label: 'Under 30 mins', value: '30', Icon: Clock },
-    { label: 'Under 60 mins', value: '60', Icon: Timer },
+    { label: "Under 15 mins", value: "15", Icon: Zap },
+    { label: "Under 30 mins", value: "30", Icon: Clock },
+    { label: "Under 60 mins", value: "60", Icon: Timer },
   ];
 
   const hasActiveFilters = Boolean(activeCuisine || activeTag || activeMaxTime);
@@ -95,7 +120,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                 {activeCuisine}
                 <button
                   type="button"
-                  onClick={() => onSelectCuisine('')}
+                  onClick={() => onSelectCuisine("")}
                   className="hover:text-black cursor-pointer"
                 >
                   <X size={13} />
@@ -107,7 +132,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                 {activeTag}
                 <button
                   type="button"
-                  onClick={() => onSelectTag('')}
+                  onClick={() => onSelectTag("")}
                   className="hover:text-black cursor-pointer"
                 >
                   <X size={13} />
@@ -119,7 +144,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                 ≤ {activeMaxTime}m
                 <button
                   type="button"
-                  onClick={() => onSelectMaxTime('')}
+                  onClick={() => onSelectMaxTime("")}
                   className="hover:text-black cursor-pointer"
                 >
                   <X size={13} />
@@ -139,34 +164,37 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 
         <div className="space-y-1">
           {cuisines.map((c) => {
-            const isSelected = activeCuisine.toLowerCase() === c.id.toLowerCase();
+            const isSelected =
+              activeCuisine.toLowerCase() === c.id.toLowerCase();
             const Icon = c.Icon;
             return (
               <button
                 key={c.id}
                 type="button"
-                onClick={() => onSelectCuisine(isSelected ? '' : c.id)}
+                onClick={() => onSelectCuisine(isSelected ? "" : c.id)}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-base font-bold transition cursor-pointer text-left ${
                   isSelected
-                    ? 'bg-[#e02f21] text-white shadow-xs'
-                    : 'hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] text-gray-800 dark:text-gray-200'
+                    ? "bg-[#e02f21] text-white shadow-xs"
+                    : "hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] text-gray-800 dark:text-gray-200"
                 }`}
               >
                 <div className="flex items-center gap-2.5 truncate">
                   <div
                     className={`p-1.5 rounded-lg shrink-0 ${
                       isSelected
-                        ? 'bg-white/20 text-white'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                        ? "bg-white/20 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
                     }`}
                   >
                     <Icon size={18} />
                   </div>
                   <div className="truncate">
-                    <p className="truncate leading-tight font-bold">{c.label}</p>
+                    <p className="truncate leading-tight font-bold">
+                      {c.label}
+                    </p>
                     <p
                       className={`text-sm ${
-                        isSelected ? 'text-red-100' : 'text-gray-400'
+                        isSelected ? "text-red-100" : "text-gray-400"
                       }`}
                     >
                       {c.native}
@@ -198,19 +226,19 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
               <button
                 key={item.value}
                 type="button"
-                onClick={() => onSelectMaxTime(isSelected ? '' : item.value)}
+                onClick={() => onSelectMaxTime(isSelected ? "" : item.value)}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-base font-bold transition cursor-pointer text-left ${
                   isSelected
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] text-gray-800 dark:text-gray-200'
+                    ? "bg-amber-600 text-white shadow-xs"
+                    : "hover:bg-gray-200/60 dark:hover:bg-[#3a3b3c] text-gray-800 dark:text-gray-200"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <div
                     className={`p-1.5 rounded-lg shrink-0 ${
                       isSelected
-                        ? 'bg-white/20 text-white'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                        ? "bg-white/20 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
                     }`}
                   >
                     <Icon size={18} />
@@ -235,7 +263,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 
         <div className="flex flex-wrap gap-2 px-1">
           {popularTags.map((tag) => {
-            const cleanTag = tag.replace('#', '');
+            const cleanTag = tag.replace("#", "");
             const isSelected =
               activeTag.toLowerCase() === cleanTag.toLowerCase() ||
               activeTag.toLowerCase() === tag.toLowerCase();
@@ -244,11 +272,11 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
               <button
                 key={tag}
                 type="button"
-                onClick={() => onSelectTag(isSelected ? '' : cleanTag)}
+                onClick={() => onSelectTag(isSelected ? "" : cleanTag)}
                 className={`px-3.5 py-1.5 rounded-xl text-sm font-bold transition cursor-pointer ${
                   isSelected
-                    ? 'bg-[#e02f21] text-white shadow-xs'
-                    : 'bg-gray-200/70 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 hover:bg-gray-300/80 dark:hover:bg-gray-700'
+                    ? "bg-[#e02f21] text-white shadow-xs"
+                    : "bg-gray-200/70 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 hover:bg-gray-300/80 dark:hover:bg-gray-700"
                 }`}
               >
                 {tag}
@@ -262,4 +290,3 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 };
 
 export default RightSidebar;
-

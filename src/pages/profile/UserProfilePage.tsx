@@ -1,3 +1,4 @@
+import { useSocial } from '../../features/community/model/useSocial';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
 import { Utensils } from 'lucide-react';
@@ -21,6 +22,7 @@ import {
 } from '../../components/ui/Skeleton';
 import { useToast } from '../../context/ToastContext';
 import { profileApi } from '../../features/profile/api/profile.api';
+import { pinnedIn, compareRecent } from "../../features/posts/model/post-policy";
 import { postsApi } from '../../features/posts/api/posts.api';
 
 const UserProfilePage = () => {
@@ -28,7 +30,7 @@ const UserProfilePage = () => {
   const { data: session } = useSession();
   const { notify } = useToast();
   const navigate = useNavigate();
-  const currentUser = session?.user;
+  const { user: currentUser, state: social } = useSocial();
   const token = session?.session?.token;
   const targetId = id || currentUser?.id || 'me';
 
@@ -49,6 +51,7 @@ const UserProfilePage = () => {
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showMobileIntro, setShowMobileIntro] = useState(false);
 
   const requireAuth = () => {
     navigate('/login');
@@ -73,7 +76,7 @@ const UserProfilePage = () => {
   const fetchUserPosts = useCallback(async (uid = targetId) => {
     try {
       const authorQuery = uid === 'me' && currentUser?.id ? currentUser.id : uid;
-      const data = await postsApi.getPosts({ authorId: authorQuery, limit: 50 }, token);
+      const data = await postsApi.getPosts({ authorId: authorQuery, limit: 50 }, token, currentUser?.id);
       if (data) {
         setPosts(data);
       }
@@ -99,7 +102,7 @@ const UserProfilePage = () => {
         setFollowersCount((prev) => (res.data.isFollowing ? prev + 1 : Math.max(0, prev - 1)));
       }
     } catch (err) {
-      console.error('Follow error:', err);
+      notify.error(err.message || 'Could not update this connection. Please try again.');
     }
   };
 
@@ -188,7 +191,7 @@ const UserProfilePage = () => {
     return (
       <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
         <SocialHeader />
-        <div className="pt-[100px] md:pt-14 w-full">
+        <main className="pt-[100px] md:pt-14 w-full">
           <ProfileHeaderSkeleton />
           <div className="max-w-[1250px] mx-auto px-4 sm:px-6 py-8">
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
@@ -201,7 +204,7 @@ const UserProfilePage = () => {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -218,12 +221,16 @@ const UserProfilePage = () => {
   }
 
   const isOwnProfile = currentUser?.id === profile.id;
+  const profilePosts = [...posts].sort((a, b) =>
+    Number(pinnedIn(b, social.pins, { type: 'profile' })) -
+    Number(pinnedIn(a, social.pins, { type: 'profile' })) || compareRecent(a, b)
+  );
   const filteredPosts =
     activeTab === 'RECIPES'
-      ? posts.filter((p) => p.postType === 'RECIPE')
+      ? profilePosts.filter((p) => p.postType === 'RECIPE')
       : activeTab === 'PHOTOS'
-      ? posts.filter((p) => p.image)
-      : posts;
+      ? profilePosts.filter((p) => p.image)
+      : profilePosts;
 
   return (
     <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
@@ -231,7 +238,7 @@ const UserProfilePage = () => {
       <SocialHeader />
 
       {/* 2. Profile Page Body with pt-[100px] on mobile and pt-14 on desktop */}
-      <div className="pt-[100px] md:pt-14 w-full">
+      <main className="pt-[100px] md:pt-14 w-full">
         {/* Profile Header Banner & Details */}
         <ProfileHeader
           profile={profile}
@@ -290,11 +297,14 @@ const UserProfilePage = () => {
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
               {/* Left Column: Intro & Personal Details Card */}
               <div className="w-full lg:w-[420px] xl:w-[440px] shrink-0 lg:sticky lg:top-18 self-start">
+                <button type="button" aria-expanded={showMobileIntro} onClick={() => setShowMobileIntro((value) => !value)} className="lg:hidden w-full rounded-2xl bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-800 p-4 text-left"><span className="flex justify-between gap-3 font-bold text-sm">About {profile.name?.split(' ')[0]}<span className="text-[#e02f21] text-xs">{showMobileIntro ? 'Hide details' : 'See details'}</span></span><span className="block text-sm text-gray-500 mt-2 line-clamp-2">{profile.bio || 'A little more about this home cook.'}</span></button>
+                <div className={showMobileIntro ? 'mt-3 lg:mt-0' : 'hidden lg:block'}>
                 <ProfileIntroCard
                   profile={profile}
                   isOwnProfile={isOwnProfile}
                   onOpenEditModal={() => setIsEditModalOpen(true)}
                 />
+                </div>
               </div>
 
               {/* Right Column: User Stream / Posts Feed */}
@@ -316,8 +326,9 @@ const UserProfilePage = () => {
                     <PostCard
                       key={post.id}
                       post={post}
+                      pinContext={{ type: "profile" }}
                       onOpenComments={(selected) => setSelectedPostForComments(selected)}
-                      onOpenShare={() => {}}
+                      onOpenShare={async (selected) => { try { await postsApi.sharePost(selected.id, '', token, currentUser); notify.success('Post shared to your feed'); fetchUserPosts(); } catch (error: any) { notify.error(error.message || 'Could not share this post.'); } }}
                       onRequireAuth={requireAuth}
                       onDeletePost={(deletedId) =>
                         setPosts((prev) => prev.filter((p) => p.id !== deletedId))
@@ -327,17 +338,6 @@ const UserProfilePage = () => {
                           prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
                         )
                       }
-                      onPinPost={(pinnedId, pinnedState) => {
-                        setPosts((prev) => {
-                          const updated = prev.map((p) =>
-                            p.id === pinnedId ? { ...p, isPinned: pinnedState } : p
-                          );
-                          return [
-                            ...updated.filter((p) => p.isPinned),
-                            ...updated.filter((p) => !p.isPinned),
-                          ];
-                        });
-                      }}
                     />
                   ))
                 ) : (
@@ -350,7 +350,7 @@ const UserProfilePage = () => {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       {/* Edit Profile Modal */}
       <EditProfileModal

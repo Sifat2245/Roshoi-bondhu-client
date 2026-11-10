@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
 import Avatar from '../../../components/ui/Avatar';
 import Button from '../../../components/ui/Button';
 import Modal from '../../../components/ui/Modal';
 import { useToast } from '../../../context/ToastContext';
 import { signOut } from '../../../lib/auth-client';
+import { useSession } from '../../../lib/auth-client';
+import { isDemoMode } from '../../../lib/demo/demo-store';
+import { profileApi } from '../../profile/api/profile.api';
 import {
   ChevronRight,
   Plus,
@@ -21,7 +23,7 @@ export interface SettingsManageAccountTabProps {
 
 export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> = ({ user }) => {
   const { notify } = useToast();
-  const navigate = useNavigate();
+  const { data: session } = useSession();
 
   // Deactivation / Deletion flow state
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
@@ -57,19 +59,14 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
       setProcessing(false);
       setIsDeactivateModalOpen(false);
 
-      if (actionType === 'DEACTIVATE') {
-        notify.info('Your Heshel account has been deactivated. You can reactivate anytime by logging in.');
-      } else {
-        notify.success('Your Heshel account and data have been scheduled for permanent deletion.');
-      }
-
-      await signOut();
-      navigate('/login');
+      notify.info('Preview complete. Your actual account has not been deactivated or deleted.');
+      if (isDemoMode()) { await signOut(); window.location.assign('/login'); }
     }, 1200);
   };
 
   return (
     <div className="space-y-7 animate-in fade-in duration-150 select-none">
+      <p className="rounded-xl border border-gray-200 dark:border-gray-700 p-3 text-xs text-gray-500">Deactivation and deletion are preview flows. They do not remove your actual account.</p>
       {/* 1. Header matching Screenshot 3 */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -164,24 +161,25 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
         onClose={() => setIsDeactivateModalOpen(false)}
         title={
           !isConfirmStep
-            ? 'Deactivating or Deleting your Heshel Account'
+            ? 'Deactivate or delete account'
             : actionType === 'DEACTIVATE'
             ? 'Confirm Account Deactivation'
             : 'Confirm Permanent Account Deletion'
         }
+        subtitle="Preview only. Your actual account is not changed."
         maxWidth="max-w-md"
       >
         {!isConfirmStep ? (
-          <div className="space-y-5">
+          <div className="space-y-5 p-5 sm:p-6">
             <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              If you want to take a break from Heshel, you can deactivate your account. If you want to permanently remove your account, posts, recipes and data, let us know.
+              Choose a temporary break or permanently remove your account and data.
             </p>
 
-            <div className="space-y-3">
+            <fieldset className="space-y-3">
+              <legend className="sr-only">Choose an account action</legend>
               {/* Option 1: Deactivate Account */}
               <label
-                onClick={() => setActionType('DEACTIVATE')}
-                className={`p-4.5 rounded-2xl border flex items-start gap-3.5 cursor-pointer transition ${
+                className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-3 cursor-pointer transition ${
                   actionType === 'DEACTIVATE'
                     ? 'border-[#e02f21] bg-red-50/40 dark:bg-red-950/20'
                     : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#2e2f30]'
@@ -190,27 +188,27 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
                 <input
                   type="radio"
                   name="account_action"
+                  value="DEACTIVATE"
                   checked={actionType === 'DEACTIVATE'}
                   onChange={() => setActionType('DEACTIVATE')}
-                  className="mt-1 accent-[#e02f21]"
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#e02f21]"
                 />
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <UserX size={18} className="text-gray-700 dark:text-gray-300" />
+                    <UserX size={18} className="text-gray-700 dark:text-gray-300 shrink-0" />
                     <p className="font-bold text-base text-gray-900 dark:text-white">
                       Deactivate account
                     </p>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                    Deactivating your account is temporary. Your profile and recipes will be hidden until you log back in.
+                    Temporarily hide your profile and recipes. Log back in whenever you're ready to return.
                   </p>
                 </div>
               </label>
 
               {/* Option 2: Delete Account */}
               <label
-                onClick={() => setActionType('DELETE')}
-                className={`p-4.5 rounded-2xl border flex items-start gap-3.5 cursor-pointer transition ${
+                className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-3 cursor-pointer transition ${
                   actionType === 'DELETE'
                     ? 'border-[#e02f21] bg-red-50/40 dark:bg-red-950/20'
                     : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#2e2f30]'
@@ -219,25 +217,26 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
                 <input
                   type="radio"
                   name="account_action"
+                  value="DELETE"
                   checked={actionType === 'DELETE'}
                   onChange={() => setActionType('DELETE')}
-                  className="mt-1 accent-[#e02f21]"
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#e02f21]"
                 />
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <Trash2 size={18} className="text-[#e02f21]" />
+                    <Trash2 size={18} className="text-[#e02f21] shrink-0" />
                     <p className="font-bold text-base text-gray-900 dark:text-white">
                       Delete account
                     </p>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                    Deleting your account is permanent. When you delete your Heshel account, you won't be able to retrieve your recipes, reviews, or followers.
+                    Permanently remove your account, recipes, reviews, and followers. This cannot be undone.
                   </p>
                 </div>
               </label>
-            </div>
+            </fieldset>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex flex-wrap justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
               <Button
                 variant="secondary"
                 size="md"
@@ -258,7 +257,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
           </div>
         ) : (
           /* Password Confirmation Step */
-          <form onSubmit={handleExecuteAction} className="space-y-5">
+          <form onSubmit={handleExecuteAction} className="space-y-5 p-5 sm:p-6">
             <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3">
               <ShieldAlert size={22} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
@@ -268,12 +267,13 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">
+              <label htmlFor="account-action-password" className="block text-sm font-bold text-gray-700 dark:text-gray-300">
                 Password
               </label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
                 <input
+                  id="account-action-password"
                   type="password"
                   required
                   value={confirmPassword}
@@ -284,7 +284,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
               </div>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex flex-wrap justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
               <Button
                 type="button"
                 variant="secondary"
@@ -315,7 +315,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
         title="Manage Heshel Profile"
         maxWidth="max-w-md"
       >
-        <div className="space-y-4">
+        <div className="space-y-4 p-4 sm:p-5">
           <div className="flex items-center gap-3.5 p-3 rounded-xl bg-gray-50 dark:bg-[#343536]">
             <Avatar src={user?.image} alt={user?.name} size="md" />
             <div>
@@ -348,9 +348,9 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
             <Button
               variant="primary"
               size="sm"
-              onClick={() => {
-                notify.success('Profile preferences updated.');
-                setIsEditProfileOpen(false);
+              onClick={async () => {
+                if (!displayName.trim()) { notify.error('Enter your display name.'); return; }
+                try { await profileApi.updateProfile({ name: displayName.trim() }, session?.session?.token); notify.success('Display name updated.'); setIsEditProfileOpen(false); } catch (error: any) { notify.error(error.message); }
               }}
               className="cursor-pointer"
             >

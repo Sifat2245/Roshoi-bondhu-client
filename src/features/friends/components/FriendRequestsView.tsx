@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import FriendRequestCard from './FriendRequestCard';
-import { UserCheck, ChevronDown } from 'lucide-react';
+import React, { useState } from "react";
+import FriendRequestCard from "./FriendRequestCard";
+import { UserCheck, ChevronDown } from "lucide-react";
 
 export interface FriendRequestsViewProps {
   requests?: any[];
@@ -97,4 +97,3 @@ const FriendRequestsView: React.FC<FriendRequestsViewProps> = ({
 };
 
 export default FriendRequestsView;
-

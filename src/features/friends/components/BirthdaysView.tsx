@@ -1,8 +1,10 @@
-import React from 'react';
-import { Gift, Calendar, Heart } from 'lucide-react';
-import Avatar from '../../../components/ui/Avatar';
+import React from "react";
+import { useChatDock } from "../../../context/ChatDockContext";
+import { Gift, Calendar, Heart } from "lucide-react";
+import Avatar from "../../../components/ui/Avatar";
 
 const BirthdaysView = ({ friends = [] }) => {
+  const { startConversation } = useChatDock();
   const sampleBirthdays = friends.slice(0, 3);
 
   return (
@@ -20,19 +22,27 @@ const BirthdaysView = ({ friends = [] }) => {
         {sampleBirthdays.length > 0 ? (
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {sampleBirthdays.map((f, i) => (
-              <div key={f.id} className="py-3 flex items-center justify-between">
+              <div
+                key={f.id}
+                className="py-3 flex flex-wrap gap-3 items-center justify-between"
+              >
                 <div className="flex items-center gap-3">
                   <Avatar src={f.image} alt={f.name} size="md" />
                   <div>
-                    <p className="font-bold text-xs text-gray-900 dark:text-white">{f.name}</p>
+                    <p className="font-bold text-xs text-gray-900 dark:text-white">
+                      {f.name}
+                    </p>
                     <p className="text-[11px] text-gray-500">
-                      {i === 0 ? 'Birthday is today! Wish them a delicious day!' : `Birthday coming up in ${i * 4 + 2} days`}
+                      {i === 0
+                        ? "Birthday is today! Wish them a delicious day!"
+                        : `Birthday coming up in ${i * 4 + 2} days`}
                     </p>
                   </div>
                 </div>
 
                 <button
                   type="button"
+                  onClick={() => startConversation(f)}
                   className="px-3 py-1.5 bg-[#e02f21] hover:bg-[#c22417] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
                 >
                   <Heart size={13} />
@@ -50,4 +60,3 @@ const BirthdaysView = ({ friends = [] }) => {
 };
 
 export default BirthdaysView;
-

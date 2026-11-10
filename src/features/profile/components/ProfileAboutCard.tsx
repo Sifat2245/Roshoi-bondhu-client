@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   MapPin,
   Briefcase,
@@ -12,7 +12,6 @@ import {
   Smile,
   Compass,
   Tag,
-  Sparkles,
   Plus,
   Edit2,
   Link2,
@@ -22,7 +21,7 @@ import {
   ChefHat,
   Coffee,
   Camera,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface ProfileAboutCardProps {
   profile: any;
@@ -31,30 +30,30 @@ interface ProfileAboutCardProps {
 }
 
 type AboutCategory =
-  | 'INTRO'
-  | 'PERSONAL'
-  | 'WORK'
-  | 'EDUCATION'
-  | 'HOBBIES'
-  | 'INTERESTS'
-  | 'TRAVEL'
-  | 'LINKS'
-  | 'CONTACT'
-  | 'NAMES'
-  | 'DETAILS';
+  | "INTRO"
+  | "PERSONAL"
+  | "WORK"
+  | "EDUCATION"
+  | "HOBBIES"
+  | "INTERESTS"
+  | "TRAVEL"
+  | "LINKS"
+  | "CONTACT"
+  | "NAMES"
+  | "DETAILS";
 
 const categories: { id: AboutCategory; label: string }[] = [
-  { id: 'INTRO', label: 'Intro' },
-  { id: 'PERSONAL', label: 'Personal details' },
-  { id: 'WORK', label: 'Work' },
-  { id: 'EDUCATION', label: 'Education' },
-  { id: 'HOBBIES', label: 'Hobbies' },
-  { id: 'INTERESTS', label: 'Interests' },
-  { id: 'TRAVEL', label: 'Travel' },
-  { id: 'LINKS', label: 'Links' },
-  { id: 'CONTACT', label: 'Contact info' },
-  { id: 'NAMES', label: 'Names' },
-  { id: 'DETAILS', label: 'Details about you' },
+  { id: "INTRO", label: "Intro" },
+  { id: "PERSONAL", label: "Personal details" },
+  { id: "WORK", label: "Work" },
+  { id: "EDUCATION", label: "Education" },
+  { id: "HOBBIES", label: "Hobbies" },
+  { id: "INTERESTS", label: "Interests" },
+  { id: "TRAVEL", label: "Travel" },
+  { id: "LINKS", label: "Links" },
+  { id: "CONTACT", label: "Contact info" },
+  { id: "NAMES", label: "Names" },
+  { id: "DETAILS", label: "Details about you" },
 ];
 
 const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
@@ -62,7 +61,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
   isOwnProfile,
   onOpenEditModal,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<AboutCategory>('INTRO');
+  const [activeCategory, setActiveCategory] = useState<AboutCategory>("INTRO");
 
   return (
     <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden flex flex-col md:flex-row min-h-[500px]">
@@ -82,8 +81,8 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                 onClick={() => setActiveCategory(cat.id)}
                 className={`w-full text-left px-4 py-3 rounded-xl text-sm sm:text-base transition cursor-pointer flex items-center justify-between ${
                   isSelected
-                    ? 'bg-gray-200/80 dark:bg-[#3a3b3c] font-black text-gray-900 dark:text-white shadow-xs'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-semibold'
+                    ? "bg-gray-200/80 dark:bg-[#3a3b3c] font-black text-gray-900 dark:text-white shadow-xs"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-semibold"
                 }`}
               >
                 <span>{cat.label}</span>
@@ -99,7 +98,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
       {/* Right Column: Category Details Panel */}
       <div className="flex-1 p-5 sm:p-8 overflow-y-auto">
         {/* 1. INTRO (Exact Match to Image 2) */}
-        {activeCategory === 'INTRO' && (
+        {activeCategory === "INTRO" && (
           <div className="space-y-8 animate-in fade-in duration-150">
             {/* Bio Section */}
             <div>
@@ -123,7 +122,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                 <span className="text-xl shrink-0">👋</span>
                 <p className="leading-relaxed">
                   {profile.bio ||
-                    'Passionate home cook exploring authentic Bengali spice blends, heritage heirloom recipes, and sharing warmth through food.'}
+                    "Passionate home cook exploring authentic Bengali spice blends, heritage heirloom recipes, and sharing warmth through food."}
                 </p>
               </div>
             </div>
@@ -155,7 +154,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                   <div>
                     <span>Lives in </span>
                     <strong className="text-gray-900 dark:text-white">
-                      {profile.city || 'Narayanganj, Bangladesh'}
+                      {profile.city || "Narayanganj, Bangladesh"}
                     </strong>
                   </div>
                 </div>
@@ -168,7 +167,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                   <div>
                     <span>Works at </span>
                     <strong className="text-gray-900 dark:text-white">
-                      {profile.work || 'Softvence Agency'}
+                      {profile.work || "Softvence Agency"}
                     </strong>
                   </div>
                 </div>
@@ -181,7 +180,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                   <div>
                     <span>Studied at </span>
                     <strong className="text-gray-900 dark:text-white">
-                      {profile.education || 'M.W High school'}
+                      {profile.education || "M.W High school"}
                     </strong>
                   </div>
                 </div>
@@ -206,12 +205,12 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                   </div>
                   <div>
                     <a
-                      href={`https://instagram.com/${profile.username || 'sifat_224'}`}
+                      href={`https://instagram.com/${profile.username || "sifat_224"}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-gray-900 dark:text-white font-bold hover:text-[#e02f21] hover:underline transition"
                     >
-                      {profile.username ? `@${profile.username}` : '@sifat_224'}
+                      {profile.username ? `@${profile.username}` : "@sifat_224"}
                     </a>
                   </div>
                 </div>
@@ -233,7 +232,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 2. PERSONAL DETAILS */}
-        {activeCategory === 'PERSONAL' && (
+        {activeCategory === "PERSONAL" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
               Personal details
@@ -243,44 +242,59 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                 <div>
                   <p className="text-sm font-semibold text-gray-500">Gender</p>
                   <p className="text-base font-bold text-gray-900 dark:text-white">
-                    {profile.gender || 'Not specified'}
+                    {profile.gender || "Not specified"}
                   </p>
                 </div>
                 {isOwnProfile && (
-                  <button onClick={onOpenEditModal} className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer">
+                  <button
+                    onClick={onOpenEditModal}
+                    className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
+                  >
                     Edit
                   </button>
                 )}
               </div>
               <div className="py-3 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-gray-500">Hometown</p>
+                  <p className="text-sm font-semibold text-gray-500">
+                    Hometown
+                  </p>
                   <p className="text-base font-bold text-gray-900 dark:text-white">
-                    {profile.city || 'Dhaka, Bangladesh'}
+                    {profile.city || "Dhaka, Bangladesh"}
                   </p>
                 </div>
                 {isOwnProfile && (
-                  <button onClick={onOpenEditModal} className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer">
+                  <button
+                    onClick={onOpenEditModal}
+                    className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
+                  >
                     Edit
                   </button>
                 )}
               </div>
               <div className="py-3 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-gray-500">Languages</p>
+                  <p className="text-sm font-semibold text-gray-500">
+                    Languages
+                  </p>
                   <p className="text-base font-bold text-gray-900 dark:text-white">
                     Bangla, English
                   </p>
                 </div>
                 {isOwnProfile && (
-                  <button onClick={onOpenEditModal} className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer">
+                  <button
+                    onClick={onOpenEditModal}
+                    className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
+                  >
                     Edit
                   </button>
                 )}
               </div>
               <div className="py-3 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-gray-500">Culinary Expertise</p>
+                  <p className="text-sm font-semibold text-gray-500">
+                    Culinary Expertise
+                  </p>
                   <p className="text-base font-bold text-gray-900 dark:text-white">
                     Authentic Bengali, Mughlai & Street Food
                   </p>
@@ -291,7 +305,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 3. WORK */}
-        {activeCategory === 'WORK' && (
+        {activeCategory === "WORK" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <div className="flex items-center justify-between">
               <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
@@ -314,11 +328,14 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                 </div>
                 <div className="flex-1">
                   <h4 className="text-base font-bold text-gray-900 dark:text-white">
-                    {profile.work || 'Culinary Creator & Chef'}
+                    {profile.work || "Culinary Creator & Chef"}
                   </h4>
-                  <p className="text-sm text-gray-500">Heshel Community Kitchen • 2022 - Present</p>
+                  <p className="text-sm text-gray-500">
+                    Heshel Community Kitchen • 2022 - Present
+                  </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
-                    Specializing in preserving heritage culinary techniques and mentoring home cooks.
+                    Specializing in preserving heritage culinary techniques and
+                    mentoring home cooks.
                   </p>
                 </div>
               </div>
@@ -327,7 +344,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 4. EDUCATION */}
-        {activeCategory === 'EDUCATION' && (
+        {activeCategory === "EDUCATION" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <div className="flex items-center justify-between">
               <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
@@ -350,9 +367,12 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                 </div>
                 <div>
                   <h4 className="text-base font-bold text-gray-900 dark:text-white">
-                    {profile.education || 'Culinary Art & Traditional Bengali Gastronomy'}
+                    {profile.education ||
+                      "Culinary Art & Traditional Bengali Gastronomy"}
                   </h4>
-                  <p className="text-sm text-gray-500">Graduated with Distinction</p>
+                  <p className="text-sm text-gray-500">
+                    Graduated with Distinction
+                  </p>
                 </div>
               </div>
 
@@ -372,7 +392,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 5. HOBBIES */}
-        {activeCategory === 'HOBBIES' && (
+        {activeCategory === "HOBBIES" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <div className="flex items-center justify-between">
               <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white">
@@ -390,14 +410,14 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
 
             <div className="flex flex-wrap gap-2.5">
               {[
-                { label: 'Traditional Cooking', icon: '🍲' },
-                { label: 'Baking & Desserts', icon: '🍰' },
-                { label: 'Food Photography', icon: '📸' },
-                { label: 'Spice Blending', icon: '🌶️' },
-                { label: 'Recipe Testing', icon: '📝' },
-                { label: 'Culinary Travel', icon: '✈️' },
-                { label: 'Kitchen Gardening', icon: '🌱' },
-                { label: 'Adda & Tea Sessions', icon: '☕' },
+                { label: "Traditional Cooking", icon: "🍲" },
+                { label: "Baking & Desserts", icon: "🍰" },
+                { label: "Food Photography", icon: "📸" },
+                { label: "Spice Blending", icon: "🌶️" },
+                { label: "Recipe Testing", icon: "📝" },
+                { label: "Culinary Travel", icon: "✈️" },
+                { label: "Kitchen Gardening", icon: "🌱" },
+                { label: "Adda & Tea Sessions", icon: "☕" },
               ].map((h, i) => (
                 <span
                   key={i}
@@ -412,24 +432,40 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 6. INTERESTS */}
-        {activeCategory === 'INTERESTS' && (
+        {activeCategory === "INTERESTS" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
               Culinary Interests & Passions
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { title: 'Kacchi Biryani Mastery', desc: 'Slow cooked fragrant meat and rice layering' },
-                { title: 'Pitha Heritage', desc: 'Winter patishapta, chitoi and dudh puli traditions' },
-                { title: 'Desi Fermentation', desc: 'Tangy homemade doi and fermented borhani' },
-                { title: 'Street Food Secrets', desc: 'Fuchka, chotpoti, and halim spice balances' },
+                {
+                  title: "Kacchi Biryani Mastery",
+                  desc: "Slow cooked fragrant meat and rice layering",
+                },
+                {
+                  title: "Pitha Heritage",
+                  desc: "Winter patishapta, chitoi and dudh puli traditions",
+                },
+                {
+                  title: "Desi Fermentation",
+                  desc: "Tangy homemade doi and fermented borhani",
+                },
+                {
+                  title: "Street Food Secrets",
+                  desc: "Fuchka, chotpoti, and halim spice balances",
+                },
               ].map((item, idx) => (
                 <div
                   key={idx}
                   className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800"
                 >
-                  <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">{item.title}</p>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">{item.desc}</p>
+                  <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
+                    {item.title}
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    {item.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -437,7 +473,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 7. TRAVEL */}
-        {activeCategory === 'TRAVEL' && (
+        {activeCategory === "TRAVEL" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
               Places Lived & Culinary Journeys
@@ -447,9 +483,11 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                 <MapPin size={20} className="text-[#e02f21]" />
                 <div>
                   <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
-                    {profile.city || 'Narayanganj, Bangladesh'}
+                    {profile.city || "Narayanganj, Bangladesh"}
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-500">Current city</p>
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    Current city
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3.5">
@@ -458,7 +496,9 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                   <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                     Dhaka, Bangladesh
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-500">Work & Culinary Community</p>
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    Work & Culinary Community
+                  </p>
                 </div>
               </div>
             </div>
@@ -466,7 +506,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 8. LINKS */}
-        {activeCategory === 'LINKS' && (
+        {activeCategory === "LINKS" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <div className="flex items-center justify-between">
               <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
@@ -486,18 +526,18 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
               <div className="flex items-center gap-3.5 p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/40">
                 <Instagram size={20} className="text-pink-500" />
                 <a
-                  href={`https://instagram.com/${profile.username || 'sifat_224'}`}
+                  href={`https://instagram.com/${profile.username || "sifat_224"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-bold text-gray-900 dark:text-white hover:text-[#e02f21] hover:underline"
                 >
-                  instagram.com/{profile.username || 'sifat_224'}
+                  instagram.com/{profile.username || "sifat_224"}
                 </a>
               </div>
               <div className="flex items-center gap-3.5 p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/40">
                 <Globe size={20} className="text-[#e02f21]" />
                 <span className="text-sm font-bold text-gray-900 dark:text-white">
-                  heshel.app/@{profile.username || 'sifat'}
+                  heshel.app/@{profile.username || "sifat"}
                 </span>
               </div>
             </div>
@@ -505,7 +545,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 9. CONTACT INFO */}
-        {activeCategory === 'CONTACT' && (
+        {activeCategory === "CONTACT" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
               Contact Information
@@ -528,12 +568,15 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
                   <div>
                     <p className="text-xs sm:text-sm text-gray-500">Phone</p>
                     <p className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
-                      {profile.phone || '+880 1712-345678'}
+                      {profile.phone || "+880 1712-345678"}
                     </p>
                   </div>
                 </div>
                 {isOwnProfile && (
-                  <button onClick={onOpenEditModal} className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer">
+                  <button
+                    onClick={onOpenEditModal}
+                    className="text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
+                  >
                     Edit
                   </button>
                 )}
@@ -543,7 +586,7 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
         )}
 
         {/* 10. NAMES */}
-        {activeCategory === 'NAMES' && (
+        {activeCategory === "NAMES" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
               Names
@@ -551,35 +594,44 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
             <div className="space-y-3.5">
               <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800">
                 <p className="text-xs sm:text-sm text-gray-500">Full Name</p>
-                <p className="text-base font-black text-gray-900 dark:text-white">{profile.name}</p>
+                <p className="text-base font-black text-gray-900 dark:text-white">
+                  {profile.name}
+                </p>
               </div>
               <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800">
                 <p className="text-xs sm:text-sm text-gray-500">Username</p>
-                <p className="text-base font-black text-gray-900 dark:text-white">@{profile.username || 'chef'}</p>
+                <p className="text-base font-black text-gray-900 dark:text-white">
+                  @{profile.username || "chef"}
+                </p>
               </div>
             </div>
           </div>
         )}
 
         {/* 11. DETAILS ABOUT YOU */}
-        {activeCategory === 'DETAILS' && (
+        {activeCategory === "DETAILS" && (
           <div className="space-y-6 animate-in fade-in duration-150">
             <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
               Details about you
             </h3>
             <div className="space-y-4">
               <div className="p-4.5 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800">
-                <p className="text-sm font-bold text-gray-500 mb-1">About {profile.name}</p>
+                <p className="text-sm font-bold text-gray-500 mb-1">
+                  About {profile.name}
+                </p>
                 <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 leading-relaxed">
                   {profile.bio ||
-                    'A passionate home cook committed to documenting traditional culinary practices, generational spice blends, and the cultural stories behind regional Bangladeshi gastronomy.'}
+                    "A passionate home cook committed to documenting traditional culinary practices, generational spice blends, and the cultural stories behind regional Bangladeshi gastronomy."}
                 </p>
               </div>
 
               <div className="p-4.5 rounded-2xl bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30">
-                <p className="text-sm font-bold text-[#e02f21] mb-1">Favorite Food Quote</p>
+                <p className="text-sm font-bold text-[#e02f21] mb-1">
+                  Favorite Food Quote
+                </p>
                 <p className="text-sm sm:text-base italic text-gray-700 dark:text-gray-300">
-                  "Cooking is an act of love made edible for friends and family."
+                  "Cooking is an act of love made edible for friends and
+                  family."
                 </p>
               </div>
             </div>
@@ -591,4 +643,3 @@ const ProfileAboutCard: React.FC<ProfileAboutCardProps> = ({
 };
 
 export default ProfileAboutCard;
-

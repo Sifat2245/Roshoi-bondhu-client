@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export interface AvatarProps {
   src?: string | null;
@@ -22,7 +22,8 @@ export const Avatar: React.FC<AvatarProps> = ({
     '2xl': 'w-32 h-32 text-2xl',
   };
 
-  const defaultPhoto = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120';
+  const [failedSource, setFailedSource] = useState<string | null>(null);
+  const initials = (alt || 'Cook').split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
 
   return (
     <div
@@ -30,14 +31,14 @@ export const Avatar: React.FC<AvatarProps> = ({
         sizes[size] || sizes.md
       } ${className}`}
     >
-      <img
-        src={src || defaultPhoto}
+      {src && failedSource !== src ? <img
+        src={src}
         alt={alt}
         className="w-full h-full object-cover"
-        onError={(e) => {
-          e.currentTarget.src = defaultPhoto;
+        onError={() => {
+          setFailedSource(src);
         }}
-      />
+      /> : <span role="img" aria-label={alt || 'Cook'} className="flex h-full w-full items-center justify-center bg-red-50 text-[#b72b20] dark:bg-red-950/40 dark:text-red-300 font-bold">{initials || 'H'}</span>}
     </div>
   );
 };

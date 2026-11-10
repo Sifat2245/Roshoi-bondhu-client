@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import { useSocial } from '../../community/model/useSocial';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router";
 import {
   MessageCircle,
   UserCheck,
@@ -10,16 +11,22 @@ import {
   Calendar,
   Utensils,
   ExternalLink,
-} from 'lucide-react';
-import Button from '../../../components/ui/Button';
-import Avatar from '../../../components/ui/Avatar';
-import PostCard from '../../posts/components/PostCard';
-import { useChatDock } from '../../../context/ChatDockContext';
+} from "lucide-react";
+import Button from "../../../components/ui/Button";
+import Avatar from "../../../components/ui/Avatar";
+import PostCard from "../../posts/components/PostCard";
+import { useChatDock } from "../../../context/ChatDockContext";
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { profileApi } from "../../profile/api/profile.api";
+import { postsApi } from "../../posts/api/posts.api";
+import { useNavigate } from "react-router";
+import { useToast } from "../../../context/ToastContext";
 
 const FriendProfilePreview = ({ friend, token }) => {
-  const { openChat } = useChatDock();
+  const { user } = useSocial();
+  const { startConversation } = useChatDock();
+  const navigate = useNavigate();
+  const { notify } = useToast();
   const [profileData, setProfileData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,28 +38,16 @@ const FriendProfilePreview = ({ friend, token }) => {
     const fetchFullProfile = async () => {
       setLoading(true);
       try {
-        const [userRes, postsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/user/${friend.id}`, {
-            credentials: 'include',
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }),
-          fetch(`${API_BASE}/api/post?authorId=${friend.id}&limit=5`, {
-            credentials: 'include',
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }),
-        ]);
-
         const [userData, postsData] = await Promise.all([
-          userRes.json(),
-          postsRes.json(),
+          profileApi.getUserProfile(friend.id, token),
+          postsApi.getPosts({ authorId: friend.id, limit: 5 }, token, user?.id),
         ]);
-
         if (isMounted) {
-          if (userData.data) setProfileData(userData.data);
-          if (postsData.data) setPosts(postsData.data);
+          setProfileData(userData);
+          setPosts(postsData);
         }
       } catch (err) {
-        console.error('Failed to load friend preview:', err);
+        console.error("Failed to load friend preview:", err);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -62,7 +57,7 @@ const FriendProfilePreview = ({ friend, token }) => {
     return () => {
       isMounted = false;
     };
-  }, [friend?.id, token]);
+  }, [friend?.id, token, user?.id]);
 
   const p = profileData || friend;
 
@@ -73,7 +68,7 @@ const FriendProfilePreview = ({ friend, token }) => {
         <img
           src={
             p.coverImage ||
-            'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200'
+            "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200"
           }
           alt={p.name}
           className="w-full h-full object-cover"
@@ -82,9 +77,9 @@ const FriendProfilePreview = ({ friend, token }) => {
 
       {/* 2. Avatar & Header Details */}
       <div className="px-5 sm:px-8 pb-5 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-14 sm:-mt-16 mb-4">
+        <div className="relative flex flex-col 2xl:flex-row 2xl:items-end justify-between gap-4 mt-4 mb-4">
           <div className="flex items-end gap-4">
-            <div className="relative">
+            <div className="relative -mt-20 shrink-0">
               <Avatar
                 src={p.image}
                 alt={p.name}
@@ -97,7 +92,8 @@ const FriendProfilePreview = ({ friend, token }) => {
                 {p.name}
               </h2>
               <p className="text-xs text-gray-500 font-medium">
-                {p.mutualCount || 8} mutual friends • {p.followersCount || 12} followers
+                {p.mutualCount || 8} mutual friends • {p.followersCount || 12}{" "}
+                followers
               </p>
             </div>
           </div>
@@ -114,19 +110,12 @@ const FriendProfilePreview = ({ friend, token }) => {
 
             <Button
               variant="secondary"
-              onClick={() => openChat('c-saba')}
+              onClick={() => startConversation(p)}
               className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
               <MessageCircle size={14} />
               <span>Message</span>
             </Button>
-
-            <button
-              type="button"
-              className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition cursor-pointer"
-            >
-              <MoreHorizontal size={16} />
-            </button>
           </div>
         </div>
       </div>
@@ -145,35 +134,59 @@ const FriendProfilePreview = ({ friend, token }) => {
         <div className="bg-white dark:bg-[#242526] rounded-xl p-4 border border-gray-100 dark:border-gray-800 shadow-xs grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-2">
             <MapPin size={15} className="text-[#e02f21] shrink-0" />
-            <span>Lives in <b className="text-gray-800 dark:text-gray-200">{p.city || 'Dhaka, Bangladesh'}</b></span>
+            <span>
+              Lives in{" "}
+              <b className="text-gray-800 dark:text-gray-200">
+                {p.city || "Dhaka, Bangladesh"}
+              </b>
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <Briefcase size={15} className="text-gray-500 dark:text-gray-400 shrink-0" />
-            <span>Works as <b className="text-gray-800 dark:text-gray-200">{p.work || 'Culinary Creator'}</b></span>
+            <Briefcase
+              size={15}
+              className="text-gray-500 dark:text-gray-400 shrink-0"
+            />
+            <span>
+              Works as{" "}
+              <b className="text-gray-800 dark:text-gray-200">
+                {p.work || "Culinary Creator"}
+              </b>
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <GraduationCap size={15} className="text-emerald-500 shrink-0" />
-            <span>Studied at <b className="text-gray-800 dark:text-gray-200">{p.education || 'Heshel Cooking Academy'}</b></span>
+            <span>
+              Studied at{" "}
+              <b className="text-gray-800 dark:text-gray-200">
+                {p.education || "Heshel Cooking Academy"}
+              </b>
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <Calendar size={15} className="text-purple-500 shrink-0" />
-            <span>Joined <b className="text-gray-800 dark:text-gray-200">Heshel Network</b></span>
+            <span>
+              Joined{" "}
+              <b className="text-gray-800 dark:text-gray-200">Heshel Network</b>
+            </span>
           </div>
         </div>
 
         {/* Recent Posts preview */}
         <div className="space-y-3">
           <h3 className="font-bold text-xs uppercase tracking-wider text-gray-500">
-            Recent Recipes & Stories by {p.name?.split(' ')[0]}
+            Recent Recipes & Stories by {p.name?.split(" ")[0]}
           </h3>
 
           {loading ? (
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <div key={i} className="bg-white dark:bg-[#242526] rounded-xl p-4 animate-pulse space-y-2">
+                <div
+                  key={i}
+                  className="bg-white dark:bg-[#242526] rounded-xl p-4 animate-pulse space-y-2"
+                >
                   <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
                   <div className="h-16 bg-gray-200 dark:bg-gray-800 rounded"></div>
                 </div>
@@ -185,9 +198,16 @@ const FriendProfilePreview = ({ friend, token }) => {
                 <PostCard
                   key={post.id}
                   post={post}
-                  onOpenComments={() => {}}
-                  onOpenShare={() => {}}
-                  onRequireAuth={() => {}}
+                  onOpenComments={(post) => navigate(`/post/${post.id}`)}
+                  onOpenShare={async (post) => {
+                    try {
+                      await postsApi.sharePost(post.id, "", token, user);
+                      notify.success("Post shared to your feed");
+                    } catch (error: any) {
+                      notify.error(error.message);
+                    }
+                  }}
+                  onRequireAuth={() => navigate("/login")}
                 />
               ))}
             </div>
@@ -204,4 +224,3 @@ const FriendProfilePreview = ({ friend, token }) => {
 };
 
 export default FriendProfilePreview;
-

@@ -31,20 +31,26 @@ const NotificationsPage = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, [fetchNotifications]);
+    const sync = () => { notificationsApi.getNotifications(token).then(setNotifications).catch(() => {}); };
+    window.addEventListener('heshel:notifications-updated', sync); window.addEventListener('heshel:notification-preferences', sync);
+    return () => { window.removeEventListener('heshel:notifications-updated', sync); window.removeEventListener('heshel:notification-preferences', sync); };
+  }, [fetchNotifications, token]);
 
   const handleMarkRead = (id) => {
+    notificationsApi.markRead([id]);
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isUnread: false } : n))
     );
   };
 
   const handleMarkAllRead = () => {
+    notificationsApi.markRead(notifications.map((item) => item.id));
     setNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })));
     notify.success('All notifications marked as read');
   };
 
-  const handleAction = (id, actionType) => {
+  const handleAction = async (id, actionType) => {
+    try { await notificationsApi.respond(id, actionType); } catch (error: any) { notify.error(error.message || 'Could not respond to the invitation.'); return; }
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     if (actionType === 'ACCEPT') {
       notify.success('Invitation accepted');
@@ -63,7 +69,7 @@ const NotificationsPage = () => {
     <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors">
       <SocialHeader />
 
-      <div className="pt-[100px] md:pt-14 w-full">
+      <main className="pt-[100px] md:pt-14 w-full">
         <div className="max-w-[800px] mx-auto px-4 py-8 space-y-5">
           {/* Header Card */}
           <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -139,7 +145,7 @@ const NotificationsPage = () => {
             )}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

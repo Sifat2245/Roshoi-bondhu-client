@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '../../../types/common.types';
+import { UserRole, UserStatus } from "../../../types/common.types";
 
 export interface User {
   id: string;
@@ -35,7 +35,7 @@ export interface AuthContextType {
   loading: boolean;
   authError: string | null;
   createUserAccount: (formData: any) => Promise<any>;
-  loginUser: (credentials: any) => Promise<any>;
+  loginUser: (emailOrCredentials: any, password?: string) => Promise<any>;
   logoutUser: () => Promise<void>;
+  [key: string]: any;
 }
-

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
-import Button from '../../../components/ui/Button';
-import logo from '../../../assets/logo.png';
-import { ArrowLeft } from 'lucide-react';
-import { useToast } from '../../../context/ToastContext';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import Button from "../../../components/ui/Button";
+import logo from "../../../assets/logo.png";
+import { ArrowLeft } from "lucide-react";
+import { useToast } from "../../../context/ToastContext";
 
 const FindAccountForm = () => {
   const navigate = useNavigate();
   const { notify } = useToast();
-  const [identifier, setIdentifier] = useState('');
+  const [identifier, setIdentifier] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e) => {
@@ -18,8 +18,11 @@ const FindAccountForm = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      notify.info(`If an account matches "${identifier}", a security recovery code has been sent.`, 'Account Recovery');
-      navigate('/login');
+      notify.info(
+        `If an account matches "${identifier}", a security recovery code has been sent.`,
+        "Account Recovery",
+      );
+      navigate("/login");
     }, 600);
   };
 
@@ -45,7 +48,8 @@ const FindAccountForm = () => {
             Find your account
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-            Enter your mobile number or email address to search for your foodie account.
+            Enter your mobile number or email address to search for your foodie
+            account.
           </p>
         </div>
       </div>

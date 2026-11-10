@@ -5,6 +5,8 @@ import ChatEmptyState from '../../features/messenger/components/ChatEmptyState';
 import ChatThread from '../../features/messenger/components/ChatThread';
 import { ChatCategory, ChatConversation } from '../../features/messenger/model/messenger.types';
 import { INITIAL_CONVERSATIONS } from '../../features/messenger/model/messenger.mock';
+import { useChatDock } from '../../context/ChatDockContext';
+import { useToast } from '../../context/ToastContext';
 import {
   MoreHorizontal,
   Edit3,
@@ -14,7 +16,8 @@ import {
 
 const MessagesPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [conversations, setConversations] = useState<ChatConversation[]>(INITIAL_CONVERSATIONS);
+  const { conversations, markChatRead } = useChatDock();
+  const { notify } = useToast();
   const [category, setCategory] = useState<ChatCategory>('ALL');
   const [search, setSearch] = useState('');
 
@@ -22,45 +25,16 @@ const MessagesPage: React.FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(chatParam || null);
 
   useEffect(() => {
-    if (chatParam) {
-      setSelectedChatId(chatParam);
-    }
+    setSelectedChatId(chatParam);
   }, [chatParam]);
 
   const handleSelectChat = (id: string) => {
     setSelectedChatId(id);
     setSearchParams({ chat: id });
     // Mark as read
-    setConversations((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c))
-    );
+    markChatRead(id);
   };
 
-  const handleSendMessage = (conversationId: string, text: string) => {
-    const newMessage = {
-      id: `m-${Date.now()}`,
-      senderId: 'me',
-      senderName: 'You',
-      text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isMine: true,
-      status: 'sent' as const,
-    };
-
-    setConversations((prev) =>
-      prev.map((conv) => {
-        if (conv.id === conversationId) {
-          return {
-            ...conv,
-            lastMessage: `You: ${text} • Just now`,
-            lastMessageTime: 'Just now',
-            messages: [...conv.messages, newMessage],
-          };
-        }
-        return conv;
-      })
-    );
-  };
 
   const selectedConversation = conversations.find((c) => c.id === selectedChatId);
 
@@ -79,12 +53,12 @@ const MessagesPage: React.FC = () => {
   });
 
   return (
-    <div className="h-screen flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden select-none">
+    <div className="h-dvh flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden">
       {/* 1. Fixed Topbar */}
       <SocialHeader />
 
       {/* 2. Main 2-Column Facebook Messenger Container (matching Image 5) */}
-      <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
+      <div className="flex-1 min-h-0 mt-[100px] md:mt-14 flex overflow-hidden">
         {/* LEFT COLUMN: Chats Sidebar */}
         <aside
           className={`w-full md:w-[360px] lg:w-[380px] xl:w-[400px] h-full shrink-0 bg-white dark:bg-[#242526] border-r border-gray-200 dark:border-gray-800 flex-col shadow-xs ${
@@ -100,13 +74,15 @@ const MessagesPage: React.FC = () => {
               <button
                 type="button"
                 className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 flex items-center justify-center transition cursor-pointer"
-                title="Chats options"
+                onClick={() => { conversations.forEach((chat) => markChatRead(chat.id)); notify.success("All conversations marked as read"); }}
+                title="Mark all chats as read"
               >
                 <MoreHorizontal size={18} />
               </button>
               <button
                 type="button"
                 className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 flex items-center justify-center transition cursor-pointer"
+                onClick={() => { setSelectedChatId(null); setSearchParams({}); document.querySelector<HTMLInputElement>('input[placeholder="Search Messenger"]')?.focus(); }}
                 title="New message"
               >
                 <Edit3 size={18} />
@@ -225,7 +201,7 @@ const MessagesPage: React.FC = () => {
 
         {/* RIGHT COLUMN: Active Thread OR Empty State (matching Image 5) */}
         <main
-          className={`flex-1 h-full overflow-hidden ${
+          className={`flex-1 min-w-0 min-h-0 h-full overflow-hidden ${
             selectedChatId ? 'flex flex-col' : 'hidden md:flex flex-col'
           }`}
         >
@@ -236,7 +212,6 @@ const MessagesPage: React.FC = () => {
                 setSelectedChatId(null);
                 setSearchParams({});
               }}
-              onSendMessage={handleSendMessage}
             />
           ) : (
             <ChatEmptyState />

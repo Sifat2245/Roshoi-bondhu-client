@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import logo from '../../assets/logo.png';
+import React, { useEffect, useState } from "react";
+import { ChefHat } from "lucide-react";
 
 const SplashScreen = ({ onFinish, duration = 1200 }) => {
   const [fading, setFading] = useState(false);
@@ -25,8 +25,9 @@ const SplashScreen = ({ onFinish, duration = 1200 }) => {
 
   return (
     <div
+      data-app-splash="true"
       className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white dark:bg-[#18191a] text-gray-900 dark:text-white transition-opacity duration-400 select-none ${
-        fading ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
       <div className="flex-1" />
@@ -35,11 +36,7 @@ const SplashScreen = ({ onFinish, duration = 1200 }) => {
       <div className="flex flex-col items-center text-center space-y-4 animate-in fade-in zoom-in-95 duration-500">
         <div className="relative">
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-red-50 dark:bg-red-950/30 flex items-center justify-center p-3 shadow-lg shadow-red-500/10 ring-1 ring-red-100 dark:ring-red-900/30">
-            <img
-              src={logo}
-              alt="Heshel"
-              className="w-full h-full object-contain animate-pulse"
-            />
+            <ChefHat size={48} className="text-[#e02f21]" />
           </div>
         </div>
 
@@ -65,4 +62,3 @@ const SplashScreen = ({ onFinish, duration = 1200 }) => {
 };
 
 export default SplashScreen;
-

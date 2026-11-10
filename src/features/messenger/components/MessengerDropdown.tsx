@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
+import React, { useState } from "react";
 import {
   MoreHorizontal,
   Maximize2,
@@ -7,9 +6,10 @@ import {
   Search,
   BellOff,
   Users,
-} from 'lucide-react';
-import { ChatCategory, ChatConversation } from '../model/messenger.types';
-import { useChatDock } from '../../../context/ChatDockContext';
+} from "lucide-react";
+import { ChatCategory, ChatConversation } from "../model/messenger.types";
+import { useChatDock } from "../../../context/ChatDockContext";
+import { useToast } from "../../../context/ToastContext";
 
 interface MessengerDropdownProps {
   onClose: () => void;
@@ -20,16 +20,16 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
   onClose,
   onOpenFullChat,
 }) => {
-  const navigate = useNavigate();
-  const { openChat, conversations } = useChatDock();
-  const [category, setCategory] = useState<ChatCategory>('ALL');
-  const [search, setSearch] = useState('');
+  const { openChat, conversations, markChatRead } = useChatDock();
+  const { notify } = useToast();
+  const [category, setCategory] = useState<ChatCategory>("ALL");
+  const [search, setSearch] = useState("");
 
   const filteredConversations = conversations.filter((c) => {
     // Category filter
-    if (category === 'UNREAD' && c.unreadCount === 0) return false;
-    if (category === 'GROUPS' && c.type !== 'GROUP') return false;
-    if (category === 'COMMUNITIES' && c.type !== 'COMMUNITY') return false;
+    if (category === "UNREAD" && c.unreadCount === 0) return false;
+    if (category === "GROUPS" && c.type !== "GROUP") return false;
+    if (category === "COMMUNITIES" && c.type !== "COMMUNITY") return false;
 
     // Search query
     if (search.trim()) {
@@ -49,7 +49,7 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="absolute right-0 top-12 w-80 sm:w-96 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[85vh] select-none"
+      className="social-popover absolute right-0 top-12 w-80 sm:w-96 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[85vh] select-none"
     >
       {/* 1. Top Header (matching Image 4) */}
       <div className="flex items-center justify-between px-2 pt-1 pb-2">
@@ -60,7 +60,11 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
           <button
             type="button"
             className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition cursor-pointer"
-            title="Options"
+            title="Mark all chats as read"
+            onClick={() => {
+              conversations.forEach((chat) => markChatRead(chat.id));
+              notify.success("All chats marked as read");
+            }}
           >
             <MoreHorizontal size={18} />
           </button>
@@ -68,7 +72,7 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
             type="button"
             onClick={() => {
               onClose();
-              navigate('/messages');
+              onOpenFullChat();
             }}
             className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition cursor-pointer"
             title="Open in full screen"
@@ -79,7 +83,7 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
             type="button"
             onClick={() => {
               onClose();
-              navigate('/messages');
+              onOpenFullChat();
             }}
             className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition cursor-pointer"
             title="New message"
@@ -110,10 +114,10 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
       <div className="flex items-center gap-1.5 px-1 pb-2 overflow-x-auto no-scrollbar">
         {(
           [
-            { id: 'ALL', label: 'All' },
-            { id: 'UNREAD', label: 'Unread' },
-            { id: 'GROUPS', label: 'Groups' },
-            { id: 'COMMUNITIES', label: 'Communities' },
+            { id: "ALL", label: "All" },
+            { id: "UNREAD", label: "Unread" },
+            { id: "GROUPS", label: "Groups" },
+            { id: "COMMUNITIES", label: "Communities" },
           ] as const
         ).map((tab) => (
           <button
@@ -122,8 +126,8 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
             onClick={() => setCategory(tab.id)}
             className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer ${
               category === tab.id
-                ? 'bg-red-50 text-[#e02f21] dark:bg-red-950/60'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? "bg-red-50 text-[#e02f21] dark:bg-red-950/60"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
           >
             {tab.label}
@@ -157,7 +161,9 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
                 <p className="font-bold text-sm text-gray-900 dark:text-white truncate">
                   {chat.name}
                 </p>
-                <p className={`text-xs truncate ${chat.unreadCount > 0 ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                <p
+                  className={`text-xs truncate ${chat.unreadCount > 0 ? "font-bold text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}`}
+                >
                   {chat.lastMessage}
                 </p>
               </div>
@@ -186,7 +192,7 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
           type="button"
           onClick={() => {
             onClose();
-            navigate('/messages');
+            onOpenFullChat();
           }}
           className="w-full py-1 text-center text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
         >
@@ -198,4 +204,3 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
 };
 
 export default MessengerDropdown;
-

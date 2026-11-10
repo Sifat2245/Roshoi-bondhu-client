@@ -1,8 +1,8 @@
-import { User } from '../../auth/types/auth.types';
+import { User } from "../../auth/types/auth.types";
 
-export type GroupPrivacy = 'PUBLIC' | 'PRIVATE';
+export type GroupPrivacy = "PUBLIC" | "PRIVATE";
 
-export type GroupMemberRole = 'ADMIN' | 'MEMBER';
+export type GroupMemberRole = "ADMIN" | "MODERATOR" | "MEMBER";
 
 export interface GroupMember {
   id: string;

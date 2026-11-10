@@ -1,13 +1,13 @@
-import React from 'react';
-import { ChefHat, Image as ImageIcon, Users, Info } from 'lucide-react';
+import React from "react";
+import { ChefHat, Image as ImageIcon, Users, Info } from "lucide-react";
 
 const ProfileNavTabs = ({ activeTab, onSelectTab, postCount = 0 }) => {
   const tabs = [
-    { id: 'POSTS', label: 'All Posts', count: postCount },
-    { id: 'RECIPES', label: 'Recipes Only', icon: ChefHat },
-    { id: 'PHOTOS', label: 'Photos', icon: ImageIcon },
-    { id: 'ABOUT', label: 'About', icon: Info },
-    { id: 'FOLLOWERS', label: 'Followers', icon: Users },
+    { id: "POSTS", label: "All Posts", count: postCount },
+    { id: "RECIPES", label: "Recipes Only", icon: ChefHat },
+    { id: "PHOTOS", label: "Photos", icon: ImageIcon },
+    { id: "ABOUT", label: "About", icon: Info },
+    { id: "FOLLOWERS", label: "Followers", icon: Users },
   ];
 
   return (
@@ -23,14 +23,16 @@ const ProfileNavTabs = ({ activeTab, onSelectTab, postCount = 0 }) => {
                 onClick={() => onSelectTab(tab.id)}
                 className={`py-4 px-4 sm:px-5 border-b-3 transition cursor-pointer whitespace-nowrap flex items-center gap-2 ${
                   isSelected
-                    ? 'border-[#e02f21] text-[#e02f21]'
-                    : 'border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg'
+                    ? "border-[#e02f21] text-[#e02f21]"
+                    : "border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg"
                 }`}
               >
                 {tab.icon && <tab.icon size={17} />}
                 <span>{tab.label}</span>
                 {tab.count !== undefined && tab.count > 0 && (
-                  <span className="text-xs opacity-75 font-semibold">({tab.count})</span>
+                  <span className="text-xs opacity-75 font-semibold">
+                    ({tab.count})
+                  </span>
                 )}
               </button>
             );

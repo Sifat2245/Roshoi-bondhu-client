@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router';
-import { MoreHorizontal, CheckCheck } from 'lucide-react';
-import NotificationItem from './NotificationItem';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { MoreHorizontal, CheckCheck } from "lucide-react";
+import NotificationItem from "./NotificationItem";
 
 const NotificationDropdown = ({
   notifications = [],
@@ -10,17 +10,18 @@ const NotificationDropdown = ({
   onMarkRead,
   onAction,
 }) => {
-  const [filter, setFilter] = useState('ALL'); // 'ALL' or 'UNREAD'
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState("ALL"); // 'ALL' or 'UNREAD'
 
   const filtered =
-    filter === 'UNREAD'
+    filter === "UNREAD"
       ? notifications.filter((n) => n.isUnread)
       : notifications;
 
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="absolute right-0 top-12 w-80 sm:w-96 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[85vh]"
+      className="social-popover absolute right-0 top-12 w-80 sm:w-96 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[85vh]"
     >
       {/* Top Header */}
       <div className="flex items-center justify-between px-2 pt-1 pb-2">
@@ -38,6 +39,11 @@ const NotificationDropdown = ({
           </button>
           <button
             type="button"
+            aria-label="Notification preferences"
+            onClick={() => {
+              onClose();
+              navigate("/settings");
+            }}
             className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:hover:text-white transition"
           >
             <MoreHorizontal size={16} />
@@ -49,22 +55,22 @@ const NotificationDropdown = ({
       <div className="flex items-center gap-2 px-2 pb-2">
         <button
           type="button"
-          onClick={() => setFilter('ALL')}
+          onClick={() => setFilter("ALL")}
           className={`px-3.5 py-1.5 rounded-full text-sm font-bold transition cursor-pointer ${
-            filter === 'ALL'
-              ? 'bg-red-50 text-[#e02f21] dark:bg-red-950/60'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            filter === "ALL"
+              ? "bg-red-50 text-[#e02f21] dark:bg-red-950/60"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
           }`}
         >
           All
         </button>
         <button
           type="button"
-          onClick={() => setFilter('UNREAD')}
+          onClick={() => setFilter("UNREAD")}
           className={`px-3.5 py-1.5 rounded-full text-sm font-bold transition cursor-pointer ${
-            filter === 'UNREAD'
-              ? 'bg-red-50 text-[#e02f21] dark:bg-red-950/60'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            filter === "UNREAD"
+              ? "bg-red-50 text-[#e02f21] dark:bg-red-950/60"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
           }`}
         >
           Unread
@@ -85,7 +91,7 @@ const NotificationDropdown = ({
           ))
         ) : (
           <div className="py-10 text-center text-sm text-gray-400">
-            No {filter === 'UNREAD' ? 'unread ' : ''}notifications
+            No {filter === "UNREAD" ? "unread " : ""}notifications
           </div>
         )}
       </div>
@@ -105,4 +111,3 @@ const NotificationDropdown = ({
 };
 
 export default NotificationDropdown;
-

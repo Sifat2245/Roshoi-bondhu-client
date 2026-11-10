@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import SocialHeader from '../../widgets/navbar/SocialHeader';
-import LeftSidebar from '../../widgets/left-sidebar/LeftSidebar';
-import RightSidebar from '../../widgets/right-sidebar/RightSidebar';
-import { X } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import SocialHeader from "../../widgets/navbar/SocialHeader";
+import LeftSidebar from "../../widgets/left-sidebar/LeftSidebar";
+import RightSidebar from "../../widgets/right-sidebar/RightSidebar";
+import { X } from "lucide-react";
 
 export interface FeedLayoutProps {
   children: React.ReactNode;
@@ -18,12 +18,11 @@ export interface FeedLayoutProps {
 
 export const FeedLayout: React.FC<FeedLayoutProps> = ({
   children,
-  onOpenCreatePost,
-  activeCuisine = '',
+  activeCuisine = "",
   onSelectCuisine,
-  activeTag = '',
+  activeTag = "",
   onSelectTag,
-  activeMaxTime = '',
+  activeMaxTime = "",
   onSelectMaxTime,
   onResetFilters,
 }) => {
@@ -31,9 +30,20 @@ export const FeedLayout: React.FC<FeedLayoutProps> = ({
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const hasActiveFilters = Boolean(activeCuisine || activeTag || activeMaxTime);
+  useEffect(() => {
+    if (!isMobileMenuOpen && !isMobileFilterOpen) return;
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false);
+        setIsMobileFilterOpen(false);
+      }
+    };
+    document.addEventListener("keydown", escape);
+    return () => document.removeEventListener("keydown", escape);
+  }, [isMobileMenuOpen, isMobileFilterOpen]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden select-none">
+    <div className="h-dvh flex flex-col bg-[#f0f2f5] dark:bg-[#18191a] text-gray-900 dark:text-gray-100 transition-colors overflow-hidden">
       {/* Fixed Topbar with Responsive Menu & Filter Actions */}
       <SocialHeader
         onToggleLeftSidebar={() => setIsMobileMenuOpen((prev) => !prev)}
@@ -42,14 +52,14 @@ export const FeedLayout: React.FC<FeedLayoutProps> = ({
       />
 
       {/* Main 3-Column Layout: Left Sidebar + Central Feed + Right Sidebar */}
-      <div className="flex-1 mt-[100px] md:mt-14 flex overflow-hidden">
+      <div className="flex-1 min-h-0 mt-[100px] md:mt-14 flex overflow-hidden">
         {/* Left Sticky Sidebar with generous top gap and breathing room */}
         <aside className="hidden lg:block w-[300px] xl:w-[320px] 2xl:w-[340px] h-full shrink-0 overflow-y-auto no-scrollbar pt-4 pb-6 px-3">
           <LeftSidebar />
         </aside>
 
         {/* Center Scrollable Feed Stream */}
-        <main className="flex-1 h-full overflow-y-auto no-scrollbar py-4 sm:py-5 px-3 sm:px-6">
+        <main className="flex-1 min-w-0 min-h-0 h-full overflow-y-auto no-scrollbar py-4 sm:py-5 px-3 sm:px-6">
           <div className="max-w-[680px] 2xl:max-w-[720px] mx-auto space-y-4">
             {children}
           </div>
@@ -76,18 +86,29 @@ export const FeedLayout: React.FC<FeedLayoutProps> = ({
             className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="relative w-[300px] max-w-[85vw] bg-white dark:bg-[#242526] h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+            className="relative w-[300px] max-w-[85vw] bg-white dark:bg-[#242526] h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200"
+          >
             <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
-              <span className="font-bold text-sm text-gray-900 dark:text-white">Navigation Menu</span>
+              <span className="font-bold text-sm text-gray-900 dark:text-white">
+                Navigation Menu
+              </span>
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(false)}
+                aria-label="Close navigation menu"
                 className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-3" onClick={() => setIsMobileMenuOpen(false)}>
+            <div
+              className="flex-1 overflow-y-auto p-3"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <LeftSidebar />
             </div>
           </div>
@@ -101,12 +122,20 @@ export const FeedLayout: React.FC<FeedLayoutProps> = ({
             className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMobileFilterOpen(false)}
           />
-          <div className="relative w-[320px] max-w-[85vw] bg-white dark:bg-[#242526] h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Recipe filters"
+            className="relative w-[320px] max-w-[85vw] bg-white dark:bg-[#242526] h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200"
+          >
             <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
-              <span className="font-bold text-sm text-gray-900 dark:text-white">Recipe & Food Filters</span>
+              <span className="font-bold text-sm text-gray-900 dark:text-white">
+                Recipe & Food Filters
+              </span>
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(false)}
+                aria-label="Close recipe filters"
                 className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 cursor-pointer"
               >
                 <X size={18} />
@@ -143,4 +172,3 @@ export const FeedLayout: React.FC<FeedLayoutProps> = ({
 };
 
 export default FeedLayout;
-

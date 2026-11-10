@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router';
-import { Users, Lock, Globe, Check } from 'lucide-react';
-import Button from '../../../components/ui/Button';
+import React, { useState } from "react";
+import { Link } from "react-router";
+import { Users, Lock, Globe, Check } from "lucide-react";
+import Button from "../../../components/ui/Button";
 
 const GroupCard = ({ group, onJoinToggle }) => {
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const GroupCard = ({ group, onJoinToggle }) => {
             </div>
           )}
           <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold flex items-center gap-1">
-            {group.privacy === 'PRIVATE' ? (
+            {group.privacy === "PRIVATE" ? (
               <>
                 <Lock size={11} />
                 <span>Private</span>
@@ -55,12 +55,18 @@ const GroupCard = ({ group, onJoinToggle }) => {
           >
             {group.name}
           </Link>
-          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-            {group.description || 'Welcome to our food community! Share recipes and food thoughts.'}
+          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+            {group.description ||
+              "Welcome to our food community! Share recipes and food thoughts."}
           </p>
-          <div className="flex items-center gap-2 text-[11px] text-gray-400 pt-1">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400 pt-1">
             <Users size={12} />
-            <span>{group.membersCount || 1} members</span>
+            <span>
+              {group.membersCount ?? group.members?.length ?? 0}{" "}
+              {(group.membersCount ?? group.members?.length ?? 0) === 1
+                ? "member"
+                : "members"}
+            </span>
             <span>•</span>
             <span>{group.postsCount || 0} posts</span>
           </div>
@@ -72,8 +78,8 @@ const GroupCard = ({ group, onJoinToggle }) => {
         <Button
           onClick={handleAction}
           loading={loading}
-          variant={group.isMember ? 'outline' : 'primary'}
-          className="w-full text-xs font-bold py-2 rounded-xl"
+          variant={group.isMember ? "outline" : "primary"}
+          className="w-full text-sm font-bold py-2.5 rounded-xl"
         >
           {group.isMember ? (
             <span className="flex items-center justify-center gap-1">
@@ -89,4 +95,3 @@ const GroupCard = ({ group, onJoinToggle }) => {
 };
 
 export default GroupCard;
-

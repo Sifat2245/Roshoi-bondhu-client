@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import Modal from "../../../components/ui/Modal";
+import { useToast } from "../../../context/ToastContext";
 import {
   X,
   ChevronRight,
@@ -7,8 +9,8 @@ import {
   User,
   AtSign,
   FileText,
-} from 'lucide-react';
-import Button from '../../../components/ui/Button';
+} from "lucide-react";
+import Button from "../../../components/ui/Button";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -25,24 +27,51 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   onSaveProfile,
   saving,
 }) => {
-  const [subView, setSubView] = useState<'MENU' | 'NAME' | 'USERNAME' | 'BIO' | 'DETAILS'>('MENU');
+  const [subView, setSubView] = useState<
+    "MENU" | "NAME" | "USERNAME" | "BIO" | "DETAILS"
+  >("MENU");
 
   // Form states
-  const [name, setName] = useState(profile?.name || '');
-  const [username, setUsername] = useState(profile?.username || '');
-  const [bio, setBio] = useState(profile?.bio || '');
-  const [city, setCity] = useState(profile?.city || '');
-  const [work, setWork] = useState(profile?.work || '');
-  const [education, setEducation] = useState(profile?.education || '');
-  const [phone, setPhone] = useState(profile?.phone || '');
-  const [gender, setGender] = useState(profile?.gender || 'Male');
-  const [imagePreview, setImagePreview] = useState(profile?.image || '');
+  const [name, setName] = useState(profile?.name || "");
+  const [username, setUsername] = useState(profile?.username || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [city, setCity] = useState(profile?.city || "");
+  const [work, setWork] = useState(profile?.work || "");
+  const [education, setEducation] = useState(profile?.education || "");
+  const [phone, setPhone] = useState(profile?.phone || "");
+  const [gender, setGender] = useState(profile?.gender || "Male");
+  const [imagePreview, setImagePreview] = useState(profile?.image || "");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const { notify } = useToast();
+  useEffect(() => {
+    if (!isOpen || !profile) return;
+    setSubView("MENU");
+    setName(profile.name || "");
+    setUsername(profile.username || "");
+    setBio(profile.bio || "");
+    setCity(profile.city || "");
+    setWork(profile.work || "");
+    setEducation(profile.education || "");
+    setPhone(profile.phone || "");
+    setGender(profile.gender || "");
+    setImagePreview(profile.image || "");
+    setImageFile(null);
+  }, [isOpen, profile]);
+  useEffect(
+    () => () => {
+      if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    },
+    [imagePreview],
+  );
 
   if (!isOpen) return null;
 
   const handleImageChange = (file?: File) => {
     if (!file) return;
+    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
+      notify.error("Choose a profile image smaller than 5 MB.");
+      return;
+    }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -61,32 +90,37 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           phone: phone.trim(),
           gender,
         },
-        imageFile
+        imageFile,
       );
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="relative w-full max-w-[540px] bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col max-h-[90vh]">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      showClose={false}
+      maxWidth="max-w-[540px]"
+    >
+      <div className="flex flex-col max-h-[90dvh]">
         {/* Header with Dynamic Subview Title */}
         <div className="relative px-6 py-4.5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            {subView !== 'MENU' && (
+            {subView !== "MENU" && (
               <button
                 type="button"
-                onClick={() => setSubView('MENU')}
+                onClick={() => setSubView("MENU")}
                 className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition mr-1 cursor-pointer"
               >
                 <ArrowLeft size={20} />
               </button>
             )}
             <h3 className="font-black text-lg sm:text-xl text-gray-900 dark:text-white">
-              {subView === 'MENU' && 'Edit profile'}
-              {subView === 'NAME' && 'Update Name'}
-              {subView === 'USERNAME' && 'Update Username'}
-              {subView === 'BIO' && 'Update Bio'}
-              {subView === 'DETAILS' && 'Edit Personal Details'}
+              {subView === "MENU" && "Edit profile"}
+              {subView === "NAME" && "Update Name"}
+              {subView === "USERNAME" && "Update Username"}
+              {subView === "BIO" && "Update Bio"}
+              {subView === "DETAILS" && "Edit Personal Details"}
             </h3>
           </div>
 
@@ -102,14 +136,18 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-5 flex-1">
           {/* Main Menu SubView */}
-          {subView === 'MENU' && (
+          {subView === "MENU" && (
             <div className="space-y-4">
               {/* Profile Avatar Edit Preview */}
               <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <img
-                      src={imagePreview || profile?.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120'}
+                      src={
+                        imagePreview ||
+                        profile?.image ||
+                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
+                      }
                       alt={profile?.name}
                       className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700 shadow-sm"
                     />
@@ -144,11 +182,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 </label>
               </div>
 
+              {imageFile && (
+                <Button onClick={handleSubmit} loading={saving}>
+                  Save profile photo
+                </Button>
+              )}
+
               {/* Navigation List to detailed edit screens */}
               <div className="space-y-1.5">
                 <button
                   type="button"
-                  onClick={() => setSubView('NAME')}
+                  onClick={() => setSubView("NAME")}
                   className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 text-left transition cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5">
@@ -158,7 +202,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         Full Name
                       </span>
                       <span className="text-sm text-gray-500 mt-0.5">
-                        {name || 'Add your full name'}
+                        {name || "Add your full name"}
                       </span>
                     </div>
                   </div>
@@ -167,7 +211,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => setSubView('USERNAME')}
+                  onClick={() => setSubView("USERNAME")}
                   className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 text-left transition cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5">
@@ -177,7 +221,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         Username
                       </span>
                       <span className="text-sm text-gray-500 mt-0.5">
-                        @{username || 'handle'}
+                        @{username || "handle"}
                       </span>
                     </div>
                   </div>
@@ -186,7 +230,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => setSubView('BIO')}
+                  onClick={() => setSubView("BIO")}
                   className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 text-left transition cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5">
@@ -196,7 +240,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                         Bio
                       </span>
                       <span className="text-sm text-gray-500 line-clamp-1 mt-0.5">
-                        {bio || 'Describe yourself to the foodie community'}
+                        {bio || "Describe yourself to the foodie community"}
                       </span>
                     </div>
                   </div>
@@ -205,7 +249,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => setSubView('DETAILS')}
+                  onClick={() => setSubView("DETAILS")}
                   className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 text-left transition cursor-pointer"
                 >
                   <div>
@@ -226,14 +270,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   Heshel Profile Settings
                 </p>
                 <p className="text-sm mt-1">
-                  Your profile information helps fellow foodies recognize your family recipes and cooking style.
+                  Your profile information helps fellow foodies recognize your
+                  family recipes and cooking style.
                 </p>
               </div>
             </div>
           )}
 
           {/* SubView: Name Update */}
-          {subView === 'NAME' && (
+          {subView === "NAME" && (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
@@ -250,10 +295,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               </div>
 
               <div className="flex justify-end gap-2.5 pt-3">
-                <Button variant="ghost" size="md" onClick={() => setSubView('MENU')}>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => setSubView("MENU")}
+                >
                   Back
                 </Button>
-                <Button type="submit" loading={saving} variant="primary" size="md">
+                <Button
+                  type="submit"
+                  loading={saving}
+                  variant="primary"
+                  size="md"
+                >
                   Save Changes
                 </Button>
               </div>
@@ -261,19 +315,25 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           )}
 
           {/* SubView: Username Update */}
-          {subView === 'USERNAME' && (
+          {subView === "USERNAME" && (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                   Username *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-3.5 text-gray-400 text-sm font-bold">@</span>
+                  <span className="absolute left-4 top-3.5 text-gray-400 text-sm font-bold">
+                    @
+                  </span>
                   <input
                     type="text"
                     required
                     value={username}
-                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    onChange={(e) =>
+                      setUsername(
+                        e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""),
+                      )
+                    }
                     placeholder="username"
                     className="w-full pl-9 pr-4 py-3.5 bg-gray-50 dark:bg-[#3a3b3c] rounded-xl text-sm sm:text-base dark:text-white border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#e02f21]"
                   />
@@ -281,10 +341,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               </div>
 
               <div className="flex justify-end gap-2.5 pt-3">
-                <Button variant="ghost" size="md" onClick={() => setSubView('MENU')}>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => setSubView("MENU")}
+                >
                   Back
                 </Button>
-                <Button type="submit" loading={saving} variant="primary" size="md">
+                <Button
+                  type="submit"
+                  loading={saving}
+                  variant="primary"
+                  size="md"
+                >
                   Save Username
                 </Button>
               </div>
@@ -292,7 +361,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           )}
 
           {/* SubView: Bio Update */}
-          {subView === 'BIO' && (
+          {subView === "BIO" && (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
@@ -308,10 +377,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               </div>
 
               <div className="flex justify-end gap-2.5 pt-3">
-                <Button variant="ghost" size="md" onClick={() => setSubView('MENU')}>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => setSubView("MENU")}
+                >
                   Back
                 </Button>
-                <Button type="submit" loading={saving} variant="primary" size="md">
+                <Button
+                  type="submit"
+                  loading={saving}
+                  variant="primary"
+                  size="md"
+                >
                   Save Bio
                 </Button>
               </div>
@@ -319,7 +397,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           )}
 
           {/* SubView: Details Update (Location, Work, Education, Phone, Gender) */}
-          {subView === 'DETAILS' && (
+          {subView === "DETAILS" && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
@@ -404,10 +482,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               </div>
 
               <div className="flex justify-end gap-2.5 pt-3">
-                <Button variant="ghost" size="md" onClick={() => setSubView('MENU')}>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => setSubView("MENU")}
+                >
                   Back
                 </Button>
-                <Button type="submit" loading={saving} variant="primary" size="md">
+                <Button
+                  type="submit"
+                  loading={saving}
+                  variant="primary"
+                  size="md"
+                >
                   Save Details
                 </Button>
               </div>
@@ -415,7 +502,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

@@ -1,140 +1,52 @@
-import { createBrowserRouter } from 'react-router';
-import SocialFeed from '../../pages/feed/SocialFeed';
-import GroupsPage from '../../pages/group/GroupsPage';
-import CreateGroupPage from '../../pages/group/CreateGroupPage';
-import GroupDetailPage from '../../pages/group/GroupDetailPage';
-import UserProfilePage from '../../pages/profile/UserProfilePage';
-import FriendsPage from '../../pages/friends/FriendsPage';
-import FriendsListPage from '../../pages/friends/FriendsListPage';
-import MessagesPage from '../../pages/messages/MessagesPage';
-import NotificationsPage from '../../pages/notifications/NotificationsPage';
-import LoginPage from '../../pages/auth/LoginPage';
-import RegisterPage from '../../pages/auth/RegisterPage';
-import ForgotPasswordPage from '../../pages/auth/ForgotPasswordPage';
-import SettingsPage from '../../pages/settings/SettingsPage';
-import NotFound from '../../pages/NotFound';
-import PrivateRoute from '../../components/guards/PrivateRoute';
+import { createBrowserRouter } from "react-router";
+import type { ComponentType } from "react";
+import NotFound from "../../pages/NotFound";
+import PrivateRoute from "../../components/guards/PrivateRoute";
+import PagePlaceholder from "../../components/common/PagePlaceholder";
+
+type PageLoader = () => Promise<{ default: ComponentType }>;
+
+// Router lazy loading keeps the current page visible while the next page's code loads.
+function page(load: PageLoader, requiresAuth = true) {
+  return async () => {
+    const { default: Page } = await load();
+    function RoutePage() {
+      return requiresAuth ? <PrivateRoute><Page /></PrivateRoute> : <Page />;
+    }
+    return { Component: RoutePage };
+  };
+}
+
+const protectedPages: [string, PageLoader][] = [
+  ["/", () => import("../../pages/feed/SocialFeed")],
+  ["/post/:id", () => import("../../pages/feed/PostPage")],
+  ["/groups", () => import("../../pages/group/GroupsPage")],
+  ["/groups/create", () => import("../../pages/group/CreateGroupPage")],
+  ["/group/:slug", () => import("../../pages/group/GroupDetailPage")],
+  ["/profile", () => import("../../pages/profile/UserProfilePage")],
+  ["/profile/:id", () => import("../../pages/profile/UserProfilePage")],
+  ["/friends", () => import("../../pages/friends/FriendsPage")],
+  ["/friends/list", () => import("../../pages/friends/FriendsListPage")],
+  ["/messages", () => import("../../pages/messages/MessagesPage")],
+  ["/notifications", () => import("../../pages/notifications/NotificationsPage")],
+  ["/settings", () => import("../../pages/settings/SettingsPage")],
+  ["/cookbook", () => import("../../pages/kitchen/CookbookPage")],
+  ["/pantry", () => import("../../pages/kitchen/PantryPage")],
+  ["/meal-planner", () => import("../../pages/kitchen/MealPlannerPage")],
+  ["/drafts", () => import("../../pages/kitchen/DraftsPage")],
+];
+const publicPages: [string, PageLoader][] = [
+  ["/login", () => import("../../pages/auth/LoginPage")],
+  ["/register", () => import("../../pages/auth/RegisterPage")],
+  ["/verify-email", () => import("../../pages/auth/VerifyEmailPage")],
+  ["/verify", () => import("../../pages/auth/VerifyEmailPage")],
+  ["/forgot-password", () => import("../../pages/auth/ForgotPasswordPage")],
+];
 
 export const router = createBrowserRouter([
-  {
-    path: '/',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <SocialFeed />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/login',
-    errorElement: <NotFound />,
-    Component: LoginPage,
-  },
-  {
-    path: '/register',
-    errorElement: <NotFound />,
-    Component: RegisterPage,
-  },
-  {
-    path: '/forgot-password',
-    errorElement: <NotFound />,
-    Component: ForgotPasswordPage,
-  },
-  {
-    path: '/groups',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <GroupsPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/groups/create',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <CreateGroupPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/group/:slug',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <GroupDetailPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/profile',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <UserProfilePage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/profile/:id',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <UserProfilePage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/friends',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <FriendsPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/friends/list',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <FriendsListPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/messages',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <MessagesPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/notifications',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <NotificationsPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '/settings',
-    errorElement: <NotFound />,
-    element: (
-      <PrivateRoute>
-        <SettingsPage />
-      </PrivateRoute>
-    ),
-  },
-  {
-    path: '*',
-    Component: NotFound,
-  },
+  ...protectedPages.map(([path, load]) => ({ path, lazy: page(load), HydrateFallback: PagePlaceholder, errorElement: <NotFound /> })),
+  ...publicPages.map(([path, load]) => ({ path, lazy: page(load, false), HydrateFallback: PagePlaceholder, errorElement: <NotFound /> })),
+  { path: "*", Component: NotFound },
 ]);
 
 export default router;
-

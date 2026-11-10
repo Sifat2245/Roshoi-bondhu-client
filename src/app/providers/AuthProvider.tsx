@@ -1,66 +1,98 @@
-import React, { useState } from 'react';
-import { useSession, signIn, signUp, signOut } from '../../lib/auth-client';
-import { AuthContext } from '../../context/AuthContext';
+import React, { useState, useEffect } from "react";
+import {
+  useSession,
+  signOut,
+  authApi,
+  getSession,
+} from "../../lib/auth-client";
+import { AuthContext } from "../../context/AuthContext";
 
 export interface AuthProviderProps {
   children: React.ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { data: rawSession, isPending: loading } = useSession();
+  const { data: rawSession, isPending: sessionLoading, refetch } = useSession();
   const session = rawSession as any;
+  const [currentUser, setCurrentUser] = useState<any>(session?.user || null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    if (session?.user) {
+      if (isMounted) {
+        setCurrentUser(session.user);
+        setCheckingAuth(false);
+      }
+    } else {
+      // Check /api/v1/auth/me for authenticated cookie or JWT session
+      authApi
+        .getMe()
+        .then((user) => {
+          if (isMounted && user) {
+            setCurrentUser(user);
+          }
+        })
+        .catch(() => {
+          // Unauthenticated visitor
+        })
+        .finally(() => {
+          if (isMounted) {
+            setCheckingAuth(false);
+          }
+        });
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session?.user]);
+
   const clearError = () => setAuthError(null);
 
-  const createUserAccount = async (email: string, password: string, name: string, profileImage?: string | null) => {
-    try {
-      setAuthError(null);
-      const res = await signUp.email({
-        name,
-        email,
-        password,
-        image: profileImage || undefined,
-      });
-      if (res.error) throw new Error(res.error.message || 'Failed to create account.');
-      return res;
-    } catch (err: any) {
-      setAuthError(err.message);
-      throw err;
-    }
+  const createUserAccount = (payload: any) => {
+    setAuthError(null);
+    return authApi.signup(payload);
   };
 
-  const loginUser = async (email: string, password: string) => {
-    try {
-      setAuthError(null);
-      const res = await signIn.email({ email, password });
-      if (res.error) throw new Error(res.error.message || 'Invalid email or password.');
-      return res;
-    } catch (err: any) {
-      setAuthError(err.message);
-      throw err;
+  const loginUser = async (emailOrCredentials: any, password?: string) => {
+    setAuthError(null);
+    const payload =
+      typeof emailOrCredentials === "object"
+        ? emailOrCredentials
+        : { email: emailOrCredentials, password };
+    const res = await authApi.login(payload);
+    const loggedUser = res?.user || res?.data?.user;
+    if (loggedUser) {
+      setCurrentUser(loggedUser);
+      await getSession();
+      if (refetch) await refetch();
     }
+    return res;
   };
 
   const logoutUser = async () => {
-    try {
-      setAuthError(null);
-      await (signOut as any)();
-    } catch (err: any) {
-      setAuthError(err.message);
-      throw err;
-    }
+    setAuthError(null);
+    await signOut();
+    setCurrentUser(null);
+    window.location.href = "/login";
   };
 
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);
 
+  const resolvedUser = currentUser || session?.user || null;
+  const isLoading = checkingAuth && !resolvedUser;
+
   const authData: any = {
-    user: session?.user || null,
+    user: resolvedUser,
     session: session?.session || null,
-    loading,
+    loading: isLoading,
+    sessionLoading,
     authError,
     setAuthError,
     clearError,
@@ -75,7 +107,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     closeAuthModal,
   };
 
-  return <AuthContext.Provider value={authData}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={authData}>{children}</AuthContext.Provider>
+  );
 };
 
 export default AuthProvider;

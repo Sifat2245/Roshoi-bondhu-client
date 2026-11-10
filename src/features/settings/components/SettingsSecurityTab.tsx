@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { isDemoMode, readDemo, writeDemo } from '../../../lib/demo/demo-store';
+import { profileApi } from '../../profile/api/profile.api';
+import { useSession } from '../../../lib/auth-client';
 import Button from '../../../components/ui/Button';
 import Modal from '../../../components/ui/Modal';
 import { useToast } from '../../../context/ToastContext';
@@ -27,11 +30,12 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
   const [savingPassword, setSavingPassword] = useState(false);
 
   // 2FA state
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const { data: session } = useSession();
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => isDemoMode() ? Boolean(readDemo().settings.twoFactorEnabled) : false);
 
   // Contact info modal state
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [phone, setPhone] = useState('+880 1712-345678');
+  const [phone, setPhone] = useState(user?.phone || '');
 
   // Active sessions mock list
   const [sessions, setSessions] = useState([
@@ -75,17 +79,18 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
       setNewPassword('');
       setConfirmPassword('');
       setOpenSection(null);
-      notify.success('Your account password has been updated.');
+      notify.info('Password form validated. Your actual password has not changed.');
     }, 800);
   };
 
   const handleToggle2FA = () => {
     const nextState = !twoFactorEnabled;
     setTwoFactorEnabled(nextState);
+    if (isDemoMode()) { const state = readDemo(); state.settings.twoFactorEnabled = nextState; writeDemo(state); }
     if (nextState) {
-      notify.success('Two-factor authentication is now active.');
+      notify.info('Two-factor authentication preview enabled.');
     } else {
-      notify.info('Two-factor authentication has been turned off.');
+      notify.info('Two-factor authentication preview disabled.');
     }
   };
 
@@ -96,6 +101,7 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
 
   return (
     <div className="space-y-7 animate-in fade-in duration-150 select-none">
+      <p className="rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 p-3 text-xs text-amber-800 dark:text-amber-200">Security controls are an interactive preview. Password, sign-in, and two-factor changes are not applied to your account.</p>
       {/* 1. Header matching Screenshot 2 */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -409,7 +415,7 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
         title="Contact Information"
         maxWidth="max-w-md"
       >
-        <div className="space-y-4">
+        <div className="space-y-4 p-4 sm:p-5">
           <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#343536] space-y-1.5">
             <p className="text-sm font-bold text-gray-500">Email Address</p>
             <p className="text-base font-bold text-gray-900 dark:text-white">{user?.email}</p>
@@ -440,9 +446,8 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
             <Button
               variant="primary"
               size="md"
-              onClick={() => {
-                notify.success('Contact info updated successfully.');
-                setIsContactModalOpen(false);
+              onClick={async () => {
+                try { await profileApi.updateProfile({ phone: phone.trim() }, session?.session?.token); notify.success('Contact info updated successfully.'); setIsContactModalOpen(false); } catch (error: any) { notify.error(error.message || 'Could not save contact information.'); }
               }}
               className="cursor-pointer"
             >

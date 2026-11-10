@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router';
-import logo from '../../../assets/logo.png';
 import {
   Home,
   Shield,
@@ -15,6 +14,7 @@ export interface SettingsSidebarProps {
 
 export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, onSelectTab }) => {
   const navItems = [
+    { id: 'PERSONAL', label: 'Personal details', icon: UserCog },
     {
       id: 'HOME',
       label: 'Home',
@@ -46,22 +46,18 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, onS
 
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <img src={logo} alt="Heshel" className="h-6 w-auto object-contain" />
             <span className="text-xl font-black tracking-tight text-gray-900 dark:text-white">
               Heshel Account
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
             Control how your account works across Heshel apps and devices.{' '}
-            <span className="text-[#e02f21] hover:underline cursor-pointer font-medium">
-              Learn more
-            </span>
           </p>
         </div>
       </div>
 
       {/* Navigation List - Modern Meta Pill Style matching Screenshot 1 */}
-      <nav className="space-y-1.5 pt-1">
+      <nav aria-label="Account settings" className="flex lg:block gap-2 lg:space-y-1.5 overflow-x-auto pt-1 pb-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -70,7 +66,8 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, onS
               key={item.id}
               type="button"
               onClick={() => onSelectTab(item.id)}
-              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition text-left cursor-pointer font-semibold text-sm ${
+              aria-current={isActive ? 'page' : undefined}
+              className={`shrink-0 lg:w-full flex items-center gap-2.5 px-4 py-3.5 rounded-2xl transition text-left cursor-pointer font-semibold text-sm whitespace-nowrap ${
                 isActive
                   ? 'bg-[#343638] text-white dark:bg-white dark:text-gray-900 shadow-xs'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2b2c2d]'

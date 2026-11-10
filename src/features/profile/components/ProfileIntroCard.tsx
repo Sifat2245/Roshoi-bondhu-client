@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router';
+import React from "react";
+import { Link } from "react-router";
 import {
   MapPin,
   Briefcase,
@@ -11,8 +11,8 @@ import {
   Settings as SettingsIcon,
   ChefHat,
   Heart,
-} from 'lucide-react';
-import Button from '../../../components/ui/Button';
+} from "lucide-react";
+import Button from "../../../components/ui/Button";
 
 interface ProfileIntroCardProps {
   profile: any;
@@ -57,9 +57,9 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
           <div className="flex items-center gap-3">
             <MapPin size={18} className="text-[#e02f21] shrink-0" />
             <span>
-              Lives in{' '}
+              Lives in{" "}
               <strong className="text-gray-900 dark:text-white font-bold">
-                {profile.city || 'Dhaka, Bangladesh'}
+                {profile.city || "Dhaka, Bangladesh"}
               </strong>
             </span>
           </div>
@@ -101,7 +101,9 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
       {/* 2. Work & Career Card */}
       <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3.5">
         <div className="flex items-center justify-between">
-          <h3 className="font-black text-base sm:text-lg text-gray-900 dark:text-white">Work</h3>
+          <h3 className="font-black text-base sm:text-lg text-gray-900 dark:text-white">
+            Work
+          </h3>
           {isOwnProfile && (
             <button
               type="button"
@@ -119,9 +121,11 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
           </div>
           <div>
             <p className="font-bold text-gray-900 dark:text-white">
-              {profile.work || 'Passionate Home Chef'}
+              {profile.work || "Passionate Home Chef"}
             </p>
-            <p className="text-sm text-gray-500 mt-0.5">Culinary Creator at Heshel</p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Culinary Creator at Heshel
+            </p>
           </div>
         </div>
       </div>
@@ -129,7 +133,9 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
       {/* 3. Education Card */}
       <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3.5">
         <div className="flex items-center justify-between">
-          <h3 className="font-black text-lg sm:text-xl text-gray-900 dark:text-white">Education</h3>
+          <h3 className="font-black text-lg sm:text-xl text-gray-900 dark:text-white">
+            Education
+          </h3>
           {isOwnProfile && (
             <button
               type="button"
@@ -147,9 +153,11 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
           </div>
           <div>
             <p className="font-bold text-gray-900 dark:text-white">
-              {profile.education || 'Self-Taught Culinary Enthusiast'}
+              {profile.education || "Self-Taught Culinary Enthusiast"}
             </p>
-            <p className="text-sm text-gray-500 mt-0.5">Bengali & International Gastronomy</p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Bengali & International Gastronomy
+            </p>
           </div>
         </div>
       </div>

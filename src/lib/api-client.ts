@@ -3,6 +3,8 @@
  * Centralizes baseURL, credentials, headers, error normalization, and request execution.
  */
 
+import { demoRequest, isDemoMode } from './demo/demo-store';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export class ApiError extends Error {
@@ -31,6 +33,7 @@ export async function apiRequest<T = any>(
   endpoint: string,
   { method = 'GET', data = null, token = null, headers = {}, ...customConfig }: RequestOptions = {}
 ): Promise<T> {
+  if (isDemoMode()) return await demoRequest(endpoint, method, data) as T;
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
   const requestHeaders: Record<string, string> = {

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Search, Plus, Sparkles } from 'lucide-react';
-import Button from '../../../components/ui/Button';
+import React from "react";
+import { Search, Plus } from "lucide-react";
+import Button from "../../../components/ui/Button";
 
 const GroupSearchBar = ({
   search,
@@ -15,7 +15,10 @@ const GroupSearchBar = ({
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         {/* Search Input */}
         <form onSubmit={onSearchSubmit} className="relative flex-1">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             value={search}
@@ -39,22 +42,22 @@ const GroupSearchBar = ({
       <div className="flex items-center gap-2 border-t border-gray-100 dark:border-gray-800 pt-3">
         <button
           type="button"
-          onClick={() => onTabChange('ALL')}
+          onClick={() => onTabChange("ALL")}
           className={`px-4 py-1.5 rounded-xl text-xs font-bold transition ${
-            activeTab === 'ALL'
-              ? 'bg-[#e02f21] text-white shadow-xs'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c]'
+            activeTab === "ALL"
+              ? "bg-[#e02f21] text-white shadow-xs"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c]"
           }`}
         >
           Discover Groups
         </button>
         <button
           type="button"
-          onClick={() => onTabChange('MY')}
+          onClick={() => onTabChange("MY")}
           className={`px-4 py-1.5 rounded-xl text-xs font-bold transition ${
-            activeTab === 'MY'
-              ? 'bg-[#e02f21] text-white shadow-xs'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c]'
+            activeTab === "MY"
+              ? "bg-[#e02f21] text-white shadow-xs"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c]"
           }`}
         >
           My Groups
@@ -65,4 +68,3 @@ const GroupSearchBar = ({
 };
 
 export default GroupSearchBar;
-

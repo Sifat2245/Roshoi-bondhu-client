@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const ChatEmptyState: React.FC = () => {
   return (
@@ -23,12 +23,26 @@ const ChatEmptyState: React.FC = () => {
               fill="url(#arrowGrad)"
             />
             <defs>
-              <linearGradient id="bubbleGrad" x1="10" y1="12" x2="62" y2="61" gradientUnits="userSpaceOnUse">
+              <linearGradient
+                id="bubbleGrad"
+                x1="10"
+                y1="12"
+                x2="62"
+                y2="61"
+                gradientUnits="userSpaceOnUse"
+              >
                 <stop stopColor="#E0E7FF" />
                 <stop offset="0.5" stopColor="#EDE9FE" />
                 <stop offset="1" stopColor="#FCE7F3" />
               </linearGradient>
-              <linearGradient id="arrowGrad" x1="31" y1="28" x2="45" y2="46" gradientUnits="userSpaceOnUse">
+              <linearGradient
+                id="arrowGrad"
+                x1="31"
+                y1="28"
+                x2="45"
+                y2="46"
+                gradientUnits="userSpaceOnUse"
+              >
                 <stop stopColor="#EC4899" />
                 <stop offset="1" stopColor="#8B5CF6" />
               </linearGradient>
@@ -41,11 +55,11 @@ const ChatEmptyState: React.FC = () => {
         No chats selected
       </h2>
       <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">
-        Choose from your existing conversations, start a new one, or connect with fellow food creators on Heshel.
+        Choose from your existing conversations, start a new one, or connect
+        with fellow food creators on Heshel.
       </p>
     </div>
   );
 };
 
 export default ChatEmptyState;
-

@@ -9,26 +9,26 @@ const NotFound = () => {
     return (
         <div
             style={{ backgroundImage: `url(${image})` }}
-            className="w-full h-screen bg-cover bg-center flex items-center justify-end px-6 md:px-12"
+            className="w-full min-h-dvh bg-cover bg-center flex items-center justify-center lg:justify-end px-4 py-10 md:px-12"
         >
             <MotionDiv
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
-                className="bg-opacity-70 p-8 rounded-xl text-center lg:text-right w-4/5 mx-auto space-y-4"
+                className="bg-white/95 dark:bg-[#242526]/95 text-gray-900 dark:text-gray-100 p-6 sm:p-10 rounded-2xl text-center w-full max-w-lg shadow-xl space-y-4"
             >
-                <h1 className="text-7xl md:text-9xl font-bold text-black">OOPS!</h1>
-                <p className="text-2xl md:text-3xl font-semibold">That page can't be found</p>
-                <p className="text-gray-700">
-                    It looks like nothing was found at this location. Maybe try to search for what you <br /> are looking for?
+                <p className="text-sm font-bold tracking-widest text-[#e02f21]">404 · HESHEL</p>
+                <h1 className="text-3xl sm:text-4xl font-bold">This page is off the menu</h1>
+                <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 leading-relaxed">
+                    We couldn’t find this page. It may have moved, or the link may be incomplete. There’s still plenty of good food in your feed.
                 </p>
 
                 <Link
                     to="/"
-                    className="btn inline-block mt-4 px-6 py-2 bg-black text-white font-semibold rounded-full hover:bg-red-700 transition"
+                    className="inline-block mt-4 px-6 py-3 bg-[#e02f21] text-white font-semibold rounded-xl hover:bg-[#c22417] transition"
                     data-tip="Go back to the home page"
                 >
-                    Back To Homepage
+                    Back to the feed
                 </Link>
 
                 

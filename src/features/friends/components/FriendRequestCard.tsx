@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router';
-import { Users } from 'lucide-react';
-import Button from '../../../components/ui/Button';
+import React from "react";
+import { Link } from "react-router";
+import { Users } from "lucide-react";
+import Button from "../../../components/ui/Button";
 
 const FriendRequestCard = ({
   request,
@@ -19,7 +19,7 @@ const FriendRequestCard = ({
         <img
           src={
             request.image ||
-            'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'
+            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400"
           }
           alt={request.name}
           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
@@ -40,7 +40,8 @@ const FriendRequestCard = ({
           <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
             <Users size={14} className="text-gray-400 shrink-0" />
             <span className="truncate">
-              {request.mutualCount || 2} mutual {request.mutualCount === 1 ? 'friend' : 'friends'}
+              {request.mutualCount || 2} mutual{" "}
+              {request.mutualCount === 1 ? "friend" : "friends"}
             </span>
           </div>
         </div>
@@ -72,4 +73,3 @@ const FriendRequestCard = ({
 };
 
 export default FriendRequestCard;
-

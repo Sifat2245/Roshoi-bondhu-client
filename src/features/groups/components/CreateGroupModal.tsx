@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { Lock, Globe, Upload } from 'lucide-react';
-import Button from '../../../components/ui/Button';
-import Modal from '../../../components/ui/Modal';
-import groupsApi from '../api/groups.api';
-import postsApi from '../../posts/api/posts.api';
-import { useToast } from '../../../context/ToastContext';
+import React, { useState } from "react";
+import { Lock, Globe, Upload } from "lucide-react";
+import Button from "../../../components/ui/Button";
+import Modal from "../../../components/ui/Modal";
+import groupsApi from "../api/groups.api";
+import postsApi from "../../posts/api/posts.api";
+import { useToast } from "../../../context/ToastContext";
 
 const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
   const { notify } = useToast();
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [coverImage, setCoverImage] = useState('');
-  const [privacy, setPrivacy] = useState('PUBLIC');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [coverImage, setCoverImage] = useState("");
+  const [privacy, setPrivacy] = useState("PUBLIC");
   const [requiresPostApproval, setRequiresPostApproval] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -26,10 +26,10 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
       if (data.data?.url) {
         setCoverImage(data.data.url);
       } else {
-        throw new Error(data.message || 'Image upload failed');
+        throw new Error(data.message || "Image upload failed");
       }
     } catch (err) {
-      notify.error(err.message, 'Upload Failed');
+      notify.error(err.message, "Upload Failed");
     } finally {
       setUploadingCover(false);
     }
@@ -49,14 +49,14 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
           privacy,
           requiresPostApproval,
         },
-        token
+        token,
       );
 
-      notify.success(`Group "${name}" has been created!`, 'Group Created');
+      notify.success(`Group "${name}" has been created!`, "Group Created");
       if (onGroupCreated) onGroupCreated();
       onClose();
     } catch (err) {
-      notify.error(err.message, 'Creation Failed');
+      notify.error(err.message, "Creation Failed");
     } finally {
       setSubmitting(false);
     }
@@ -105,31 +105,33 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
           <div className="grid grid-cols-2 gap-2.5">
             <label
               className={`p-3 rounded-xl border flex items-center gap-2 cursor-pointer transition ${
-                privacy === 'PUBLIC'
-                  ? 'border-[#e02f21] bg-red-50/50 dark:bg-red-950/20 text-[#e02f21]'
-                  : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
+                privacy === "PUBLIC"
+                  ? "border-[#e02f21] bg-red-50/50 dark:bg-red-950/20 text-[#e02f21]"
+                  : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
               }`}
             >
               <Globe size={16} />
               <div className="text-left">
                 <p className="text-xs font-bold">Public</p>
-                <p className="text-[10px] opacity-75">Anyone can see and join</p>
+                <p className="text-[10px] opacity-75">
+                  Anyone can see and join
+                </p>
               </div>
               <input
                 type="radio"
                 name="group-privacy"
                 value="PUBLIC"
-                checked={privacy === 'PUBLIC'}
-                onChange={() => setPrivacy('PUBLIC')}
+                checked={privacy === "PUBLIC"}
+                onChange={() => setPrivacy("PUBLIC")}
                 className="hidden"
               />
             </label>
 
             <label
               className={`p-3 rounded-xl border flex items-center gap-2 cursor-pointer transition ${
-                privacy === 'PRIVATE'
-                  ? 'border-[#e02f21] bg-red-50/50 dark:bg-red-950/20 text-[#e02f21]'
-                  : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
+                privacy === "PRIVATE"
+                  ? "border-[#e02f21] bg-red-50/50 dark:bg-red-950/20 text-[#e02f21]"
+                  : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
               }`}
             >
               <Lock size={16} />
@@ -141,8 +143,8 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
                 type="radio"
                 name="group-privacy"
                 value="PRIVATE"
-                checked={privacy === 'PRIVATE'}
-                onChange={() => setPrivacy('PRIVATE')}
+                checked={privacy === "PRIVATE"}
+                onChange={() => setPrivacy("PRIVATE")}
                 className="hidden"
               />
             </label>
@@ -158,7 +160,10 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
             onChange={(e) => setRequiresPostApproval(e.target.checked)}
             className="w-4 h-4 rounded text-[#e02f21] accent-[#e02f21]"
           />
-          <label htmlFor="create-req-appr" className="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+          <label
+            htmlFor="create-req-appr"
+            className="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+          >
             Require post approval from admin/moderator
           </label>
         </div>
@@ -171,7 +176,11 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
           <label className="w-full flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
             <Upload size={18} className="text-gray-400 mb-1" />
             <span className="text-xs font-semibold text-gray-500">
-              {uploadingCover ? 'Uploading...' : coverImage ? 'Change Cover Photo' : 'Upload Cover Photo'}
+              {uploadingCover
+                ? "Uploading..."
+                : coverImage
+                  ? "Change Cover Photo"
+                  : "Upload Cover Photo"}
             </span>
             <input
               type="file"
@@ -196,4 +205,3 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
 };
 
 export default CreateGroupModal;
-
