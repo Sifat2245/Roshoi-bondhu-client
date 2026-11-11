@@ -1,52 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../../../components/ui/Button';
-import Avatar from '../../../components/ui/Avatar';
-import { User, AtSign, Mail, Phone, MapPin, Briefcase, GraduationCap, Camera } from 'lucide-react';
+import { User, AtSign, Mail, Phone, MapPin, Briefcase, GraduationCap } from 'lucide-react';
 import { useToast } from '../../../context/ToastContext';
-import { useSession } from '../../../lib/auth-client';
+import { useSession, authApi } from '../../../lib/auth-client';
 import { useAuth } from '../../../context/AuthContext';
 import { profileApi } from '../../profile/api/profile.api';
 
-const SettingsPersonalTab = ({ user, onUserUpdated }) => {
+interface SettingsPersonalTabProps {
+  user?: any;
+  onUserUpdated?: () => void;
+}
+
+const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserUpdated }) => {
   const { notify } = useToast();
   const { data: session } = useSession();
-  const { updateUser, refetchUser } = useAuth();
+  const { user: authUser, updateUser, refetchUser } = useAuth();
   const token = session?.session?.token;
 
-  const [name, setName] = useState(user?.name || '');
-  const [username, setUsername] = useState(user?.username || '');
-  const [phone, setPhone] = useState(user?.phone || '');
-  const [city, setCity] = useState(user?.city || '');
-  const [work, setWork] = useState(user?.work || '');
-  const [education, setEducation] = useState(user?.education || '');
-  const [bio, setBio] = useState(user?.bio || '');
+  const effectiveUser = authUser || user;
+
+  const [name, setName] = useState(effectiveUser?.name || '');
+  const [username, setUsername] = useState(
+    (effectiveUser?.username || effectiveUser?.profile?.username || '').replace(/^@/, '')
+  );
+  const [phone, setPhone] = useState(effectiveUser?.phone || '');
+  const [city, setCity] = useState(
+    effectiveUser?.city || effectiveUser?.profile?.city || effectiveUser?.profile?.hometown || ''
+  );
+  const [work, setWork] = useState(
+    effectiveUser?.work || effectiveUser?.profile?.work || ''
+  );
+  const [education, setEducation] = useState(
+    effectiveUser?.education || effectiveUser?.profile?.education || ''
+  );
+  const [bio, setBio] = useState(effectiveUser?.bio || effectiveUser?.profile?.bio || '');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
+
+    const populate = (data: any) => {
+      if (!isMounted || !data) return;
+      if (data.name) setName(data.name);
+      const u = data.username || data.profile?.username;
+      if (u) setUsername(u.replace(/^@/, ''));
+      if (data.phone) setPhone(data.phone);
+      const c = data.city || data.profile?.city || data.profile?.hometown || data.hometown;
+      if (c) setCity(c);
+      const w = data.work || data.profile?.work;
+      if (w) setWork(w);
+      const e = data.education || data.profile?.education;
+      if (e) setEducation(e);
+      if (data.bio) setBio(data.bio);
+    };
+
+    if (effectiveUser) {
+      populate(effectiveUser);
+    }
+
     profileApi
       .getUserProfile('me', token)
       .then((data: any) => {
-        if (isMounted && data) {
-          if (data.name) setName(data.name);
-          if (data.username) setUsername(data.username.replace(/^@/, ''));
-          if (data.phone) setPhone(data.phone);
-          if (data.city || data.hometown) setCity(data.city || data.hometown);
-          if (data.work) setWork(data.work);
-          if (data.education) setEducation(data.education);
-          if (data.bio) setBio(data.bio);
-        }
+        if (data) populate(data);
       })
-      .catch((err) => {
-        console.warn('Could not load detailed profile for prefill:', err);
+      .catch(() => {
+        authApi
+          .getMe()
+          .then((meData) => {
+            if (meData) populate(meData);
+          })
+          .catch(() => {});
       });
 
     return () => {
       isMounted = false;
     };
-  }, [token]);
+  }, [token, effectiveUser]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {

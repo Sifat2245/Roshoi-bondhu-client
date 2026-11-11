@@ -5,17 +5,14 @@ import AppProviders from "./providers/AppProviders";
 import SplashScreen from "../components/common/SplashScreen";
 
 export const App: React.FC = () => {
-  const [showSplash, setShowSplash] = useState(
-    () => sessionStorage.getItem("heshel:opened") !== "true",
-  );
+  const [showSplash, setShowSplash] = useState(true);
   const finishSplash = useCallback(() => {
-    sessionStorage.setItem("heshel:opened", "true");
     setShowSplash(false);
   }, []);
 
   return (
     <>
-      {showSplash && <SplashScreen duration={650} onFinish={finishSplash} />}
+      {showSplash && <SplashScreen duration={850} onFinish={finishSplash} />}
       <AppProviders>
         <RouterProvider router={router} />
       </AppProviders>

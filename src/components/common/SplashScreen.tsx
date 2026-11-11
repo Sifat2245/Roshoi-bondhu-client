@@ -1,14 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { ChefHat } from "lucide-react";
 
-const SplashScreen = ({ onFinish, duration = 1200 }) => {
+interface SplashScreenProps {
+  onFinish?: () => void;
+  duration?: number;
+}
+
+export const SplashScreen: React.FC<SplashScreenProps> = ({
+  onFinish,
+  duration = 900,
+}) => {
   const [fading, setFading] = useState(false);
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => {
       setFading(true);
-    }, duration - 400);
+    }, Math.max(duration - 350, 400));
 
     const finishTimer = setTimeout(() => {
       setVisible(false);
@@ -26,7 +34,7 @@ const SplashScreen = ({ onFinish, duration = 1200 }) => {
   return (
     <div
       data-app-splash="true"
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white dark:bg-[#18191a] text-gray-900 dark:text-white transition-opacity duration-400 select-none ${
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-white dark:bg-[#18191a] text-gray-900 dark:text-white transition-opacity duration-350 select-none ${
         fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >

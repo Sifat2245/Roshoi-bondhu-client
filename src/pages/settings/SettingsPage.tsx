@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSession } from '../../lib/auth-client';
+import { useAuth } from '../../context/AuthContext';
 import { SettingsLayout } from '../../app/layouts/SettingsLayout';
 import SettingsSidebar from '../../features/settings/components/SettingsSidebar';
 import SettingsHomeTab from '../../features/settings/components/SettingsHomeTab';
@@ -10,8 +11,9 @@ import SettingsPersonalTab from '../../features/settings/components/SettingsPers
 import SettingsPreferences from '../../features/settings/components/SettingsPreferences';
 
 const SettingsPage = () => {
-  const { data: session, refetch } = useSession();
-  const user = session?.user;
+  const { user: authUser, refetchUser } = useAuth();
+  const { data: session, refetch: refetchSession } = useSession();
+  const user = authUser || session?.user;
 
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get('tab') || 'HOME';
@@ -55,7 +57,15 @@ const SettingsPage = () => {
         <SettingsPreferences />
         </div>
       )}
-      {activeTab === 'PERSONAL' && <SettingsPersonalTab user={user} onUserUpdated={() => refetch?.()} />}
+      {activeTab === 'PERSONAL' && (
+        <SettingsPersonalTab
+          user={user}
+          onUserUpdated={() => {
+            if (refetchUser) refetchUser();
+            if (refetchSession) refetchSession();
+          }}
+        />
+      )}
 
       {activeTab === 'SECURITY' && (
         <SettingsSecurityTab
