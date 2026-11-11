@@ -4,15 +4,18 @@ import { useAuth } from "../../../context/AuthContext";
 import Button from "../../../components/ui/Button";
 import DemoAccountsBar from "./DemoAccountsBar";
 import { useToast } from "../../../context/ToastContext";
+import { signIn } from "../../../lib/auth-client";
+import { Fingerprint } from "lucide-react";
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { notify } = useToast();
-  const { loginUser, user } = useAuth();
+  const { loginUser, user, refetchUser } = useAuth();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -46,6 +49,19 @@ const LoginForm = () => {
         );
       }
 
+      if (res?.data?.twoFactorRedirect || res?.twoFactorRedirect) {
+        notify.info(
+          res.message || "Two-factor authentication required.",
+          "2FA Verification",
+        );
+        return navigate("/two-factor", {
+          state: {
+            email: cleanEmail,
+            twoFactorMethods: res?.data?.twoFactorMethods || res?.twoFactorMethods || ["otp"],
+          },
+        });
+      }
+
       notify.success("Logged in successfully!", "Welcome Back");
       const from = (location.state as any)?.from?.pathname;
       const target = from && from !== "/login" && from !== "/register" ? from : "/";
@@ -54,6 +70,26 @@ const LoginForm = () => {
       notify.error(err.message || "Invalid email or password.", "Login Failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasskeySignIn = async () => {
+    setPasskeyLoading(true);
+    try {
+      const res = await signIn.passkey();
+      if (res?.error) {
+        if (res.error.code === 'AUTH_CANCELLED') return;
+        throw new Error(res.error.message || 'Passkey authentication failed.');
+      }
+      if (refetchUser) await refetchUser();
+      notify.success('Signed in with passkey successfully!', 'Welcome Back');
+      const from = (location.state as any)?.from?.pathname;
+      const target = from && from !== '/login' && from !== '/register' ? from : '/';
+      navigate(target, { replace: true });
+    } catch (err: any) {
+      notify.error(err.message || 'Passkey authentication could not be completed.');
+    } finally {
+      setPasskeyLoading(false);
     }
   };
 
@@ -108,10 +144,22 @@ const LoginForm = () => {
         <Button
           type="submit"
           loading={loading}
+          disabled={loading || passkeyLoading}
           className="w-full py-3.5 text-sm font-bold bg-[#e02f21] hover:bg-[#c22417] text-white rounded-xl shadow-sm transition"
         >
           Log in
         </Button>
+
+        {/* Passkey 1-Click Biometric Login */}
+        <button
+          type="button"
+          onClick={handlePasskeySignIn}
+          disabled={loading || passkeyLoading}
+          className="w-full py-3 px-4 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#2c2d2e] rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+        >
+          <Fingerprint size={18} className="text-[#e02f21]" />
+          <span>{passkeyLoading ? 'Authenticating with passkey...' : 'Sign in with Passkey'}</span>
+        </button>
 
         {/* Forgotten Password Link */}
         <div className="text-center pt-1">

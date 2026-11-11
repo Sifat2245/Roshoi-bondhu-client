@@ -28,6 +28,14 @@ export const profileApi = {
     return apiClient.patch("/api/user/bio", bioData, { token });
   },
 
+  getPreferences: async (token: string | null = null) => {
+    return apiClient.get("/api/user/preferences", { token });
+  },
+
+  updatePreferences: async (preferencesData: any, token: string | null = null) => {
+    return apiClient.patch("/api/user/preferences", preferencesData, { token });
+  },
+
   toggleFollow: async (targetUserId: string, token: string | null = null) => {
     return apiClient.post(`/api/user/${targetUserId}/follow`, {}, { token });
   },

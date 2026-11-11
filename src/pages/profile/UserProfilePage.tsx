@@ -23,6 +23,10 @@ import {
 } from '../../components/ui/Skeleton';
 import { useToast } from '../../context/ToastContext';
 import { profileApi } from '../../features/profile/api/profile.api';
+import {
+  useUserProfileQuery,
+  useInvalidateProfileQueries,
+} from '../../features/profile/hooks/useProfileQueries';
 import { pinnedIn, compareRecent } from "../../features/posts/model/post-policy";
 import { postsApi } from '../../features/posts/api/posts.api';
 
@@ -36,12 +40,24 @@ const UserProfilePage = () => {
   const token = session?.session?.token;
   const targetId = id || currentUser?.id || 'me';
 
-  const [profile, setProfile] = useState(null);
+  const { data: cachedProfile, isLoading: isProfileQueryLoading } = useUserProfileQuery(targetId, token);
+  const { invalidateProfile } = useInvalidateProfileQueries();
+
+  const [profile, setProfile] = useState<any>(cachedProfile || null);
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cachedProfile && isProfileQueryLoading);
   const [activeTab, setActiveTab] = useState('POSTS'); // 'POSTS', 'RECIPES', 'PHOTOS', 'ABOUT', 'FOLLOWERS'
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [followersCount, setFollowersCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(Boolean(cachedProfile?.isFollowing));
+  const [followersCount, setFollowersCount] = useState(cachedProfile?.followersCount || 0);
+
+  useEffect(() => {
+    if (cachedProfile) {
+      setProfile(cachedProfile);
+      setIsFollowing(Boolean(cachedProfile.isFollowing));
+      setFollowersCount(cachedProfile.followersCount || 0);
+      setLoading(false);
+    }
+  }, [cachedProfile]);
 
   // Modals
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -120,6 +136,7 @@ const UserProfilePage = () => {
       if (updateUser) updateUser({ coverImage: upData.data.url });
       if (refetchUser) refetchUser();
       if (refetch) refetch();
+      invalidateProfile(targetId);
       notify.success('Cover photo updated');
     } catch (err) {
       notify.error(err.message || 'Failed to update cover');
@@ -140,6 +157,7 @@ const UserProfilePage = () => {
       if (updateUser) updateUser({ image: upData.data.url });
       if (refetchUser) refetchUser();
       if (refetch) refetch();
+      invalidateProfile(targetId);
       notify.success('Profile picture updated');
     } catch (err) {
       notify.error(err.message || 'Failed to update avatar');
@@ -201,6 +219,7 @@ const UserProfilePage = () => {
       }
       if (refetchUser) refetchUser();
       if (refetch) refetch();
+      invalidateProfile(targetId);
       setIsEditModalOpen(false);
       notify.success('Profile updated');
     } catch (err) {

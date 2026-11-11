@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Button from '../../../components/ui/Button';
 import { User, AtSign, Mail, Phone, MapPin, Briefcase, GraduationCap } from 'lucide-react';
 import { useToast } from '../../../context/ToastContext';
-import { useSession, authApi } from '../../../lib/auth-client';
+import { useSession } from '../../../lib/auth-client';
 import { useAuth } from '../../../context/AuthContext';
 import { profileApi } from '../../profile/api/profile.api';
+import {
+  useUserProfileQuery,
+  useInvalidateProfileQueries,
+} from '../../profile/hooks/useProfileQueries';
 
 interface SettingsPersonalTabProps {
   user?: any;
@@ -18,6 +22,9 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
   const token = session?.session?.token;
 
   const effectiveUser = authUser || user;
+
+  const { data: cachedProfile, isLoading: isQueryLoading } = useUserProfileQuery('me', token);
+  const { invalidateProfile } = useInvalidateProfileQueries();
 
   const [name, setName] = useState(effectiveUser?.name || '');
   const [username, setUsername] = useState(
@@ -35,12 +42,11 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
   );
   const [bio, setBio] = useState(effectiveUser?.bio || effectiveUser?.profile?.bio || '');
   const [saving, setSaving] = useState(false);
+  const loadingData = isQueryLoading && !cachedProfile && !effectiveUser;
 
   useEffect(() => {
-    let isMounted = true;
-
-    const populate = (data: any) => {
-      if (!isMounted || !data) return;
+    const data = cachedProfile || effectiveUser;
+    if (data) {
       if (data.name) setName(data.name);
       const u = data.username || data.profile?.username;
       if (u) setUsername(u.replace(/^@/, ''));
@@ -52,30 +58,8 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
       const e = data.education || data.profile?.education;
       if (e) setEducation(e);
       if (data.bio) setBio(data.bio);
-    };
-
-    if (effectiveUser) {
-      populate(effectiveUser);
     }
-
-    profileApi
-      .getUserProfile('me', token)
-      .then((data: any) => {
-        if (data) populate(data);
-      })
-      .catch(() => {
-        authApi
-          .getMe()
-          .then((meData) => {
-            if (meData) populate(meData);
-          })
-          .catch(() => {});
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [token, effectiveUser]);
+  }, [cachedProfile, effectiveUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +91,7 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
         });
       }
       if (refetchUser) refetchUser();
+      invalidateProfile();
       notify.success('Personal details saved successfully');
       if (onUserUpdated) onUserUpdated();
     } catch (err: any) {
@@ -139,33 +124,41 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Full Name *
               </label>
-              <div className="relative">
-                <User size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your full name"
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
-                />
-              </div>
+              {loadingData ? (
+                <div className="w-full h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-xl animate-pulse" />
+              ) : (
+                <div className="relative">
+                  <User size={16} className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your full name"
+                    className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
+                  />
+                </div>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Username (@handle)
               </label>
-              <div className="relative">
-                <AtSign size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="e.g. chef_rahima"
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
-                />
-              </div>
+              {loadingData ? (
+                <div className="w-full h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-xl animate-pulse" />
+              ) : (
+                <div className="relative">
+                  <AtSign size={16} className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="e.g. chef_rahima"
+                    className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -181,32 +174,42 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Email Address
               </label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="email"
-                  disabled
-                  value={user?.email || ''}
-                  className="w-full pl-9 pr-3 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm text-gray-500 cursor-not-allowed border border-transparent"
-                />
-              </div>
-              <p className="text-[10px] text-gray-400 mt-1">Managed via authentication provider</p>
+              {loadingData ? (
+                <div className="w-full h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-xl animate-pulse" />
+              ) : (
+                <>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3 top-3 text-gray-400" />
+                    <input
+                      type="email"
+                      disabled
+                      value={user?.email || ''}
+                      className="w-full pl-9 pr-3 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm text-gray-500 cursor-not-allowed border border-transparent"
+                    />
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-1">Managed via authentication provider</p>
+                </>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Phone Number
               </label>
-              <div className="relative">
-                <Phone size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+880 1700 000000"
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
-                />
-              </div>
+              {loadingData ? (
+                <div className="w-full h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-xl animate-pulse" />
+              ) : (
+                <div className="relative">
+                  <Phone size={16} className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+880 1700 000000"
+                    className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -222,48 +225,60 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 City / Location
               </label>
-              <div className="relative">
-                <MapPin size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Dhaka, Bangladesh"
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
-                />
-              </div>
+              {loadingData ? (
+                <div className="w-full h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-xl animate-pulse" />
+              ) : (
+                <div className="relative">
+                  <MapPin size={16} className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="Dhaka, Bangladesh"
+                    className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
+                  />
+                </div>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Work / Culinary Role
               </label>
-              <div className="relative">
-                <Briefcase size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  value={work}
-                  onChange={(e) => setWork(e.target.value)}
-                  placeholder="e.g. Home Chef"
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
-                />
-              </div>
+              {loadingData ? (
+                <div className="w-full h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-xl animate-pulse" />
+              ) : (
+                <div className="relative">
+                  <Briefcase size={16} className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    value={work}
+                    onChange={(e) => setWork(e.target.value)}
+                    placeholder="e.g. Home Chef"
+                    className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
+                  />
+                </div>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Education / Alma Mater
               </label>
-              <div className="relative">
-                <GraduationCap size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  value={education}
-                  onChange={(e) => setEducation(e.target.value)}
-                  placeholder="e.g. University of Dhaka"
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
-                />
-              </div>
+              {loadingData ? (
+                <div className="w-full h-10 bg-gray-200 dark:bg-[#3a3b3c] rounded-xl animate-pulse" />
+              ) : (
+                <div className="relative">
+                  <GraduationCap size={16} className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    value={education}
+                    onChange={(e) => setEducation(e.target.value)}
+                    placeholder="e.g. University of Dhaka"
+                    className="w-full pl-9 pr-3 py-2.5 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -271,13 +286,17 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
               Culinary Bio & Passion
             </label>
-            <textarea
-              rows={3}
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell other foodies about your cooking journey, favorite spices, and family heritage recipes..."
-              className="w-full p-3 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300 resize-none"
-            />
+            {loadingData ? (
+              <div className="w-full h-24 bg-gray-200 dark:bg-[#3a3b3c] rounded-xl animate-pulse" />
+            ) : (
+              <textarea
+                rows={3}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Tell other foodies about your cooking journey, favorite spices, and family heritage recipes..."
+                className="w-full p-3 bg-[#f0f2f5] dark:bg-[#3a3b3c] rounded-xl text-sm dark:text-white focus:outline-none border border-transparent focus:border-red-300 resize-none"
+              />
+            )}
           </div>
         </div>
 

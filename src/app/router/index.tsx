@@ -31,6 +31,7 @@ const protectedPages: [string, PageLoader][] = [
   ["/notifications", () => import("../../pages/notifications/NotificationsPage")],
   ["/settings", () => import("../../pages/settings/SettingsPage")],
   ["/settings/password", () => import("../../pages/settings/ChangePasswordPage")],
+  ["/settings/passkeys", () => import("../../pages/settings/PasskeysPage")],
   ["/settings/two-factor", () => import("../../pages/settings/TwoFactorPage")],
   ["/settings/sessions", () => import("../../pages/settings/ActiveSessionsPage")],
   ["/cookbook", () => import("../../pages/kitchen/CookbookPage")],
@@ -44,6 +45,7 @@ const publicPages: [string, PageLoader][] = [
   ["/verify-email", () => import("../../pages/auth/VerifyEmailPage")],
   ["/verify", () => import("../../pages/auth/VerifyEmailPage")],
   ["/forgot-password", () => import("../../pages/auth/ForgotPasswordPage")],
+  ["/two-factor", () => import("../../pages/auth/TwoFactorAuthPage")],
 ];
 
 export const router = createBrowserRouter([

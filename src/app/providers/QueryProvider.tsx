@@ -11,7 +11,8 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes
+            staleTime: 1000 * 60 * 10, // 10 minutes fresh caching
+            gcTime: 1000 * 60 * 15,    // 15 minutes memory retention
             refetchOnWindowFocus: false,
             retry: 1,
           },

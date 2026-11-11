@@ -1,5 +1,6 @@
 import { createAuthClient } from 'better-auth/react';
-import { emailOTPClient } from 'better-auth/client/plugins';
+import { emailOTPClient, twoFactorClient } from 'better-auth/client/plugins';
+import { passkeyClient } from '@better-auth/passkey/client';
 import { useSyncExternalStore } from 'react';
 import { exitDemo, getDemoSession, getDemoSnapshot, isDemoMode, subscribeDemo } from './demo/demo-store';
 
@@ -9,11 +10,19 @@ export const authClient = createAuthClient({
   baseURL: API_BASE_URL,
   plugins: [
     emailOTPClient(),
+    twoFactorClient({
+      onTwoFactorRedirect() {
+        window.location.href = '/two-factor';
+      },
+    }),
+    passkeyClient(),
   ],
 });
 
 export const signIn = authClient.signIn;
 export const signUp = authClient.signUp;
+export const twoFactor = authClient.twoFactor;
+export const passkey = authClient.passkey;
 export const signOut = async (options?: any) => {
   if (isDemoMode()) { exitDemo(); return { data: null }; }
   await authApi.logout();
@@ -107,6 +116,13 @@ export const authApi = {
         requiresVerification: true,
       };
     }
+    if (json.data?.twoFactorRedirect || json.twoFactorRedirect) {
+      return {
+        ...json,
+        twoFactorRedirect: true,
+        twoFactorMethods: json.data?.twoFactorMethods || json.twoFactorMethods || ['otp'],
+      };
+    }
     if (!res.ok) throw new Error(json.message || 'Invalid email or password.');
     const user = json.data?.user || json.user;
     const token = json.data?.token || json.token;
@@ -151,6 +167,122 @@ export const authApi = {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.message || 'Failed to change password.');
+    return json;
+  },
+
+  getTwoFactorStatus: async (token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/two-factor/status`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+    });
+    const json = await res.json();
+    return json.data || { twoFactorEnabled: false, emailOtpEnabled: false, totpEnabled: false };
+  },
+
+  enableEmailOtp: async (password: string, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/two-factor/enable-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify({ password }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to enable Email OTP.');
+    return json.data || json;
+  },
+
+  disableEmailOtp: async (password: string, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/two-factor/disable-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify({ password }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to disable Email OTP.');
+    return json.data || json;
+  },
+
+  disableTotp: async (password: string, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/two-factor/disable-totp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify({ password }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to remove Authenticator App.');
+    return json.data || json;
+  },
+
+  confirmTotp: async (token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/two-factor/confirm-totp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to confirm authenticator setup.');
+    return json.data || json;
+  },
+
+  disableAllTwoFactor: async (password: string, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/two-factor/disable-all`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify({ password }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to turn off two-factor authentication.');
+    return json.data || json;
+  },
+
+  listPasskeys: async (token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/auth/passkey/list-user-passkeys`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return Array.isArray(json) ? json : json?.data || [];
+  },
+
+  deletePasskey: async (id: string, token?: string | null) => {
+    const res = await fetch(`${API_BASE_URL}/api/auth/passkey/delete-passkey`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify({ id }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Failed to remove passkey.');
     return json;
   },
 
