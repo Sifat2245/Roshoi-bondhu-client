@@ -8,6 +8,8 @@ export interface FriendRequestsViewProps {
   onDelete?: (userId: string) => void;
   onSeeAll?: () => void;
   loading?: boolean;
+  processingId?: string | null;
+  processingAction?: "confirm" | "delete" | null;
 }
 
 const FriendRequestsView: React.FC<FriendRequestsViewProps> = ({
@@ -16,6 +18,8 @@ const FriendRequestsView: React.FC<FriendRequestsViewProps> = ({
   onDelete,
   onSeeAll,
   loading = false,
+  processingId = null,
+  processingAction = null,
 }) => {
   const [visibleCount, setVisibleCount] = useState(12);
 
@@ -64,6 +68,8 @@ const FriendRequestsView: React.FC<FriendRequestsViewProps> = ({
                 request={req}
                 onConfirm={onConfirm}
                 onDelete={onDelete}
+                isProcessing={processingId === req.id}
+                processingAction={processingId === req.id ? processingAction : null}
               />
             ))}
           </div>

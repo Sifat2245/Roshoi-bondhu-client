@@ -496,7 +496,7 @@ const PostCard: React.FC<PostCardProps> = ({
           type="button"
           aria-label={`View ${post.title || "post from " + post.author?.name}`}
           onClick={() => onOpenComments && onOpenComments(post)}
-          className="block w-full cursor-pointer max-h-[460px] overflow-hidden bg-black/5"
+          className="block w-full cursor-pointer overflow-hidden max-h-[560px] bg-black/5 dark:bg-black/20"
         >
           <img
             src={post.image}
@@ -504,7 +504,7 @@ const PostCard: React.FC<PostCardProps> = ({
               post.title || "A kitchen moment shared by " + post.author?.name
             }
             loading="lazy"
-            className="w-full max-h-[460px] object-cover hover:opacity-95 transition"
+            className="w-full max-h-[560px] object-cover hover:opacity-95 transition"
           />
         </button>
       )}

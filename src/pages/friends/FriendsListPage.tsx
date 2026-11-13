@@ -13,12 +13,20 @@ import { useToast } from '../../context/ToastContext';
 import ProfilePhotosCard from '../../features/profile/components/ProfilePhotosCard';
 import ProfileFriendsCard from '../../features/profile/components/ProfileFriendsCard';
 import ProfileAboutCard from '../../features/profile/components/ProfileAboutCard';
+import BlockUserModal from '../../features/friends/components/BlockUserModal';
+import UnfriendUserModal from '../../features/friends/components/UnfriendUserModal';
+import {
+  useFriendsQuery,
+  useInvalidateFriendsQueries,
+} from '../../features/friends/hooks/useFriendsQueries';
 import {
   ArrowLeft,
   Search,
   MoreHorizontal,
   MessageCircle,
   UserCheck,
+  UserX,
+  ShieldAlert,
   MapPin,
   Briefcase,
   GraduationCap,
@@ -36,41 +44,73 @@ export const FriendsListPage = () => {
   const token = session?.session?.token;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [friends, setFriends] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: cachedFriends = [], isLoading: isFriendsLoading } = useFriendsQuery(token);
+  const { invalidateAllFriendsData } = useInvalidateFriendsQueries();
+
+  const [friends, setFriends] = useState<any[]>(cachedFriends);
   const [search, setSearch] = useState('');
   const [selectedFriendId, setSelectedFriendId] = useState<string | null>(
     searchParams.get('uid') || null
   );
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  const [blockModalTarget, setBlockModalTarget] = useState<{ id: string; name: string } | null>(null);
+  const [unfriendModalTarget, setUnfriendModalTarget] = useState<{ id: string; name: string } | null>(null);
+  const [modalActionLoading, setModalActionLoading] = useState(false);
+
+  useEffect(() => {
+    if (cachedFriends) {
+      setFriends(cachedFriends);
+    }
+  }, [cachedFriends]);
+
+  const loading = isFriendsLoading && friends.length === 0;
+
+  const handleConfirmUnfriend = async () => {
+    if (!unfriendModalTarget) return;
+    setModalActionLoading(true);
+    try {
+      await friendsApi.unfriend(unfriendModalTarget.id, token);
+      setFriends((prev) => prev.filter((f) => f.id !== unfriendModalTarget.id));
+      invalidateAllFriendsData(unfriendModalTarget.id);
+      if (selectedFriendId === unfriendModalTarget.id) {
+        setSelectedFriendId(null);
+        setSearchParams({});
+      }
+      notify.success(`Unfriended ${unfriendModalTarget.name}`);
+      setUnfriendModalTarget(null);
+    } catch (err: any) {
+      notify.error(err.message || 'Failed to unfriend');
+    } finally {
+      setModalActionLoading(false);
+    }
+  };
+
+  const handleConfirmBlock = async () => {
+    if (!blockModalTarget) return;
+    setModalActionLoading(true);
+    try {
+      await friendsApi.blockUser(blockModalTarget.id, token);
+      setFriends((prev) => prev.filter((f) => f.id !== blockModalTarget.id));
+      invalidateAllFriendsData(blockModalTarget.id);
+      if (selectedFriendId === blockModalTarget.id) {
+        setSelectedFriendId(null);
+        setSearchParams({});
+      }
+      notify.info(`Blocked ${blockModalTarget.name}`);
+      setBlockModalTarget(null);
+    } catch (err: any) {
+      notify.error(err.message || 'Failed to block user');
+    } finally {
+      setModalActionLoading(false);
+    }
+  };
 
   // Selected friend's detailed profile & posts
   const [activeTab, setActiveTab] = useState('ALL');
   const [friendProfile, setFriendProfile] = useState<any>(null);
   const [friendPosts, setFriendPosts] = useState<any[]>([]);
   const [loadingProfile, setLoadingProfile] = useState(false);
-
-  // Load all friends
-  useEffect(() => {
-    let isMounted = true;
-    const fetchFriends = async () => {
-      setLoading(true);
-      try {
-        const data = await friendsApi.getAllFriends(token);
-        if (isMounted && data) {
-          setFriends(data);
-        }
-      } catch (err) {
-        console.error('Failed to load friends:', err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchFriends();
-    return () => {
-      isMounted = false;
-    };
-  }, [token]);
 
   // Filter friends list by search input
   const filteredFriends = useMemo(() => {
@@ -201,26 +241,91 @@ export const FriendsListPage = () => {
             ) : filteredFriends.length > 0 ? (
               filteredFriends.map((f) => {
                 const isSelected = selectedFriendId === f.id;
+                const isDropdownOpen = openDropdownId === f.id;
                 return (
                   <div
                     key={f.id}
                     onClick={() => handleSelectFriend(f)}
-                    className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition ${
+                    className={`relative flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition ${
                       isSelected
                         ? 'bg-gray-100 dark:bg-[#3a3b3c]'
                         : 'hover:bg-gray-100/70 dark:hover:bg-[#3a3b3c]/60'
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0 pr-2">
                       <Avatar src={f.image} alt={f.name} size="md" />
                       <div className="truncate">
                         <p className="font-bold text-base truncate text-gray-900 dark:text-white">
                           {f.name}
                         </p>
                         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
-                          {f.mutualCount || 2} mutual friends
+                          {f.mutualFriends !== undefined && f.mutualFriends > 0
+                            ? `${f.mutualFriends} mutual friends`
+                            : f.city || `@${f.username || 'cook'}`}
                         </p>
                       </div>
+                    </div>
+
+                    {/* 3-Dots Action Menu (Matching Image 2) */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        aria-label="More options"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenDropdownId(isDropdownOpen ? null : f.id);
+                        }}
+                        className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 transition"
+                      >
+                        <MoreHorizontal size={16} />
+                      </button>
+
+                      {isDropdownOpen && (
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute right-0 top-9 z-30 w-52 bg-white dark:bg-[#242526] rounded-xl border border-gray-100 dark:border-gray-800 shadow-xl p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenDropdownId(null);
+                              startConversation({
+                                id: f.id,
+                                name: f.name,
+                                image: f.image,
+                              });
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-left transition"
+                          >
+                            <MessageCircle size={14} className="text-gray-500" />
+                            <span>Message {f.name.split(' ')[0]}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUnfriendModalTarget({ id: f.id, name: f.name });
+                              setOpenDropdownId(null);
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-left transition"
+                          >
+                            <UserX size={14} />
+                            <span>Unfriend {f.name.split(' ')[0]}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBlockModalTarget({ id: f.id, name: f.name });
+                              setOpenDropdownId(null);
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-left transition"
+                          >
+                            <ShieldAlert size={14} />
+                            <span>Block {f.name.split(' ')[0]}'s profile</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -488,6 +593,24 @@ export const FriendsListPage = () => {
           )}
         </main>
       </div>
+
+      {/* Block Confirmation Modal */}
+      <BlockUserModal
+        isOpen={Boolean(blockModalTarget)}
+        onClose={() => setBlockModalTarget(null)}
+        onConfirm={handleConfirmBlock}
+        userName={blockModalTarget?.name}
+        loading={modalActionLoading}
+      />
+
+      {/* Unfriend Confirmation Modal */}
+      <UnfriendUserModal
+        isOpen={Boolean(unfriendModalTarget)}
+        onClose={() => setUnfriendModalTarget(null)}
+        onConfirm={handleConfirmUnfriend}
+        userName={unfriendModalTarget?.name}
+        loading={modalActionLoading}
+      />
     </div>
   );
 };

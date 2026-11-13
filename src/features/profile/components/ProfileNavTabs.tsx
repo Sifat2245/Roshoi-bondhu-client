@@ -1,19 +1,33 @@
 import React from "react";
-import { ChefHat, Image as ImageIcon, Users, Info } from "lucide-react";
 
-const ProfileNavTabs = ({ activeTab, onSelectTab, postCount = 0 }) => {
+interface ProfileNavTabsProps {
+  activeTab: string;
+  onSelectTab: (tab: string) => void;
+  postCount?: number;
+  friendsCount?: number;
+}
+
+const ProfileNavTabs: React.FC<ProfileNavTabsProps> = ({
+  activeTab,
+  onSelectTab,
+  friendsCount,
+}) => {
   const tabs = [
-    { id: "POSTS", label: "All Posts", count: postCount },
-    { id: "RECIPES", label: "Recipes Only", icon: ChefHat },
-    { id: "PHOTOS", label: "Photos", icon: ImageIcon },
-    { id: "ABOUT", label: "About", icon: Info },
-    { id: "FOLLOWERS", label: "Followers", icon: Users },
+    { id: "POSTS", label: "All" },
+    { id: "ABOUT", label: "About" },
+    {
+      id: "FRIENDS",
+      label: "Friends",
+      count: friendsCount,
+    },
+    { id: "PHOTOS", label: "Photos" },
+    { id: "RECIPES", label: "Recipes" },
   ];
 
   return (
-    <div className="w-full bg-white dark:bg-[#242526] border-t border-b border-gray-200 dark:border-gray-800 shadow-xs">
-      <div className="max-w-[1250px] mx-auto px-4 sm:px-8">
-        <div className="flex items-center gap-2 overflow-x-auto text-sm sm:text-base font-bold text-gray-500 dark:text-gray-400 no-scrollbar">
+    <div id="profile-nav-tabs" className="w-full bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-gray-800 shadow-xs">
+      <div className="max-w-[1250px] mx-auto px-4 sm:px-6">
+        <div className="flex items-center gap-1 overflow-x-auto text-sm sm:text-[15px] font-bold text-gray-600 dark:text-gray-300 no-scrollbar">
           {tabs.map((tab) => {
             const isSelected = activeTab === tab.id;
             return (
@@ -21,17 +35,16 @@ const ProfileNavTabs = ({ activeTab, onSelectTab, postCount = 0 }) => {
                 key={tab.id}
                 type="button"
                 onClick={() => onSelectTab(tab.id)}
-                className={`py-4 px-4 sm:px-5 border-b-3 transition cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+                className={`py-3.5 px-3.5 sm:px-4.5 border-b-[3px] transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                   isSelected
-                    ? "border-[#e02f21] text-[#e02f21]"
-                    : "border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg"
+                    ? "border-[#e02f21] text-[#e02f21] font-extrabold"
+                    : "border-transparent hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-lg text-gray-600 dark:text-gray-300"
                 }`}
               >
-                {tab.icon && <tab.icon size={17} />}
                 <span>{tab.label}</span>
                 {tab.count !== undefined && tab.count > 0 && (
-                  <span className="text-xs opacity-75 font-semibold">
-                    ({tab.count})
+                  <span className={`text-xs ${isSelected ? "text-[#e02f21]" : "text-gray-400"}`}>
+                    {tab.count}
                   </span>
                 )}
               </button>

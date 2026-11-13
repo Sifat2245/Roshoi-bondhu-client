@@ -11,8 +11,9 @@ import FloatingChatDock from "../../features/messenger/components/FloatingChatDo
 import notificationsApi from "../../features/notifications/api/notifications.api";
 import LeftSidebar from "../left-sidebar/LeftSidebar";
 import Modal from "../../components/ui/Modal";
-import { isDemoMode, startDemo } from "../../lib/demo/demo-store";
+import { isDemoMode } from "../../lib/demo/demo-store";
 import { useChatDock } from "../../context/ChatDockContext";
+import logo from "../../assets/logo.png";
 import {
   Home,
   Users,
@@ -313,12 +314,11 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
 
             {/* Logo */}
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span
-                className="grid h-9 w-9 place-items-center rounded-xl bg-[#e02f21] text-white"
-                aria-label="Heshel"
-              >
-                <ChefHat size={23} />
-              </span>
+              <img
+                src={logo}
+                alt="Heshel"
+                className="h-9 w-9 object-contain rounded-xl"
+              />
               {isDemoMode() && (
                 <span className="hidden xl:inline ml-2 text-[10px] rounded-full bg-red-50 dark:bg-red-950/40 px-2 py-1 text-[#b92b20] dark:text-red-300 font-bold">
                   Demo
@@ -399,7 +399,7 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
           </div>
 
           {/* Center: Facebook Central Tabs (Desktop Only: md:flex) */}
-          <nav className="hidden md:flex items-center justify-center flex-1 max-w-xl h-full mx-2">
+          <nav className="hidden md:flex items-center justify-center flex-1 max-w-[640px] 2xl:max-w-[700px] h-full mx-auto px-2 gap-1 sm:gap-2">
             {navTabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -409,13 +409,25 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
                   title={tab.label}
                   aria-label={tab.label}
                   aria-current={tab.isActive ? "page" : undefined}
-                  className={`h-14 px-3 lg:px-5 flex items-center justify-center border-b-3 transition duration-150 cursor-pointer ${
+                  className={`flex-1 max-w-[110px] lg:max-w-[124px] h-full flex items-center justify-center relative cursor-pointer border-b-[3px] transition duration-150 ${
                     tab.isActive
                       ? "border-[#e02f21] text-[#e02f21]"
-                      : "border-transparent text-gray-500 hover:bg-gray-100/80 dark:hover:bg-gray-800"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                   }`}
                 >
-                  <Icon size={22} />
+                  <div
+                    className={`w-full h-[46px] my-auto rounded-xl flex items-center justify-center transition duration-150 ${
+                      tab.isActive
+                        ? ""
+                        : "hover:bg-gray-100 dark:hover:bg-[#3a3b3c]"
+                    }`}
+                  >
+                    <Icon
+                      size={26}
+                      className={tab.isActive ? "text-[#e02f21]" : "text-gray-500 dark:text-gray-400"}
+                      strokeWidth={tab.isActive ? 2.3 : 2}
+                    />
+                  </div>
                 </Link>
               );
             })}
@@ -648,7 +660,6 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
                       <span>Settings & Privacy</span>
                     </Link>
 
-                    {!isDemoMode() && <button type="button" onClick={() => { startDemo(); window.location.assign('/'); }} className="w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#e02f21] hover:bg-red-50 dark:hover:bg-red-950/30"><ChefHat size={20} /><span>Try interactive demo</span></button>}
                     <button
                       type="button"
                       onClick={handleLogout}

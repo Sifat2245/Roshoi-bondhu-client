@@ -29,6 +29,7 @@ import {
 } from "../../community/model/community-domain";
 import { postAudience, type PostAudience } from "../model/post-policy";
 import { useAuth } from "../../../context/AuthContext";
+import { useUpload } from "../../../context/UploadContext";
 
 const CreatePostModal = ({
   isOpen,
@@ -42,6 +43,7 @@ const CreatePostModal = ({
   const { data: session } = useSession();
   const { notify } = useToast();
   const { user: authUser } = useAuth();
+  const { runUpload } = useUpload();
   const user = session?.user || authUser;
   const { update } = useKitchen();
   const draftId = useRef("");
@@ -53,7 +55,6 @@ const CreatePostModal = ({
   const [mode, setMode] = useState(initialMode); // 'CASUAL' or 'RECIPE'
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState("");
-  const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   // Recipe Specific States
@@ -211,9 +212,8 @@ const CreatePostModal = ({
     );
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
       const isRecipe = mode === "RECIPE";
@@ -239,71 +239,121 @@ const CreatePostModal = ({
       if (isRecipe && (Number(preparationTime) <= 0 || Number(servings) <= 0))
         throw new Error("Cooking time and servings must be greater than zero.");
 
-      let publishedImage = image;
-      if (
-        image.startsWith("data:") &&
-        mode !== "POLL" &&
-        (groupId || audience === "PUBLIC")
-      ) {
-        // A locally drafted photo is uploaded only when publishing publicly or to a group.
-        const blob = await (await fetch(image)).blob();
-        const uploaded = await postsApi.uploadImage(
-          new File([blob], "post-photo", { type: blob.type }),
-          session?.session?.token,
-        );
-        if (!uploaded.data?.url)
-          throw new Error("Photo upload failed. Your draft is still here.");
-        publishedImage = uploaded.data.url;
-      }
-      await postsApi.createPost(
-        {
-          postType: mode,
-          ...(!groupId ? { audience } : {}),
-          ...(mode === "POLL" ? { poll } : {}),
-          caption: caption.trim(),
-          title: isRecipe ? title.trim() : null,
-          image: publishedImage || null,
-          preparationTime: isRecipe ? parseInt(preparationTime) : null,
-          servings: isRecipe ? parseInt(servings) : null,
-          cuisine: isRecipe ? cuisine : null,
-          ingredients: isRecipe ? ingredients.filter((i) => i.trim()) : null,
-          instructions: isRecipe
-            ? instructions.filter((s) => s.title || s.details)
-            : null,
-          groupId,
-        },
-        session?.session?.token,
-        { user, group: initialDraft?.group || defaultGroup },
-      );
+      // Capture all form fields before closing
+      const postMode = mode;
+      const postCaption = caption.trim();
+      const postTitle = isRecipe ? title.trim() : null;
+      const postImage = image;
+      const postAudience = audience;
+      const postPoll = poll;
+      const postPreparationTime = preparationTime;
+      const postServings = servings;
+      const postCuisine = cuisine;
+      const postIngredients = ingredients;
+      const postInstructions = instructions;
+      const postGroupId = groupId;
+      const currentDraftId = draftId.current;
+      const postUser = user;
+      const postToken = session?.session?.token;
 
-      submitted.current = true;
-      try {
-        update((s) => {
-          s.drafts = s.drafts.filter((draft) => draft.id !== draftId.current);
-        });
-      } catch {
-        /* A published post should not be submitted twice if local storage is unavailable. */
-      }
-      if (onPostCreated) onPostCreated();
-      notify.success(
-        !groupId && audience !== "PUBLIC"
-          ? "Post saved with your selected audience in this device preview"
-          : mode === "POLL"
-            ? "Your poll is ready in this preview"
-            : isRecipe
-              ? "Your recipe has been shared!"
-              : "Your post has been shared!",
-      );
+      // Close modal immediately so user doesn't wait!
+      onClose();
+
+      // Reset form state
       setCaption("");
       setTitle("");
       setImage("");
       setIngredients([]);
       setInstructions([{ title: "", details: "" }]);
-      onClose();
+
+      // Launch background upload with feed progress tracking
+      const uploadType: "POST" | "RECIPE" | "POLL" =
+        postMode === "RECIPE"
+          ? "RECIPE"
+          : postMode === "POLL"
+          ? "POLL"
+          : "POST";
+
+      runUpload(
+        {
+          type: uploadType,
+          title:
+            postMode === "RECIPE"
+              ? "published a new recipe."
+              : postMode === "POLL"
+              ? "created a poll."
+              : "published a post.",
+          caption: postCaption || postTitle || undefined,
+          previewUrl: postImage || undefined,
+          userImage: postUser?.image,
+          userName: postUser?.name || "You",
+        },
+        async (onProgress) => {
+          let publishedImage = postImage;
+          if (
+            postImage.startsWith("data:") &&
+            postMode !== "POLL" &&
+            (postGroupId || postAudience === "PUBLIC")
+          ) {
+            onProgress(35);
+            const blob = await (await fetch(postImage)).blob();
+            const uploaded = await postsApi.uploadImage(
+              new File([blob], "post-photo", { type: blob.type }),
+              postToken,
+            );
+            if (!uploaded.data?.url)
+              throw new Error("Photo upload failed. Your draft is still here.");
+            publishedImage = uploaded.data.url;
+            onProgress(70);
+          }
+
+          await postsApi.createPost(
+            {
+              postType: postMode,
+              ...(!postGroupId ? { audience: postAudience } : {}),
+              ...(postMode === "POLL" ? { poll: postPoll } : {}),
+              caption: postCaption,
+              title: postTitle,
+              image: publishedImage || null,
+              preparationTime: isRecipe ? parseInt(postPreparationTime) : null,
+              servings: isRecipe ? parseInt(postServings) : null,
+              cuisine: isRecipe ? postCuisine : null,
+              ingredients: isRecipe ? postIngredients.filter((i) => i.trim()) : null,
+              instructions: isRecipe
+                ? postInstructions.filter((s) => s.title || s.details)
+                : null,
+              groupId: postGroupId,
+            },
+            postToken,
+            { user: postUser, group: initialDraft?.group || defaultGroup },
+          );
+
+          submitted.current = true;
+          try {
+            update((s) => {
+              s.drafts = s.drafts.filter((draft) => draft.id !== currentDraftId);
+            });
+          } catch {
+            /* local storage fallback */
+          }
+
+          if (onPostCreated) onPostCreated();
+
+          notify.success(
+            !postGroupId && postAudience !== "PUBLIC"
+              ? "Post saved with your selected audience"
+              : postMode === "POLL"
+              ? "Your poll has been published!"
+              : isRecipe
+              ? "Your recipe has been shared!"
+              : "Your post has been shared!"
+          );
+        }
+      ).catch((err) => {
+        notify.error(err.message || "Post Failed", "Post Failed");
+      });
     } catch (err) {
       notify.error(err.message, "Post Failed");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -381,46 +431,57 @@ const CreatePostModal = ({
           </p>
         )}
 
-        {/* Mode Switcher Tabs */}
-        <div className="flex rounded-xl bg-gray-100 dark:bg-[#3a3b3c] p-1 gap-1">
-          <button
-            type="button"
-            onClick={() => setMode("CASUAL")}
-            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition ${
-              mode === "CASUAL"
-                ? "bg-white dark:bg-[#242526] text-gray-900 dark:text-white shadow-xs"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Foodie Post
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("RECIPE")}
-            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
+        {/* Text Area Caption */}
+        <div>
+          <textarea
+            aria-label="Post caption"
+            rows={mode === "CASUAL" ? 4 : 2}
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder={
               mode === "RECIPE"
-                ? "bg-white dark:bg-[#242526] text-[#e02f21] shadow-xs"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <ChefHat size={18} />
-            <span>Recipe Post</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("POLL")}
-            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${mode === "POLL" ? "bg-white dark:bg-[#242526] text-[#e02f21] shadow-xs" : "text-gray-500 hover:text-gray-700"}`}
-          >
-            <BarChart3 size={18} />
-            <span>Poll</span>
-          </button>
+                ? "Share story, secret tips, or flavor profile..."
+                : `What are you cooking today, ${user?.name?.split(" ")[0] || "Chef"}? Share your thoughts...`
+            }
+            className="w-full bg-transparent border-none text-base dark:text-white placeholder:text-gray-400 focus:outline-none resize-none leading-relaxed"
+          />
         </div>
 
-        {mode === "POLL" && <PollEditor value={poll} onChange={setPoll} />}
+        {mode === "POLL" && (
+          <div className="p-3 bg-amber-50/50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                <BarChart3 size={16} />
+                <span>Poll</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setMode("CASUAL")}
+                className="text-xs font-bold text-gray-400 hover:text-red-500 cursor-pointer transition"
+              >
+                Remove
+              </button>
+            </div>
+            <PollEditor value={poll} onChange={setPoll} />
+          </div>
+        )}
 
         {/* RECIPE SPECIFIC FORM FIELDS */}
         {mode === "RECIPE" && (
           <div className="space-y-4 bg-red-50/50 dark:bg-red-950/20 p-4 rounded-xl border border-red-100 dark:border-red-900/30">
+            <div className="flex items-center justify-between pb-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#e02f21] flex items-center gap-1.5">
+                <ChefHat size={16} />
+                <span>Recipe Details</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setMode("CASUAL")}
+                className="text-xs font-bold text-gray-400 hover:text-red-500 cursor-pointer transition"
+              >
+                Remove
+              </button>
+            </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 Recipe Title *
@@ -605,22 +666,6 @@ const CreatePostModal = ({
           </div>
         )}
 
-        {/* Text Area Caption */}
-        <div>
-          <textarea
-            aria-label="Post caption"
-            rows={mode === "CASUAL" ? 4 : 2}
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder={
-              mode === "RECIPE"
-                ? "Share story, secret tips, or flavor profile..."
-                : `What are you cooking today, ${user.name?.split(" ")[0]}? Share your thoughts...`
-            }
-            className="w-full bg-transparent border-none text-base dark:text-white placeholder:text-gray-400 focus:outline-none resize-none leading-relaxed"
-          />
-        </div>
-
         {/* Uploaded Photo Preview */}
         {image && (
           <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 max-h-56">
@@ -640,15 +685,19 @@ const CreatePostModal = ({
           </div>
         )}
 
-        {/* Photo Upload Attachment Bar */}
+        {/* Attachment Options Bar ("Add to your post") */}
         <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
             Add to your post
           </span>
 
-          <div className="flex items-center gap-1.5">
-            <label className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#3a3b3c] text-emerald-500 cursor-pointer transition">
-              <ImageIcon size={20} />
+          <div className="flex items-center gap-1 sm:gap-1.5">
+            {/* 1. Photo Upload */}
+            <label
+              title="Add photo"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#3a3b3c] text-emerald-500 cursor-pointer transition flex items-center justify-center"
+            >
+              <ImageIcon size={22} />
               <input
                 aria-label="Add a post photo"
                 type="file"
@@ -658,8 +707,41 @@ const CreatePostModal = ({
                 onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
               />
             </label>
+
+            {/* 2. Recipe Option */}
+            <button
+              type="button"
+              title={mode === "RECIPE" ? "Remove recipe details" : "Add recipe details"}
+              onClick={() =>
+                setMode((prev) => (prev === "RECIPE" ? "CASUAL" : "RECIPE"))
+              }
+              className={`p-2 rounded-full transition cursor-pointer flex items-center justify-center ${
+                mode === "RECIPE"
+                  ? "bg-red-50 dark:bg-red-950/40 text-[#e02f21] ring-2 ring-[#e02f21]"
+                  : "hover:bg-gray-100 dark:hover:bg-[#3a3b3c] text-[#e02f21]"
+              }`}
+            >
+              <ChefHat size={22} />
+            </button>
+
+            {/* 3. Poll Option */}
+            <button
+              type="button"
+              title={mode === "POLL" ? "Remove poll" : "Create poll"}
+              onClick={() =>
+                setMode((prev) => (prev === "POLL" ? "CASUAL" : "POLL"))
+              }
+              className={`p-2 rounded-full transition cursor-pointer flex items-center justify-center ${
+                mode === "POLL"
+                  ? "bg-amber-50 dark:bg-amber-950/40 text-amber-500 ring-2 ring-amber-500"
+                  : "hover:bg-gray-100 dark:hover:bg-[#3a3b3c] text-amber-500"
+              }`}
+            >
+              <BarChart3 size={22} />
+            </button>
+
             {uploadingPhoto && (
-              <span className="text-sm font-semibold text-gray-500">
+              <span className="text-xs font-semibold text-gray-500 ml-1">
                 Uploading...
               </span>
             )}
@@ -682,19 +764,12 @@ const CreatePostModal = ({
             View drafts
           </Link>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={handleClose}
-            disabled={loading || uploadingPhoto}
-          >
-            Save & close
-          </Button>
+        <div className="flex">
           {/* Submit Post Button with Spinner */}
           <Button
             type="submit"
-            loading={loading || uploadingPhoto}
-            className="flex-1 py-3.5 text-base font-bold rounded-xl shadow-xs"
+            loading={uploadingPhoto}
+            className="w-full py-3.5 text-base font-bold rounded-xl shadow-xs"
           >
             <span>Post</span>
           </Button>

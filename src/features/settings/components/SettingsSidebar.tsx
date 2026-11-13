@@ -5,6 +5,7 @@ import {
   Shield,
   UserCog,
   ArrowLeft,
+  UserX,
 } from 'lucide-react';
 
 export interface SettingsSidebarProps {
@@ -24,6 +25,11 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, onS
       id: 'SECURITY',
       label: 'Login and security',
       icon: Shield,
+    },
+    {
+      id: 'BLOCKING',
+      label: 'Blocking',
+      icon: UserX,
     },
     {
       id: 'MANAGE',

@@ -9,6 +9,7 @@ import SettingsManageAccountTab from '../../features/settings/components/Setting
 import { Link, useSearchParams } from 'react-router';
 import SettingsPersonalTab from '../../features/settings/components/SettingsPersonalTab';
 import SettingsPreferences from '../../features/settings/components/SettingsPreferences';
+import SettingsBlockingTab from '../../features/settings/components/SettingsBlockingTab';
 
 const SettingsPage = () => {
   const { user: authUser, refetchUser } = useAuth();
@@ -17,7 +18,7 @@ const SettingsPage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get('tab') || 'HOME';
-  const activeTab = ['HOME', 'PERSONAL', 'SECURITY', 'MANAGE'].includes(requestedTab) ? requestedTab : 'HOME';
+  const activeTab = ['HOME', 'PERSONAL', 'SECURITY', 'BLOCKING', 'MANAGE'].includes(requestedTab) ? requestedTab : 'HOME';
   const setActiveTab = (tab: string) => setSearchParams(tab === 'HOME' ? {} : { tab });
 
   if (!user) {
@@ -71,6 +72,10 @@ const SettingsPage = () => {
         <SettingsSecurityTab
           user={user}
         />
+      )}
+
+      {activeTab === 'BLOCKING' && (
+        <SettingsBlockingTab />
       )}
 
       {activeTab === 'MANAGE' && (

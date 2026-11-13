@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Search, Users } from "lucide-react";
 import Avatar from "../../../components/ui/Avatar";
-import { friendsApi } from "../../friends/api/friends.api";
+import { useFriendsQuery } from "../../friends/hooks/useFriendsQueries";
 import { useSession } from "../../../lib/auth-client";
 import { isDemoMode, readDemo } from "../../../lib/demo/demo-store";
 
@@ -14,11 +14,15 @@ export default function ProfileFriendsCard({
   isOwnProfile?: boolean;
 }) {
   const { data: session } = useSession();
-  const [friends, setFriends] = useState<any[]>(profile?.friends || []);
+  const token = session?.session?.token;
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("All friends");
+  const targetUid = isOwnProfile ? undefined : (profile?.id || undefined);
+  const { data: queryFriends, isLoading } = useFriendsQuery(token, undefined, targetUid);
+
+  const [friends, setFriends] = useState<any[]>([]);
+
   useEffect(() => {
-    let active = true;
     if (isDemoMode()) {
       const state = readDemo();
       setFriends(
@@ -26,18 +30,12 @@ export default function ProfileFriendsCard({
           (user) => user.id !== profile?.id && state.friends.includes(user.id),
         ),
       );
-    } else if (isOwnProfile)
-      friendsApi
-        .getAllFriends(session?.session?.token)
-        .then((data) => {
-          if (active) setFriends(data);
-        })
-        .catch(() => {});
-    else setFriends(profile?.friends || []);
-    return () => {
-      active = false;
-    };
-  }, [profile?.id, profile?.friends, isOwnProfile, session?.session?.token]);
+    } else if (queryFriends) {
+      setFriends(queryFriends);
+    } else if (profile?.friends) {
+      setFriends(profile.friends);
+    }
+  }, [profile?.id, profile?.friends, queryFriends]);
   const filtered = friends.filter(
     (friend) =>
       friend.name.toLowerCase().includes(search.toLowerCase()) &&
@@ -68,7 +66,7 @@ export default function ProfileFriendsCard({
         </label>
       </div>
       <div className="flex gap-2 overflow-x-auto pb-2">
-        {["All friends", "Recently added", "Current city", "Following"].map(
+        {["All friends", "Recently added", "Current city"].map(
           (label) => (
             <button
               key={label}
@@ -82,20 +80,34 @@ export default function ProfileFriendsCard({
           ),
         )}
       </div>
-      {filtered.length ? (
+      {isLoading && !friends.length ? (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 border border-gray-100 dark:border-gray-800 rounded-xl p-3 animate-pulse"
+            >
+              <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0" />
+              <div className="space-y-2 flex-1 min-w-0">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filtered.length ? (
         <div className="grid sm:grid-cols-2 gap-3">
           {filtered.map((friend) => (
             <Link
               key={friend.id}
               to={`/profile/${friend.id}`}
-              className="flex items-center gap-3 border border-gray-100 dark:border-gray-800 rounded-xl p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="flex items-center gap-3 border border-gray-100 dark:border-gray-800 rounded-xl p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             >
               <Avatar src={friend.image} alt={friend.name} size="lg" />
-              <div className="min-w-0">
-                <h3 className="font-semibold truncate">{friend.name}</h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  {friend.city || "Home cook"} · {friend.mutualFriends || 0}{" "}
-                  mutual friends
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold truncate text-gray-900 dark:text-white">{friend.name}</h3>
+                <p className="text-xs text-gray-500 mt-0.5 truncate">
+                  {friend.city || "Home cook"}{friend.mutualFriends > 0 ? ` · ${friend.mutualFriends} mutual friends` : ''}
                 </p>
               </div>
             </Link>
@@ -103,7 +115,7 @@ export default function ProfileFriendsCard({
         </div>
       ) : (
         <div className="text-center py-10 text-sm text-gray-500">
-          <Users size={28} className="mx-auto mb-3" />
+          <Users size={28} className="mx-auto mb-3 text-gray-400" />
           No connections match your search.
         </div>
       )}

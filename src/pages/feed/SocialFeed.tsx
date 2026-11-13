@@ -6,8 +6,9 @@ import { FeedLayout } from "../../app/layouts/FeedLayout";
 import CreatePostTrigger from "../../features/posts/components/CreatePostTrigger";
 import PostCard from "../../features/posts/components/PostCard";
 import CreatePostModal from "../../features/posts/components/CreatePostModal";
-import KitchenShortcuts from "../../features/kitchen/components/KitchenShortcuts";
 import PostDetailsModal from "../../features/posts/components/PostDetailsModal";
+import FeedPeopleYouMayKnow from "../../features/friends/components/FeedPeopleYouMayKnow";
+import UploadProgressFeedCard from "../../features/posts/components/UploadProgressFeedCard";
 import { PostSkeleton } from "../../components/ui/Skeleton";
 import {
   uniqueRecent,
@@ -218,9 +219,9 @@ const SocialFeed = () => {
           onClick={(mode) => handleOpenCreateModal(mode)}
           onRequireAuth={requireAuth}
         />
+        <UploadProgressFeedCard />
 
         {/* Active Filters Summary Bar */}
-        <KitchenShortcuts />
         {hasAnyFilter && (
           <div className="flex items-center justify-between gap-2 flex-wrap text-xs bg-red-50 dark:bg-red-950/30 p-2.5 rounded-xl border border-red-100 dark:border-red-900/40">
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -312,24 +313,6 @@ const SocialFeed = () => {
           </div>
         )}
 
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 px-1">
-          <h1 className="font-semibold text-gray-700 dark:text-gray-300">
-            {filterParam === "FOLLOWING" ? "Following" : "Your feed"}{" "}
-            <span className="font-normal text-gray-500 dark:text-gray-400">
-              · Newest first
-            </span>
-          </h1>
-          <button
-            type="button"
-            aria-label="Refresh feed"
-            onClick={() => fetchFeed()}
-            disabled={loading || loadingMore}
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#3a3b3c] disabled:opacity-40"
-          >
-            <RotateCcw size={16} />
-          </button>
-        </div>
-
         {/* Posts Stream / Skeleton Loading */}
         {loading ? (
           <div className="space-y-4">
@@ -338,26 +321,28 @@ const SocialFeed = () => {
             <PostSkeleton />
           </div>
         ) : posts.length > 0 ? (
-          posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onOpenComments={(selected) =>
-                setSelectedPostForComments(selected)
-              }
-              onOpenShare={handleSharePost}
-              onRequireAuth={requireAuth}
-              onDeletePost={(deletedId) =>
-                setPosts((prev) => prev.filter((p) => p.id !== deletedId))
-              }
-              onUpdatePost={(updated) =>
-                setPosts((prev) =>
-                  prev.map((p) =>
-                    p.id === updated.id ? { ...p, ...updated } : p,
-                  ),
-                )
-              }
-            />
+          posts.map((post, index) => (
+            <React.Fragment key={post.id}>
+              <PostCard
+                post={post}
+                onOpenComments={(selected) =>
+                  setSelectedPostForComments(selected)
+                }
+                onOpenShare={handleSharePost}
+                onRequireAuth={requireAuth}
+                onDeletePost={(deletedId) =>
+                  setPosts((prev) => prev.filter((p) => p.id !== deletedId))
+                }
+                onUpdatePost={(updated) =>
+                  setPosts((prev) =>
+                    prev.map((p) =>
+                      p.id === updated.id ? { ...p, ...updated } : p,
+                    ),
+                  )
+                }
+              />
+              {index === 3 && <FeedPeopleYouMayKnow />}
+            </React.Fragment>
           ))
         ) : feedError ? null : (
           <div className="bg-white dark:bg-[#242526] rounded-2xl p-12 text-center border border-gray-100 dark:border-gray-800 shadow-xs space-y-3">

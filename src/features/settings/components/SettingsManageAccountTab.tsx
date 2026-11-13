@@ -242,7 +242,7 @@ export const SettingsManageAccountTab: React.FC<SettingsManageAccountTabProps> =
                     <option value={30}>30 Days timer (or reactivate on login)</option>
                   </select>
                   <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-                    💡 <b>Reactivation rule:</b> When you try to log in yourself with your email and password, your account will immediately reactivate.
+                    <b>Reactivation rule:</b> When you try to log in yourself with your email and password, your account will immediately reactivate.
                   </p>
                 </div>
               )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Loader2 } from 'lucide-react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: React.ReactNode;
@@ -51,7 +51,12 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {loading ? (
         <>
-          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          <Loader2
+            className={`${
+              size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'
+            } animate-spin flex-shrink-0`}
+          />
+          {children && <span>{children}</span>}
         </>
       ) : (
         <>

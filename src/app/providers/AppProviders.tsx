@@ -6,6 +6,7 @@ import { ThemeProvider } from "../../context/ThemeContext";
 import { LanguageProvider } from "../../context/LanguageContext";
 import { ToastProvider } from "../../context/ToastContext";
 import { ChatDockProvider } from "../../context/ChatDockContext";
+import { UploadProvider } from "../../context/UploadContext";
 
 export interface AppProvidersProps {
   children: React.ReactNode;
@@ -19,7 +20,9 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
           <LanguageProvider>
             <ThemeProvider>
               <ToastProvider>
-                <ChatDockProvider>{children}</ChatDockProvider>
+                <ChatDockProvider>
+                  <UploadProvider>{children}</UploadProvider>
+                </ChatDockProvider>
               </ToastProvider>
             </ThemeProvider>
           </LanguageProvider>

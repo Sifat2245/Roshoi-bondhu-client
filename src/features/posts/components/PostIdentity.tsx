@@ -58,16 +58,23 @@ export default function PostIdentity({ post }: { post: any }) {
         </Link>
       )}
       <div className="min-w-0 flex-1">
-        <Link
-          to={
-            group
-              ? `/group/${group.slug || group.id}`
-              : `/profile/${author?.id}`
-          }
-          className="block font-bold text-sm sm:text-base leading-snug break-words hover:underline"
-        >
-          {group?.name || author?.name || "Home cook"}
-        </Link>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Link
+            to={
+              group
+                ? `/group/${group.slug || group.id}`
+                : `/profile/${author?.id}`
+            }
+            className="font-bold text-sm sm:text-base leading-snug break-words hover:underline text-gray-900 dark:text-white"
+          >
+            {group?.name || author?.name || "Home cook"}
+          </Link>
+          {post.title && !group && (
+            <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-normal">
+              {post.title}
+            </span>
+          )}
+        </div>
         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           {group && (
             <>

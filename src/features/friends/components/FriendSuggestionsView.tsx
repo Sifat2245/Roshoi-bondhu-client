@@ -4,11 +4,20 @@ import { UserPlus, X, Users } from "lucide-react";
 import Button from "../../../components/ui/Button";
 import defaultUserAvatar from "../../../assets/user-image.png";
 
-const FriendSuggestionsView = ({
+interface FriendSuggestionsViewProps {
+  suggestions?: any[];
+  onAddFriend: (id: string) => void;
+  onRemoveSuggestion: (id: string) => void;
+  loading?: boolean;
+  addingIds?: Set<string>;
+}
+
+const FriendSuggestionsView: React.FC<FriendSuggestionsViewProps> = ({
   suggestions = [],
   onAddFriend,
   onRemoveSuggestion,
   loading = false,
+  addingIds = new Set<string>(),
 }) => {
   return (
     <div className="space-y-4">
@@ -63,11 +72,20 @@ const FriendSuggestionsView = ({
                     {person.name}
                   </Link>
 
-                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    <Users size={14} className="text-gray-400 shrink-0" />
-                    <span className="truncate">
-                      {person.mutualCount || 3} mutual friends
-                    </span>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                    {person.mutualFriends !== undefined && person.mutualFriends > 0 ? (
+                      <span className="flex items-center gap-1.5 truncate">
+                        <Users size={14} className="text-gray-400 shrink-0" />
+                        <span className="truncate">
+                          {person.mutualFriends} mutual{" "}
+                          {person.mutualFriends === 1 ? "friend" : "friends"}
+                        </span>
+                      </span>
+                    ) : person.city ? (
+                      <span className="truncate">{person.city}</span>
+                    ) : (
+                      <span>{person.reason || "Suggested for you"}</span>
+                    )}
                   </div>
                 </div>
 
@@ -76,17 +94,20 @@ const FriendSuggestionsView = ({
                   <Button
                     type="button"
                     onClick={() => onAddFriend(person.id)}
-                    className="w-full py-2.5 bg-[#e02f21] hover:bg-[#c92518] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    loading={addingIds.has(person.id)}
+                    icon={addingIds.has(person.id) ? undefined : UserPlus}
+                    disabled={addingIds.has(person.id)}
+                    className="w-full py-2.5 bg-[#e02f21] hover:bg-[#c92518] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-[0.98]"
                   >
-                    <UserPlus size={16} />
-                    <span>Add Friend</span>
+                    Add Friend
                   </Button>
 
                   <Button
                     type="button"
                     variant="secondary"
                     onClick={() => onRemoveSuggestion(person.id)}
-                    className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer whitespace-nowrap"
+                    disabled={addingIds.has(person.id)}
+                    className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer whitespace-nowrap active:scale-[0.98]"
                   >
                     Remove
                   </Button>
