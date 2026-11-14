@@ -301,11 +301,11 @@ const SettingsPersonalTab: React.FC<SettingsPersonalTabProps> = ({ user, onUserU
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-stretch sm:justify-end pt-2">
           <Button
             type="submit"
             loading={saving}
-            className="px-6 py-2.5 text-sm font-bold bg-[#e02f21] hover:bg-[#c22417] text-white rounded-xl shadow-xs"
+            className="w-full sm:w-auto px-6 py-2.5 text-sm font-bold bg-[#e02f21] hover:bg-[#c22417] text-white rounded-xl shadow-xs justify-center"
           >
             Save Changes
           </Button>

@@ -1,7 +1,8 @@
 import { User } from "../../auth/types/auth.types";
 import type { Poll } from "../../community/model/community-domain";
 
-export type { PostAudience } from "../model/post-policy";
+import type { PostAudience } from "../model/post-policy";
+export type { PostAudience };
 
 export type PostType = "CASUAL" | "RECIPE" | "POLL" | "REPOST";
 
@@ -21,6 +22,8 @@ export interface Like {
 }
 
 export interface Post {
+  description: string;
+  originalPost: Post;
   id: string;
   authorId: string;
   author?: User;

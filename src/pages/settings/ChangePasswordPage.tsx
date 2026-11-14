@@ -60,6 +60,7 @@ const ChangePasswordPage: React.FC = () => {
 
   return (
     <SettingsLayout
+      isMobileSubpage={true}
       sidebar={
         <SettingsSidebar
           activeTab="SECURITY"
@@ -88,7 +89,7 @@ const ChangePasswordPage: React.FC = () => {
         </div>
 
         {/* Change Password Card */}
-        <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200/90 dark:border-gray-800 shadow-xs p-6 space-y-5">
+        <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200/90 dark:border-gray-800 shadow-xs p-4 sm:p-6 space-y-5">
           <div className="flex items-center gap-3 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/40 text-amber-800 dark:text-amber-200 text-xs font-medium">
             <ShieldCheck size={20} className="shrink-0 text-amber-600 dark:text-amber-400" />
             <p>
@@ -150,21 +151,22 @@ const ChangePasswordPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-100 dark:border-gray-800">
               <Link
                 to="/forgot-password"
-                className="text-xs font-bold text-[#e02f21] hover:underline"
+                className="text-xs font-bold text-[#e02f21] hover:underline text-center sm:text-left py-1"
               >
                 Forgot your password?
               </Link>
 
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2.5 w-full sm:w-auto">
                 <Button
                   type="button"
                   variant="secondary"
                   size="sm"
                   disabled={saving}
                   onClick={() => navigate('/settings?tab=SECURITY')}
+                  className="flex-1 sm:flex-none justify-center whitespace-nowrap"
                 >
                   Cancel
                 </Button>
@@ -174,6 +176,7 @@ const ChangePasswordPage: React.FC = () => {
                   size="sm"
                   loading={saving}
                   disabled={saving}
+                  className="flex-1 sm:flex-none justify-center whitespace-nowrap"
                 >
                   Update Password
                 </Button>

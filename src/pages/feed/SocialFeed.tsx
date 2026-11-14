@@ -32,7 +32,6 @@ const SocialFeed = () => {
   const hasLoaded = useRef(false);
   const [cursor, setCursor] = useState<FeedCursor | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
-  const pending = useRef<AbortController | null>(null);
   const morePending = useRef(false);
   const retryCursor = useRef<FeedCursor | undefined>(undefined);
 
@@ -59,9 +58,6 @@ const SocialFeed = () => {
   const fetchFeed = useCallback(
     async (next?: FeedCursor) => {
       if (next && morePending.current) return;
-      pending.current?.abort();
-      const controller = new AbortController();
-      pending.current = controller;
       morePending.current = Boolean(next);
       retryCursor.current = next;
       setLoadingMore(Boolean(next));
@@ -78,31 +74,24 @@ const SocialFeed = () => {
             maxTime: activeMaxTime,
             search: searchKeyword,
           },
-          session?.session?.token,
+          null,
           activeUser?.id,
           next,
-          controller.signal,
         );
-        if (
-          currentRequest === requestId.current &&
-          !controller.signal.aborted
-        ) {
+        if (currentRequest === requestId.current) {
           setPosts((previous) =>
             next ? uniqueRecent([...previous, ...data.posts]) : data.posts,
           );
           setCursor(data.cursor);
         }
       } catch {
-        if (controller.signal.aborted) return;
-        if (currentRequest === requestId.current)
+        if (currentRequest === requestId.current) {
           setFeedError(
             "Your feed could not be loaded. Please check your connection and try again.",
           );
+        }
       } finally {
-        if (
-          currentRequest === requestId.current &&
-          !controller.signal.aborted
-        ) {
+        if (currentRequest === requestId.current) {
           setLoading(false);
           setLoadingMore(false);
           morePending.current = false;
@@ -117,7 +106,6 @@ const SocialFeed = () => {
       activeTag,
       activeMaxTime,
       searchKeyword,
-      session,
       activeUser?.id,
     ],
   );
@@ -127,7 +115,6 @@ const SocialFeed = () => {
     setCursor(null);
     setLoading(true);
     fetchFeed();
-    return () => pending.current?.abort();
   }, [fetchFeed]);
 
   const clearSearch = () => {

@@ -51,7 +51,7 @@ export const PasskeysPage: React.FC = () => {
       });
 
       if (res?.error) {
-        if (res.error.code === 'REGISTRATION_CANCELLED') {
+        if ('code' in res.error && res.error.code === 'REGISTRATION_CANCELLED') {
           return;
         }
         throw new Error(res.error.message || 'Failed to create passkey.');
@@ -87,6 +87,7 @@ export const PasskeysPage: React.FC = () => {
 
   return (
     <SettingsLayout
+      isMobileSubpage={true}
       sidebar={
         <SettingsSidebar
           activeTab="SECURITY"
@@ -254,14 +255,14 @@ export const PasskeysPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <Button
               type="button"
               variant="secondary"
               size="md"
               onClick={() => setIsAddModalOpen(false)}
               disabled={actionLoading}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center cursor-pointer"
             >
               Cancel
             </Button>
@@ -271,9 +272,9 @@ export const PasskeysPage: React.FC = () => {
               size="md"
               loading={actionLoading}
               disabled={actionLoading}
-              className="cursor-pointer font-bold"
+              className="flex-1 sm:flex-none justify-center whitespace-nowrap cursor-pointer font-bold"
             >
-              Continue to Biometrics
+              Continue
             </Button>
           </div>
         </form>

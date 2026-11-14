@@ -1,4 +1,21 @@
 import apiClient from "../../../lib/api-client";
+import { apolloClient } from "../../../lib/graphql/client";
+import {
+  FEED_QUERY,
+  POST_QUERY,
+  TRASH_QUERY,
+} from "../../../lib/graphql/queries";
+import {
+  CREATE_POST_MUTATION,
+  UPDATE_POST_MUTATION,
+  REPOST_MUTATION,
+  TOGGLE_LIKE_MUTATION,
+  CREATE_COMMENT_MUTATION,
+  DELETE_POST_MUTATION,
+  RESTORE_POST_MUTATION,
+  PERMANENT_DELETE_POST_MUTATION,
+  EMPTY_TRASH_MUTATION,
+} from "../../../lib/graphql/mutations";
 import { optimizeImageForUpload } from "../../../lib/media-preferences";
 import { Post, CreatePostPayload, PostFilterParams } from "../types/post.types";
 import {
@@ -22,9 +39,7 @@ import {
   canSharePost,
   matchesPost,
   postAudience,
-  readFeedPage,
   uniqueRecent,
-  type FeedCursor,
 } from "../model/post-policy";
 
 async function visiblePosts(
@@ -40,7 +55,6 @@ async function visiblePosts(
       (post) => postAudience(post) === "FRIENDS" && post.authorId !== actorId,
     )
   ) {
-    // A follow is not a friendship. If the friendship lookup fails, fail closed.
     try {
       friendIds = (await friendsApi.getAllFriends(token)).map(
         (person) => person.id,
@@ -52,6 +66,7 @@ async function visiblePosts(
   const viewer = { id: actorId, friendIds };
   return posts.map((post) => postForViewer(post, viewer)).filter(Boolean);
 }
+
 function localPosts(params: PostFilterParams, actorId?: string) {
   const demo = isDemoMode() ? readDemo() : null;
   return readSocial(socialScope(actorId))
@@ -64,19 +79,6 @@ function localPosts(params: PostFilterParams, actorId?: string) {
           demo?.following.includes(post.authorId)),
     );
 }
-async function remotePosts(
-  params: PostFilterParams & { page?: number },
-  token?: string | null,
-  signal?: AbortSignal,
-) {
-  const query = new URLSearchParams();
-  for (const [field, value] of Object.entries(params))
-    if (value) query.set(field, String(value));
-  return apiClient.get<{
-    data: any[];
-    meta?: { page: number; totalPages: number };
-  }>(`/api/post?${query}`, { token, signal });
-}
 
 export const postsApi = {
   getPosts: async (
@@ -85,46 +87,91 @@ export const postsApi = {
     actorId?: string,
   ): Promise<Post[]> => {
     const limit = Math.min(100, Math.max(1, Number(params.limit) || 50));
-    const res = await remotePosts({ ...params, limit }, token);
-    const posts = uniqueRecent([
-      ...(res.data || []),
-      ...localPosts(params, actorId),
-    ]).filter((post) => matchesPost(post, params));
-    return (await visiblePosts(posts, actorId, token)).slice(0, limit);
+    try {
+      const { data } = await apolloClient.query({
+        query: FEED_QUERY,
+        variables: {
+          first: limit,
+          type: params.type,
+          cuisine: params.cuisine,
+          search: params.search,
+          authorId: params.authorId,
+          groupId: params.groupId,
+          filter: params.filter,
+        },
+        fetchPolicy: "network-only",
+      });
+      const remote = (data?.feed?.edges || []).map((e: any) => e.node);
+      const posts = uniqueRecent([
+        ...remote,
+        ...localPosts(params, actorId),
+      ]).filter((post) => matchesPost(post, params));
+      return (await visiblePosts(posts, actorId, token)).slice(0, limit);
+    } catch {
+      // Fall back to local posts if network fails
+      return (await visiblePosts(localPosts(params, actorId), actorId, token)).slice(0, limit);
+    }
   },
+
   getFeedPage: async (
     params: PostFilterParams,
     token: string | null,
     actorId: string,
-    cursor?: FeedCursor,
+    cursor?: any,
     signal?: AbortSignal,
   ) => {
-    const device = cursor
-      ? []
-      : await visiblePosts(localPosts(params, actorId), actorId, token);
-    return readFeedPage(
-      async (page, limit) => {
-        const response = await remotePosts(
-          { ...params, page, limit },
-          token,
-          signal,
-        );
-        return {
-          data: await visiblePosts(
-            (response.data || []).filter((post) => matchesPost(post, params)),
-            actorId,
-            token,
-          ),
-          hasMore: response.meta
-            ? response.meta.page < response.meta.totalPages
-            : response.data?.length >= limit,
-        };
-      },
-      device,
-      12,
-      cursor,
-    );
+    // Relay cursor pagination: cursor is either the endCursor string or null
+    const afterCursor = typeof cursor === "string" ? cursor : cursor?.endCursor || null;
+
+    try {
+      const { data } = await apolloClient.query({
+        query: FEED_QUERY,
+        variables: {
+          first: 12,
+          after: afterCursor,
+          type: params.type || undefined,
+          cuisine: params.cuisine || undefined,
+          search: params.search || undefined,
+          authorId: params.authorId || undefined,
+          groupId: params.groupId || undefined,
+          filter: params.filter || undefined,
+        },
+        fetchPolicy: "network-only",
+        context: signal ? { fetchOptions: { signal } } : undefined,
+      });
+
+      const feed = data?.feed;
+      const remotePostsList = (feed?.edges || []).map((e: any) => e.node);
+      const visibleRemote = await visiblePosts(remotePostsList, actorId, token);
+
+      const devicePosts = afterCursor
+        ? []
+        : await visiblePosts(localPosts(params, actorId), actorId, token);
+
+      const combined = uniqueRecent([...devicePosts, ...visibleRemote]).filter((p) =>
+        matchesPost(p, params)
+      );
+
+      const pageInfo = feed?.pageInfo;
+      const nextCursor = pageInfo?.hasNextPage ? pageInfo.endCursor : null;
+
+      return {
+        posts: combined,
+        cursor: nextCursor,
+      };
+    } catch (err) {
+      console.warn("[postsApi.getFeedPage error/offline]:", err);
+      // In offline / demo mode fallback to local device posts
+      const device = afterCursor
+        ? []
+        : await visiblePosts(localPosts(params, actorId), actorId, token);
+      return {
+        posts: device,
+        cursor: null,
+      };
+    }
   },
+
   getPostById: async (
     postId: string,
     token: string | null = null,
@@ -139,18 +186,23 @@ export const postsApi = {
     }
     if (postId.startsWith("local-post-"))
       throw new Error("This post is no longer available.");
-    const res = await apiClient.get<{ success: boolean; data: Post }>(
-      `/api/post/${postId}`,
-      { token },
-    );
-    const [visible] = await visiblePosts([res.data], actorId, token);
+
+    const { data } = await apolloClient.query({
+      query: POST_QUERY,
+      variables: { id: postId },
+      fetchPolicy: "network-only",
+    });
+
+    if (!data?.post) throw new Error("This post is no longer available.");
+    const [visible] = await visiblePosts([data.post], actorId, token);
     if (!visible)
       throw new Error("This post is not available to this audience.");
     return visible;
   },
+
   createPost: async (
     postData: CreatePostPayload,
-    token: string | null = null,
+    _token: string | null = null,
     context?: { user: Person; group?: any },
   ) => {
     if (postData.postType === "POLL") {
@@ -161,14 +213,31 @@ export const postsApi = {
       if (error) throw new Error(error);
       return publishLocalPost(postData, context?.user, context?.group);
     }
-    if (!postData.groupId && postAudience(postData) !== "PUBLIC") {
-      return publishLocalPost(postData, context?.user, context?.group);
-    }
-    // The live server has no audience column. Do not send an unsupported field.
-    const { audience: _audience, ...payload } = postData;
-    void _audience;
-    return apiClient.post("/api/post", payload, { token });
+
+    const { data } = await apolloClient.mutate({
+      mutation: CREATE_POST_MUTATION,
+      variables: {
+        input: {
+          postType: postData.postType,
+          audience: postData.audience || "PUBLIC",
+          caption: postData.caption || postData.content || null,
+          title: postData.title || null,
+          image: postData.image || null,
+          images: postData.images || [],
+          ingredients: postData.ingredients || [],
+          instructions: postData.instructions || [],
+          preparationTime: postData.preparationTime || postData.cookingTime || null,
+          servings: postData.servings || null,
+          cuisine: postData.cuisine || null,
+          categories: postData.tags || [],
+          groupId: postData.groupId || null,
+        },
+      },
+    });
+
+    return data?.createPost;
   },
+
   toggleLikePost: async (
     postId: string,
     token: string | null = null,
@@ -186,8 +255,15 @@ export const postsApi = {
       });
       return { success: true, data: result };
     }
-    return apiClient.post(`/api/post/${postId}/like`, {}, { token });
+
+    const { data } = await apolloClient.mutate({
+      mutation: TOGGLE_LIKE_MUTATION,
+      variables: { postId },
+    });
+
+    return { success: true, data: data?.toggleLike };
   },
+
   addComment: async (
     postId: string,
     content: string,
@@ -213,31 +289,41 @@ export const postsApi = {
       });
       return { success: true, data: comment };
     }
-    return apiClient.post(
-      `/api/post/${postId}/comment`,
-      { content },
-      { token },
-    );
+
+    const { data } = await apolloClient.mutate({
+      mutation: CREATE_COMMENT_MUTATION,
+      variables: { postId, content },
+    });
+
+    return { success: true, data: data?.createComment };
   },
+
   sharePost: async (
     postId: string,
     caption = "",
     audience: "PUBLIC" | "FRIENDS" | "ONLY_ME" = "PUBLIC",
-    token: string | null = null,
+    _token: string | null = null,
     actor?: Person,
   ) => {
-    const post = await postsApi.getPostById(postId, token, actor?.id);
+    const post = await postsApi.getPostById(postId, _token, actor?.id);
     if (!canSharePost(post))
       throw new Error(
         "This post's audience does not allow sharing to a public feed.",
       );
     if (postId.startsWith("local-post-"))
       return shareLocalPost(post, actor, caption, audience);
-    return apiClient.post(`/api/post/${postId}/share`, { caption, audience }, { token });
+
+    const { data } = await apolloClient.mutate({
+      mutation: REPOST_MUTATION,
+      variables: { originalPostId: postId, caption, audience },
+    });
+
+    return { success: true, data: data?.repostPost };
   },
+
   deletePost: async (
     postId: string,
-    token: string | null = null,
+    _token: string | null = null,
     actorId?: string,
   ) => {
     if (postId.startsWith("local-post-")) {
@@ -249,12 +335,19 @@ export const postsApi = {
       });
       return { success: true, data: { id: postId } };
     }
-    return apiClient.delete(`/api/post/${postId}`, { token });
+
+    const { data } = await apolloClient.mutate({
+      mutation: DELETE_POST_MUTATION,
+      variables: { postId },
+    });
+
+    return { success: true, data: data?.deletePost };
   },
+
   updatePost: async (
     postId: string,
     data: { caption?: string; title?: string },
-    token: string | null = null,
+    _token: string | null = null,
     actorId?: string,
   ) => {
     if (postId.startsWith("local-post-")) {
@@ -266,8 +359,16 @@ export const postsApi = {
       });
       return { success: true, data: localPost(postId, actorId) };
     }
-    return apiClient.put(`/api/post/${postId}`, data, { token });
+
+    const res = await apolloClient.mutate({
+      mutation: UPDATE_POST_MUTATION,
+      variables: { id: postId, input: data },
+    });
+
+    return { success: true, data: res.data?.updatePost };
   },
+
+  // Binary multipart upload remains infrastructure HTTP stream
   uploadImage: async (
     file: File,
     token: string | null = null,
@@ -277,18 +378,38 @@ export const postsApi = {
     formData.append("image", fileToUpload);
     return apiClient.upload("/api/upload/image", formData, { token });
   },
-  getTrash: async (token: string | null = null): Promise<Post[]> => {
-    const res = await apiClient.get<{ data: Post[] }>("/api/posts/trash", { token });
-    return res.data || [];
+
+  getTrash: async (_token: string | null = null): Promise<Post[]> => {
+    const { data } = await apolloClient.query({
+      query: TRASH_QUERY,
+      variables: { first: 50 },
+      fetchPolicy: "network-only",
+    });
+    return (data?.trash?.edges || []).map((e: any) => e.node);
   },
-  restorePost: async (postId: string, token: string | null = null) => {
-    return apiClient.post(`/api/posts/trash/${postId}/restore`, {}, { token });
+
+  restorePost: async (postId: string, _token: string | null = null) => {
+    const { data } = await apolloClient.mutate({
+      mutation: RESTORE_POST_MUTATION,
+      variables: { postId },
+    });
+    return { success: true, data: data?.restorePost };
   },
-  permanentDeletePost: async (postId: string, token: string | null = null) => {
-    return apiClient.delete(`/api/posts/trash/${postId}`, { token });
+
+  permanentDeletePost: async (postId: string, _token: string | null = null) => {
+    const { data } = await apolloClient.mutate({
+      mutation: PERMANENT_DELETE_POST_MUTATION,
+      variables: { postId },
+    });
+    return { success: true, data: data?.permanentDeletePost };
   },
-  emptyTrash: async (token: string | null = null) => {
-    return apiClient.post("/api/posts/trash/empty", {}, { token });
+
+  emptyTrash: async (_token: string | null = null) => {
+    const { data } = await apolloClient.mutate({
+      mutation: EMPTY_TRASH_MUTATION,
+    });
+    return { success: true, data: data?.emptyTrash };
   },
 };
+
 export default postsApi;

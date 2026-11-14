@@ -1,4 +1,14 @@
 import apiClient from "../../../lib/api-client";
+import { apolloClient } from "../../../lib/graphql/client";
+import {
+  USER_PROFILE_QUERY,
+  USER_PREFERENCES_QUERY,
+} from "../../../lib/graphql/queries";
+import {
+  UPDATE_PROFILE_MUTATION,
+  UPDATE_PREFERENCES_MUTATION,
+  TOGGLE_FOLLOW_MUTATION,
+} from "../../../lib/graphql/mutations";
 import {
   UserProfile,
   UpdateProfilePayload,
@@ -8,36 +18,58 @@ import {
 export const profileApi = {
   getUserProfile: async (
     userId: string,
-    token: string | null = null,
+    _token: string | null = null,
   ): Promise<UserProfile> => {
-    const res = await apiClient.get<{ success: boolean; data: UserProfile }>(
-      `/api/user/${userId}`,
-      { token },
-    );
-    return res.data;
+    const isMe = !userId || userId === "me";
+    const { data } = await apolloClient.query({
+      query: USER_PROFILE_QUERY,
+      variables: { id: isMe ? undefined : userId },
+      fetchPolicy: "network-only",
+    });
+    return data?.userProfile;
   },
 
   updateProfile: async (
     profileData: UpdateProfilePayload,
-    token: string | null = null,
+    _token: string | null = null,
   ) => {
-    return apiClient.patch("/api/user/profile", profileData, { token });
+    const { data } = await apolloClient.mutate({
+      mutation: UPDATE_PROFILE_MUTATION,
+      variables: { input: profileData },
+    });
+    return { success: true, data: data?.updateProfile };
   },
 
-  updateBio: async (bioData: UpdateBioPayload, token: string | null = null) => {
-    return apiClient.patch("/api/user/bio", bioData, { token });
+  updateBio: async (bioData: UpdateBioPayload, _token: string | null = null) => {
+    const { data } = await apolloClient.mutate({
+      mutation: UPDATE_PROFILE_MUTATION,
+      variables: { input: { bio: bioData.bio } },
+    });
+    return { success: true, data: data?.updateProfile };
   },
 
-  getPreferences: async (token: string | null = null) => {
-    return apiClient.get("/api/user/preferences", { token });
+  getPreferences: async (_token: string | null = null) => {
+    const { data } = await apolloClient.query({
+      query: USER_PREFERENCES_QUERY,
+      fetchPolicy: "network-only",
+    });
+    return { success: true, data: data?.userPreferences };
   },
 
-  updatePreferences: async (preferencesData: any, token: string | null = null) => {
-    return apiClient.patch("/api/user/preferences", preferencesData, { token });
+  updatePreferences: async (preferencesData: any, _token: string | null = null) => {
+    const { data } = await apolloClient.mutate({
+      mutation: UPDATE_PREFERENCES_MUTATION,
+      variables: { input: preferencesData },
+    });
+    return { success: true, data: data?.updatePreferences };
   },
 
-  toggleFollow: async (targetUserId: string, token: string | null = null) => {
-    return apiClient.post(`/api/user/${targetUserId}/follow`, {}, { token });
+  toggleFollow: async (targetUserId: string, _token: string | null = null) => {
+    const { data } = await apolloClient.mutate({
+      mutation: TOGGLE_FOLLOW_MUTATION,
+      variables: { targetUserId },
+    });
+    return { success: true, data: data?.toggleFollow };
   },
 
   uploadImage: async (

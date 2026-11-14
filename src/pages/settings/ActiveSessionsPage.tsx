@@ -86,6 +86,7 @@ const ActiveSessionsPage: React.FC = () => {
 
   return (
     <SettingsLayout
+      isMobileSubpage={true}
       sidebar={
         <SettingsSidebar
           activeTab="SECURITY"
@@ -182,7 +183,7 @@ const ActiveSessionsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="shrink-0 flex items-center justify-end sm:self-center pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200/50 dark:border-gray-700/50">
+                    <div className="shrink-0 flex items-center justify-end sm:self-center pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200/50 dark:border-gray-700/50 w-full sm:w-auto">
                       <Button
                         type="button"
                         variant={s.activeNow ? 'outline' : 'danger'}
@@ -190,7 +191,7 @@ const ActiveSessionsPage: React.FC = () => {
                         loading={isItemRevoking}
                         disabled={isItemRevoking || revokingAll}
                         onClick={() => handleRevokeSingle(s)}
-                        className="text-xs px-3 py-1.5 cursor-pointer"
+                        className="text-xs px-3 py-1.5 cursor-pointer w-full sm:w-auto justify-center whitespace-nowrap"
                       >
                         {s.activeNow ? 'Log out' : 'Sign out'}
                       </Button>

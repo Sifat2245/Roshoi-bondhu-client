@@ -4,6 +4,9 @@ import { passkeyClient } from '@better-auth/passkey/client';
 import { useSyncExternalStore } from 'react';
 import { exitDemo, getDemoSession, getDemoSnapshot, isDemoMode, subscribeDemo } from './demo/demo-store';
 
+import { apolloClient } from './graphql/client';
+import { ME_QUERY } from './graphql/queries';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const authClient = createAuthClient({
@@ -145,14 +148,15 @@ export const authApi = {
 
   getMe: async () => {
     if (isDemoMode()) return getDemoSession().user;
-    const res = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.message || 'Failed to load user details.');
-    return json.data;
+    try {
+      const { data } = await apolloClient.query({
+        query: ME_QUERY,
+        fetchPolicy: 'network-only',
+      });
+      return data?.me || null;
+    } catch {
+      return null;
+    }
   },
 
   changePassword: async (payload: { currentPassword: string; newPassword: string }, token?: string | null) => {

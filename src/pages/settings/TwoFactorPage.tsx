@@ -126,7 +126,7 @@ export const TwoFactorPage: React.FC = () => {
         throw new Error(res.error.message || 'Invalid password.');
       }
 
-      const uri = res.data?.totpURI || '';
+      const uri = (res.data && 'totpURI' in res.data) ? res.data.totpURI : '';
       setTotpURI(uri);
 
       try {
@@ -231,6 +231,7 @@ export const TwoFactorPage: React.FC = () => {
 
   return (
     <SettingsLayout
+      isMobileSubpage={true}
       sidebar={
         <SettingsSidebar
           activeTab="SECURITY"
@@ -487,14 +488,14 @@ export const TwoFactorPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <Button
               type="button"
               variant="secondary"
               size="md"
               onClick={handleCloseModal}
               disabled={actionLoading}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center cursor-pointer"
             >
               Cancel
             </Button>
@@ -504,7 +505,7 @@ export const TwoFactorPage: React.FC = () => {
               size="md"
               loading={actionLoading}
               disabled={actionLoading || !password}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center whitespace-nowrap cursor-pointer"
             >
               Enable Email OTP
             </Button>
@@ -540,14 +541,14 @@ export const TwoFactorPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <Button
               type="button"
               variant="secondary"
               size="md"
               onClick={handleCloseModal}
               disabled={actionLoading}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center cursor-pointer"
             >
               Cancel
             </Button>
@@ -557,7 +558,7 @@ export const TwoFactorPage: React.FC = () => {
               size="md"
               loading={actionLoading}
               disabled={actionLoading || !password}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center whitespace-nowrap cursor-pointer"
             >
               Disable Email OTP
             </Button>
@@ -594,14 +595,14 @@ export const TwoFactorPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-2">
+            <div className="flex items-center justify-end gap-2.5 pt-2">
               <Button
                 type="button"
                 variant="secondary"
                 size="md"
                 onClick={handleCloseModal}
                 disabled={actionLoading}
-                className="cursor-pointer"
+                className="flex-1 sm:flex-none justify-center cursor-pointer"
               >
                 Cancel
               </Button>
@@ -611,7 +612,7 @@ export const TwoFactorPage: React.FC = () => {
                 size="md"
                 loading={actionLoading}
                 disabled={actionLoading || !password}
-                className="cursor-pointer"
+                className="flex-1 sm:flex-none justify-center whitespace-nowrap cursor-pointer"
               >
                 Continue
               </Button>
@@ -676,14 +677,14 @@ export const TwoFactorPage: React.FC = () => {
               />
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-2">
+            <div className="flex items-center justify-end gap-2.5 pt-2">
               <Button
                 type="button"
                 variant="secondary"
                 size="md"
                 onClick={handleCloseModal}
                 disabled={actionLoading}
-                className="cursor-pointer"
+                className="flex-1 sm:flex-none justify-center cursor-pointer"
               >
                 Cancel
               </Button>
@@ -693,9 +694,9 @@ export const TwoFactorPage: React.FC = () => {
                 size="md"
                 loading={actionLoading}
                 disabled={actionLoading || totpCode.trim().length < 6}
-                className="cursor-pointer"
+                className="flex-1 sm:flex-none justify-center whitespace-nowrap cursor-pointer"
               >
-                Verify & Activate TOTP
+                Verify & Activate
               </Button>
             </div>
           </form>
@@ -730,14 +731,14 @@ export const TwoFactorPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <Button
               type="button"
               variant="secondary"
               size="md"
               onClick={handleCloseModal}
               disabled={actionLoading}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center cursor-pointer"
             >
               Cancel
             </Button>
@@ -747,9 +748,9 @@ export const TwoFactorPage: React.FC = () => {
               size="md"
               loading={actionLoading}
               disabled={actionLoading || !password}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center whitespace-nowrap cursor-pointer"
             >
-              Remove Authenticator App
+              Remove App
             </Button>
           </div>
         </form>
@@ -783,14 +784,14 @@ export const TwoFactorPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <Button
               type="button"
               variant="secondary"
               size="md"
               onClick={handleCloseModal}
               disabled={actionLoading}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center cursor-pointer"
             >
               Cancel
             </Button>
@@ -800,7 +801,7 @@ export const TwoFactorPage: React.FC = () => {
               size="md"
               loading={actionLoading}
               disabled={actionLoading || !password}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center whitespace-nowrap cursor-pointer"
             >
               Turn Off 2FA
             </Button>

@@ -239,13 +239,13 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
             />
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <Button
               variant="secondary"
               size="md"
               disabled={savingContact}
               onClick={() => setIsContactModalOpen(false)}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center cursor-pointer"
             >
               Cancel
             </Button>
@@ -255,7 +255,7 @@ export const SettingsSecurityTab: React.FC<SettingsSecurityTabProps> = ({ user }
               loading={savingContact}
               disabled={savingContact}
               onClick={handleSaveContact}
-              className="cursor-pointer"
+              className="flex-1 sm:flex-none justify-center cursor-pointer"
             >
               Save
             </Button>
