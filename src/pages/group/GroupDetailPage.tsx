@@ -141,7 +141,7 @@ const GroupDetailPage = () => {
         />
 
         {/* Content Area with Generous Gap */}
-        <div className="max-w-[1250px] mx-auto px-4 sm:px-8 py-6 sm:py-8">
+        <div className="max-w-[1250px] mx-auto px-0 sm:px-8 py-3 sm:py-8">
           {(activeTab === 'DISCUSSION' || activeTab === 'FEATURED') && (
             <div className="flex flex-col lg:flex-row gap-6 items-start">
               {/* Left Column: Discussion Posts & Featured Section */}
@@ -193,7 +193,6 @@ const GroupDetailPage = () => {
                       canManageGroupPins={isMember && ['ADMIN', 'MODERATOR'].includes(group.membershipRole)}
                       showPinBadge={activeTab === 'FEATURED'}
                       onOpenComments={(selected) => setSelectedPostForComments(selected)}
-                      onOpenShare={async (selected) => { try { await postsApi.sharePost(selected.id, '', session?.session?.token, user); notify.success('Post shared to your feed'); } catch (error: any) { notify.error(error.message); } }}
                       onRequireAuth={requireAuth}
                       onDeletePost={(deletedId) =>
                         setPosts((prev) => prev.filter((p) => p.id !== deletedId))

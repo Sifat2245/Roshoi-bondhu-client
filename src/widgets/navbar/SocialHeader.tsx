@@ -10,7 +10,6 @@ import MessengerDropdown from "../../features/messenger/components/MessengerDrop
 import FloatingChatDock from "../../features/messenger/components/FloatingChatDock";
 import notificationsApi from "../../features/notifications/api/notifications.api";
 import LeftSidebar from "../left-sidebar/LeftSidebar";
-import Modal from "../../components/ui/Modal";
 import { isDemoMode } from "../../lib/demo/demo-store";
 import { useChatDock } from "../../context/ChatDockContext";
 import logo from "../../assets/logo.png";
@@ -87,6 +86,15 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
     setIsMessengerOpen(false);
     setGlobalMenuOpen(false);
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!globalMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setGlobalMenuOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [globalMenuOpen]);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
@@ -749,18 +757,48 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
         </nav>
       </header>
 
-      {/* Floating Bottom-Right Chat Popup / Dock (Matching user's Image 1 & 2) */}
-      <FloatingChatDock />
-      <Modal
-        isOpen={globalMenuOpen}
-        onClose={() => setGlobalMenuOpen(false)}
-        title="Navigation"
-        maxWidth="max-w-sm"
-      >
-        <div className="p-3">
-          <LeftSidebar />
+      {/* Floating Bottom-Right Chat Popup / Dock (Desktop only: hidden on mobile) */}
+      <div className="hidden md:block">
+        <FloatingChatDock />
+      </div>
+
+      {/* Mobile Left Sidebar Drawer */}
+      {globalMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex animate-in fade-in duration-150">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            onClick={() => setGlobalMenuOpen(false)}
+          />
+          {/* Slide-out Drawer Panel */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation sidebar"
+            className="relative w-[300px] max-w-[85vw] bg-white dark:bg-[#242526] h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+              <span className="font-bold text-base text-gray-900 dark:text-white">
+                Menu
+              </span>
+              <button
+                type="button"
+                onClick={() => setGlobalMenuOpen(false)}
+                aria-label="Close navigation sidebar"
+                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div
+              className="flex-1 overflow-y-auto p-3 no-scrollbar"
+              onClick={() => setGlobalMenuOpen(false)}
+            >
+              <LeftSidebar />
+            </div>
+          </div>
         </div>
-      </Modal>
+      )}
     </>
   );
 };

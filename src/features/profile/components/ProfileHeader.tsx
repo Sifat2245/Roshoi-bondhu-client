@@ -149,22 +149,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 sm:gap-6">
             {/* Left: Avatar (overlaps cover) + Info block */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
-              {/* Avatar with Camera Overlay & Thought Bubble */}
+              {/* Avatar with Camera Overlay */}
               <div className="-mt-16 sm:-mt-20 md:-mt-24 shrink-0 relative z-10">
-                {/* Floating "Share a thought..." bubble pill (Facebook style) */}
-                {isOwnProfile && (
-                  <button
-                    type="button"
-                    onClick={onOpenCreateRecipe}
-                    className="absolute -top-3.5 -left-2 sm:left-1 bg-white dark:bg-[#3a3b3c] hover:bg-gray-50 dark:hover:bg-[#4e4f50] text-gray-800 dark:text-gray-100 text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 transition cursor-pointer flex items-center gap-1.5 z-20 hover:scale-105 active:scale-95 group"
-                    title="Share a thought..."
-                  >
-                    <span>Share a thought...</span>
-                    {/* Tail */}
-                    <span className="absolute -bottom-1 left-5 w-2.5 h-2.5 bg-white dark:bg-[#3a3b3c] rotate-45 border-r border-b border-gray-100 dark:border-gray-700" />
-                  </button>
-                )}
-
                 {/* Circular Avatar Container */}
                 <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44 rounded-full ring-4 ring-white dark:ring-[#242526] overflow-hidden bg-white dark:bg-gray-800 shadow-xl">
                   <img

@@ -25,8 +25,12 @@ export const ToastProvider = ({ children }) => {
   );
 
   const notify = {
-    success: (message, title = "Success") =>
-      showToast({ type: "success", title, message }),
+    // User directive: Never show success alerts unless explicitly requested
+    success: (message, title = "Success", force = false) => {
+      if (force) {
+        showToast({ type: "success", title, message });
+      }
+    },
     error: (message, title = "Error") =>
       showToast({ type: "error", title, message }),
     info: (message, title = "Notice") =>
@@ -50,26 +54,26 @@ export const ToastProvider = ({ children }) => {
           return (
             <div
               key={toast.id}
-              className="pointer-events-auto bg-white dark:bg-[#242526] text-gray-900 dark:text-white rounded-2xl p-4 shadow-2xl border border-gray-100 dark:border-gray-800 flex items-start gap-3.5 animate-in slide-in-from-bottom-3 duration-200 transition-all"
+              className="pointer-events-auto bg-[#242526] text-white rounded-2xl p-4 shadow-2xl border border-gray-700/80 flex items-start gap-3.5 animate-in slide-in-from-bottom-3 duration-200 transition-all backdrop-blur-md"
             >
               <div className="shrink-0 mt-0.5">
                 {isSuccess && (
-                  <CheckCircle2 size={18} className="text-emerald-500" />
+                  <CheckCircle2 size={18} className="text-emerald-400" />
                 )}
-                {isError && <AlertCircle size={18} className="text-rose-500" />}
+                {isError && <AlertCircle size={18} className="text-rose-400" />}
                 {!isSuccess && !isError && (
-                  <Info size={18} className="text-blue-500" />
+                  <Info size={18} className="text-sky-400" />
                 )}
               </div>
 
               <div className="flex-1 min-w-0">
                 {toast.title && (
-                  <h4 className="font-bold text-sm tracking-tight text-gray-900 dark:text-white">
+                  <h4 className="font-bold text-sm tracking-tight text-white">
                     {toast.title}
                   </h4>
                 )}
                 {toast.message && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
+                  <p className="text-sm text-gray-300 mt-0.5 leading-relaxed font-medium">
                     {toast.message}
                   </p>
                 )}
@@ -79,7 +83,7 @@ export const ToastProvider = ({ children }) => {
                 type="button"
                 aria-label="Dismiss notification"
                 onClick={() => removeToast(toast.id)}
-                className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1 rounded-lg transition shrink-0"
+                className="text-gray-400 hover:text-white p-1 rounded-lg transition shrink-0 cursor-pointer"
               >
                 <X size={16} />
               </button>

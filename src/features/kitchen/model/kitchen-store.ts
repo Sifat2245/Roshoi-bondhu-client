@@ -22,6 +22,7 @@ export type Draft = {
   title: string;
   caption: string;
   image: string;
+  images?: string[];
   preparationTime: string;
   servings: string;
   cuisine: string;

@@ -481,7 +481,6 @@ const GroupsPage: React.FC = () => {
                     key={post.id}
                     post={post}
                     onOpenComments={(post) => navigate(`/post/${post.id}`)}
-                    onOpenShare={async (post) => { try { await postsApi.sharePost(post.id, '', token, user); notify.success('Post shared to your feed'); } catch (error: any) { notify.error(error.message); } }}
                     onRequireAuth={() => navigate('/login')}
                     onDeletePost={(deletedId) =>
                       setGroupPosts((prev) => prev.filter((p) => p.id !== deletedId))

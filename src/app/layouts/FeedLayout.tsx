@@ -59,8 +59,8 @@ export const FeedLayout: React.FC<FeedLayoutProps> = ({
         </aside>
 
         {/* Center Scrollable Feed Stream */}
-        <main className="flex-1 min-w-0 min-h-0 h-full overflow-y-auto no-scrollbar py-4 sm:py-5 px-3 sm:px-6">
-          <div className="max-w-[680px] 2xl:max-w-[720px] mx-auto space-y-4">
+        <main className="flex-1 min-w-0 min-h-0 h-full overflow-y-auto no-scrollbar py-0 sm:py-5 px-0 sm:px-6">
+          <div className="max-w-[680px] 2xl:max-w-[720px] mx-auto space-y-2.5 sm:space-y-4">
             {children}
           </div>
         </main>

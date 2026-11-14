@@ -516,7 +516,7 @@ const UserProfilePage = () => {
         />
 
         {/* Main Content Area with generous gap (matching Image 1) */}
-        <div className="max-w-[1250px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 pb-16">
+        <div className="max-w-[1250px] mx-auto px-0 sm:px-6 pt-3 sm:pt-10 pb-16">
           {activeTab === 'ABOUT' ? (
             /* About View (Matching Image 2 & Image 3) */
             <div className="space-y-8 animate-in fade-in duration-200">
@@ -556,7 +556,7 @@ const UserProfilePage = () => {
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-start">
               {/* Left Column: Intro & Personal Details Card */}
               <div className="w-full lg:w-[360px] xl:w-[380px] shrink-0 lg:sticky lg:top-18 self-start">
-                <button type="button" aria-expanded={showMobileIntro} onClick={() => setShowMobileIntro((value) => !value)} className="lg:hidden w-full rounded-2xl bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-800 p-4 text-left"><span className="flex justify-between gap-3 font-bold text-sm">About {profile.name?.split(' ')[0]}<span className="text-[#e02f21] text-xs">{showMobileIntro ? 'Hide details' : 'See details'}</span></span><span className="block text-sm text-gray-500 mt-2 line-clamp-2">{profile.bio || 'A little more about this home cook.'}</span></button>
+                <button type="button" aria-expanded={showMobileIntro} onClick={() => setShowMobileIntro((value) => !value)} className="lg:hidden w-full rounded-none sm:rounded-2xl bg-white dark:bg-[#242526] border-x-0 sm:border-x border-y border-gray-200 dark:border-gray-800 p-4 text-left"><span className="flex justify-between gap-3 font-bold text-sm">About {profile.name?.split(' ')[0]}<span className="text-[#e02f21] text-xs">{showMobileIntro ? 'Hide details' : 'See details'}</span></span><span className="block text-sm text-gray-500 mt-2 line-clamp-2">{profile.bio || 'A little more about this home cook.'}</span></button>
                 <div className={showMobileIntro ? 'mt-3 lg:mt-0' : 'hidden lg:block'}>
                 <ProfileIntroCard
                   profile={profile}
@@ -567,7 +567,7 @@ const UserProfilePage = () => {
               </div>
 
               {/* Right Column: User Stream / Posts Feed */}
-              <div className="flex-1 min-w-0 space-y-4">
+              <div className="flex-1 min-w-0 space-y-2.5 sm:space-y-4">
                 {/* "What's on your mind?" Create Post Trigger (if own profile) */}
                 {isOwnProfile && (
                   <CreatePostTrigger
@@ -583,7 +583,7 @@ const UserProfilePage = () => {
                 <UploadProgressFeedCard />
 
                 {/* Facebook-style "Posts" Header Card */}
-                <div className="bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3.5">
+                <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl p-4 sm:p-5 border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 shadow-none sm:shadow-xs space-y-3.5">
                   <div className="flex items-center justify-between">
                     <h3 className="font-extrabold text-lg sm:text-xl text-gray-900 dark:text-white">
                       Posts
@@ -699,15 +699,6 @@ const UserProfilePage = () => {
                         post={post}
                         pinContext={{ type: "profile" }}
                         onOpenComments={(selected) => setSelectedPostForComments(selected)}
-                        onOpenShare={async (selected) => {
-                          try {
-                            await postsApi.sharePost(selected.id, '', token, currentUser);
-                            notify.success('Post shared to your feed');
-                            fetchUserPosts();
-                          } catch (error: any) {
-                            notify.error(error.message || 'Could not share this post.');
-                          }
-                        }}
                         onRequireAuth={requireAuth}
                         onDeletePost={(deletedId) =>
                           setPosts((prev) => prev.filter((p) => p.id !== deletedId))

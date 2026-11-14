@@ -12,7 +12,7 @@ export const SkeletonCircle = ({ size = 'w-10 h-10', className = '' }) => (
 
 // Post Card Skeleton (Facebook Style)
 export const PostSkeleton = () => (
-  <div className="bg-white dark:bg-[#242526] rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3.5">
+  <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl p-4 border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 shadow-none sm:shadow-xs space-y-3.5">
     {/* Author Row */}
     <div className="flex items-center gap-3">
       <SkeletonCircle size="w-10 h-10" />
@@ -29,7 +29,7 @@ export const PostSkeleton = () => (
     </div>
 
     {/* Post Image Placeholder */}
-    <div className="w-full h-56 sm:h-72 rounded-xl bg-gray-200 dark:bg-[#3a3b3c] animate-pulse" />
+    <div className="w-full h-56 sm:h-72 rounded-none sm:rounded-xl bg-gray-200 dark:bg-[#3a3b3c] animate-pulse" />
 
     {/* Bottom Actions Row */}
     <div className="pt-2 border-t border-gray-100 dark:border-gray-800 grid grid-cols-3 gap-2">

@@ -14,7 +14,6 @@ import {
   Send,
   ThumbsUp,
   Gift,
-  Edit3,
   Check,
   CheckCheck,
 } from "lucide-react";
@@ -28,9 +27,7 @@ const FloatingChatDock: React.FC = () => {
     closeChat,
     minimizeChat,
     restoreChat,
-    openChat,
     toggleMuteConversation,
-    conversations,
   } = useChatDock();
 
   const [showOptions, setShowOptions] = useState(false);
@@ -53,16 +50,10 @@ const FloatingChatDock: React.FC = () => {
     return null;
   }
 
-  const handleOpenLatest = () => {
-    if (conversations.length > 0) {
-      openChat(conversations[0].id);
-    }
-  };
-
-  // 1. Minimized State: Floating Chat Head + Compose Button (matching Image 2)
+  // 1. Minimized State: Floating Chat Head (Desktop only: hidden on mobile)
   if (isMinimized && activeConversation) {
     return (
-      <div className="fixed bottom-5 right-5 sm:right-8 z-50 flex flex-col items-center gap-3 select-none">
+      <div className="hidden md:flex fixed bottom-5 right-5 sm:right-8 z-50 flex-col items-center gap-3 select-none">
         {/* Floating Chat Head */}
         <div className="relative group">
           <button
@@ -94,39 +85,18 @@ const FloatingChatDock: React.FC = () => {
             <X size={12} />
           </button>
         </div>
-
-        {/* Floating Compose Button (matching Image 2) */}
-        <button
-          type="button"
-          onClick={() => navigate("/messages")}
-          className="w-12 h-12 bg-white dark:bg-[#242526] rounded-full shadow-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer hover:scale-105 active:scale-95"
-          title="New message"
-        >
-          <Edit3 size={19} />
-        </button>
       </div>
     );
   }
 
-  // If no chat is active at all, show the floating compose button at the bottom right (matching Image 2)
+  // If no chat is active at all, do not show any floating button overlay
   if (!activeConversation) {
-    return (
-      <div className="fixed bottom-5 right-5 sm:right-8 z-40 select-none">
-        <button
-          type="button"
-          onClick={handleOpenLatest}
-          className="w-12 h-12 bg-white dark:bg-[#242526] rounded-full shadow-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer hover:scale-105 active:scale-95"
-          title="Open Messenger"
-        >
-          <Edit3 size={19} />
-        </button>
-      </div>
-    );
+    return null;
   }
 
-  // 2. Expanded Floating Chat Window (matching Image 1)
+  // 2. Expanded Floating Chat Window (Desktop only: hidden on mobile)
   return (
-    <div className="fixed bottom-0 right-2 sm:right-6 z-50 w-[calc(100vw-16px)] max-w-[350px] h-[455px] max-h-[calc(100dvh-110px)] bg-white dark:bg-[#242526] rounded-t-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-200 select-none">
+    <div className="hidden md:flex fixed bottom-0 right-2 sm:right-6 z-50 w-[calc(100vw-16px)] max-w-[350px] h-[455px] max-h-[calc(100dvh-110px)] bg-white dark:bg-[#242526] rounded-t-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-200 select-none">
       {/* A. Top Header (Avatar, Name with dropdown, Phone, Video, Minimize, Close) */}
       <div className="h-14 px-3.5 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-gray-800 flex items-center justify-between shrink-0 shadow-2xs relative z-20">
         <div className="flex items-center gap-2.5 min-w-0">

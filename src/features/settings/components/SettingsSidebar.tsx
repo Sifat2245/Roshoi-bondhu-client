@@ -6,6 +6,9 @@ import {
   UserCog,
   ArrowLeft,
   UserX,
+  Film,
+  Trash2,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 export interface SettingsSidebarProps {
@@ -13,28 +16,38 @@ export interface SettingsSidebarProps {
   onSelectTab: (tab: string) => void;
 }
 
+interface NavSection {
+  title?: string;
+  items: {
+    id: string;
+    label: string;
+    icon: React.ComponentType<{ size?: number; className?: string }>;
+  }[];
+}
+
 export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, onSelectTab }) => {
-  const navItems = [
-    { id: 'PERSONAL', label: 'Personal details', icon: UserCog },
+  const sections: NavSection[] = [
     {
-      id: 'HOME',
-      label: 'Home',
-      icon: Home,
+      title: 'Profile and security',
+      items: [
+        { id: 'HOME', label: 'Home', icon: Home },
+        { id: 'PERSONAL', label: 'Personal details', icon: UserCog },
+        { id: 'SECURITY', label: 'Login and security', icon: Shield },
+        { id: 'MANAGE', label: 'Manage account', icon: SlidersHorizontal },
+      ],
     },
     {
-      id: 'SECURITY',
-      label: 'Login and security',
-      icon: Shield,
+      title: 'Media',
+      items: [
+        { id: 'MEDIA', label: 'Media', icon: Film },
+      ],
     },
     {
-      id: 'BLOCKING',
-      label: 'Blocking',
-      icon: UserX,
-    },
-    {
-      id: 'MANAGE',
-      label: 'Manage account',
-      icon: UserCog,
+      title: 'Privacy & Activity',
+      items: [
+        { id: 'BLOCKING', label: 'Blocking', icon: UserX },
+        { id: 'TRASH', label: 'Trash', icon: Trash2 },
+      ],
     },
   ];
 
@@ -62,32 +75,44 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, onS
         </div>
       </div>
 
-      {/* Navigation List - Modern Meta Pill Style matching Screenshot 1 */}
-      <nav aria-label="Account settings" className="flex lg:block gap-2 lg:space-y-1.5 overflow-x-auto pt-1 pb-2">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onSelectTab(item.id)}
-              aria-current={isActive ? 'page' : undefined}
-              className={`shrink-0 lg:w-full flex items-center gap-2.5 px-4 py-3.5 rounded-2xl transition text-left cursor-pointer font-semibold text-sm whitespace-nowrap ${
-                isActive
-                  ? 'bg-[#343638] text-white dark:bg-white dark:text-gray-900 shadow-xs'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2b2c2d]'
-              }`}
-            >
-              <Icon size={19} className="shrink-0" />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
+      {/* Navigation List - Desktop Categorized Sidebar */}
+      <nav aria-label="Account settings" className="space-y-5">
+        {sections.map((section, idx) => (
+          <div key={idx} className="space-y-1">
+            {/* Category Header */}
+            {section.title && (
+              <div className="px-3 pt-2 pb-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  {section.title}
+                </span>
+              </div>
+            )}
+
+            {section.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelectTab(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-2xl transition text-left cursor-pointer font-semibold text-sm whitespace-nowrap ${
+                    isActive
+                      ? 'bg-[#343638] text-white dark:bg-white dark:text-gray-900 shadow-xs'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2b2c2d]'
+                  }`}
+                >
+                  <Icon size={18} className="shrink-0" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </nav>
     </aside>
   );
 };
 
 export default SettingsSidebar;
-

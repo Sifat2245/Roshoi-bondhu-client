@@ -1,4 +1,5 @@
 import apiClient from "../../../lib/api-client";
+import { optimizeImageForUpload } from "../../../lib/media-preferences";
 import { Post, CreatePostPayload, PostFilterParams } from "../types/post.types";
 import {
   localPost,
@@ -221,6 +222,7 @@ export const postsApi = {
   sharePost: async (
     postId: string,
     caption = "",
+    audience: "PUBLIC" | "FRIENDS" | "ONLY_ME" = "PUBLIC",
     token: string | null = null,
     actor?: Person,
   ) => {
@@ -230,8 +232,8 @@ export const postsApi = {
         "This post's audience does not allow sharing to a public feed.",
       );
     if (postId.startsWith("local-post-"))
-      return shareLocalPost(post, actor, caption);
-    return apiClient.post(`/api/post/${postId}/share`, { caption }, { token });
+      return shareLocalPost(post, actor, caption, audience);
+    return apiClient.post(`/api/post/${postId}/share`, { caption, audience }, { token });
   },
   deletePost: async (
     postId: string,
@@ -270,9 +272,23 @@ export const postsApi = {
     file: File,
     token: string | null = null,
   ): Promise<any> => {
+    const fileToUpload = await optimizeImageForUpload(file);
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", fileToUpload);
     return apiClient.upload("/api/upload/image", formData, { token });
+  },
+  getTrash: async (token: string | null = null): Promise<Post[]> => {
+    const res = await apiClient.get<{ data: Post[] }>("/api/posts/trash", { token });
+    return res.data || [];
+  },
+  restorePost: async (postId: string, token: string | null = null) => {
+    return apiClient.post(`/api/posts/trash/${postId}/restore`, {}, { token });
+  },
+  permanentDeletePost: async (postId: string, token: string | null = null) => {
+    return apiClient.delete(`/api/posts/trash/${postId}`, { token });
+  },
+  emptyTrash: async (token: string | null = null) => {
+    return apiClient.post("/api/posts/trash/empty", {}, { token });
   },
 };
 export default postsApi;

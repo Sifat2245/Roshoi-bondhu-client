@@ -20,7 +20,7 @@ export const UploadProgressFeedCard: React.FC = () => {
         return (
           <div
             key={item.id}
-            className="bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-4.5 border border-gray-100 dark:border-gray-800 shadow-sm space-y-3 animate-in fade-in slide-in-from-top-2 duration-200"
+            className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl p-4 sm:p-4.5 border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 shadow-none sm:shadow-sm space-y-3 animate-in fade-in slide-in-from-top-2 duration-200"
           >
             {/* Top row: Avatar + Info + Preview Thumbnail */}
             <div className="flex items-start justify-between gap-3">

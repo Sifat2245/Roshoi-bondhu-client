@@ -7,6 +7,7 @@ import CreatePostTrigger from "../../features/posts/components/CreatePostTrigger
 import PostCard from "../../features/posts/components/PostCard";
 import CreatePostModal from "../../features/posts/components/CreatePostModal";
 import PostDetailsModal from "../../features/posts/components/PostDetailsModal";
+import SharePostModal from "../../features/posts/components/SharePostModal";
 import FeedPeopleYouMayKnow from "../../features/friends/components/FeedPeopleYouMayKnow";
 import UploadProgressFeedCard from "../../features/posts/components/UploadProgressFeedCard";
 import { PostSkeleton } from "../../components/ui/Skeleton";
@@ -16,10 +17,8 @@ import {
 } from "../../features/posts/model/post-policy";
 import postsApi from "../../features/posts/api/posts.api";
 import { Utensils, X, RotateCcw } from "lucide-react";
-import { useToast } from "../../context/ToastContext";
 
 const SocialFeed = () => {
-  const { notify } = useToast();
   const { data: session } = useSession();
   const { user: authUser } = useAuth();
   const activeUser = session?.user || authUser;
@@ -50,6 +49,7 @@ const SocialFeed = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createInitialMode, setCreateInitialMode] = useState("CASUAL");
   const [selectedPostForComments, setSelectedPostForComments] = useState(null);
+  const [sharingPost, setSharingPost] = useState<any>(null);
 
   const requireAuth = () => {
     navigate("/login");
@@ -152,24 +152,12 @@ const SocialFeed = () => {
     setIsCreateOpen(true);
   };
 
-  const handleSharePost = async (post) => {
+  const handleSharePost = (post: any) => {
     if (!activeUser) {
       requireAuth();
       return;
     }
-
-    try {
-      await postsApi.sharePost(
-        post.id,
-        "",
-        session?.session?.token,
-        activeUser,
-      );
-      notify.success("Post shared to your feed");
-      fetchFeed();
-    } catch (err) {
-      notify.error(err.message || "Error sharing post");
-    }
+    setSharingPost(post);
   };
 
   const hasAnyFilter = Boolean(
@@ -427,6 +415,13 @@ const SocialFeed = () => {
           onRequireAuth={requireAuth}
         />
       )}
+      {/* Share Post Modal Popup */}
+      <SharePostModal
+        post={sharingPost}
+        isOpen={Boolean(sharingPost)}
+        onClose={() => setSharingPost(null)}
+        onShared={fetchFeed}
+      />
     </>
   );
 };

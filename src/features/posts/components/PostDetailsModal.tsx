@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { useSession } from "../../../lib/auth-client";
 import Avatar from "../../../components/ui/Avatar";
-import Button from "../../../components/ui/Button";
 import Modal from "../../../components/ui/Modal";
 import postsApi from "../api/posts.api";
 import LikeButton from "./LikeButton";
@@ -14,11 +13,13 @@ import SharedPostPreview from "./SharedPostPreview";
 import PostPoll from "../../community/components/PostPoll";
 import { useSocial } from "../../community/model/useSocial";
 import RecipeExperience from "../../kitchen/components/RecipeExperience";
+import CommentIcon from "../../../components/ui/icons/CommentIcon";
+import ShareIcon from "../../../components/ui/icons/ShareIcon";
+import SharePostModal from "./SharePostModal";
 import {
   Heart,
-  MessageCircle,
-  Share2,
-  Send,
+  SendHorizontal,
+  Loader2,
   ChefHat,
   Clock,
   Users,
@@ -40,6 +41,7 @@ const PostDetailsModal = ({
   const [loadingComments, setLoadingComments] = useState(false);
   const [commentInput, setCommentInput] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const { hasLiked, likeCount, handleLike } = usePostLike(post, onRequireAuth);
 
@@ -160,16 +162,52 @@ const PostDetailsModal = ({
           )}
           {post.postType === "REPOST" && <SharedPostPreview post={post} />}
 
-          {/* Media Image */}
-          {post.image && (
-            <div className="rounded-xl overflow-hidden bg-black/5 max-h-96">
-              <img
-                src={post.image}
-                alt={post.title || "Post image"}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+          {/* Media Images */}
+          {(() => {
+            const modalImages: string[] =
+              Array.isArray(post.images) && post.images.length > 0
+                ? post.images
+                : post.image
+                ? [post.image]
+                : [];
+
+            if (modalImages.length === 0) return null;
+
+            if (modalImages.length === 1) {
+              return (
+                <div className="rounded-xl overflow-hidden bg-black/5 dark:bg-black/20 max-h-96">
+                  <img
+                    src={modalImages[0]}
+                    alt={post.title || "Post image"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              );
+            }
+
+            return (
+              <div
+                className={`rounded-xl overflow-hidden bg-black/5 dark:bg-black/20 gap-1.5 p-1 ${
+                  modalImages.length === 2
+                    ? "grid grid-cols-2"
+                    : "grid grid-cols-2 sm:grid-cols-3"
+                }`}
+              >
+                {modalImages.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="aspect-square rounded-lg overflow-hidden bg-black/10"
+                  >
+                    <img
+                      src={img}
+                      alt={`Photo ${idx + 1}`}
+                      className="w-full h-full object-cover hover:scale-105 transition duration-200"
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Engagement Count line */}
           {isRecipe && <RecipeExperience key={post.id} recipe={post} />}
@@ -190,7 +228,7 @@ const PostDetailsModal = ({
               onClick={() => commentRef.current?.focus()}
               className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[#3a3b3c] flex items-center justify-center gap-2 transition cursor-pointer"
             >
-              <MessageCircle size={18} />
+              <CommentIcon size={19} />
               <span>Comment</span>
             </button>
 
@@ -202,23 +240,10 @@ const PostDetailsModal = ({
                   ? "Share post"
                   : "Sharing is unavailable for this audience"
               }
-              onClick={async () => {
-                try {
-                  await postsApi.sharePost(
-                    post.id,
-                    "",
-                    session?.session?.token,
-                    user,
-                  );
-                  notify.success("Post shared to your feed");
-                  onPostUpdated?.();
-                } catch (error: any) {
-                  notify.error(error.message || "Could not share this post.");
-                }
-              }}
+              onClick={() => setIsShareModalOpen(true)}
               className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[#3a3b3c] flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Share2 size={18} />
+              <ShareIcon size={19} />
               <span>Share</span>
             </button>
           </div>
@@ -300,21 +325,36 @@ const PostDetailsModal = ({
                 placeholder="Write a comment..."
                 className="w-full pl-4 pr-11 py-2.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-full text-sm dark:text-white focus:outline-none focus:border-[#e02f21]"
               />
-              <Button
+              <button
                 type="submit"
-                loading={submittingComment}
-                disabled={!commentInput.trim()}
+                disabled={!commentInput.trim() || submittingComment}
                 aria-label="Send comment"
-                variant="primary"
-                size="sm"
-                className="absolute right-1 w-8 h-8 p-0 rounded-full flex items-center justify-center shadow-none cursor-pointer"
+                className={`absolute right-1.5 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                  commentInput.trim()
+                    ? "bg-[#e02f21] text-white hover:bg-[#c22417] shadow-xs active:scale-95 opacity-100"
+                    : "opacity-0 pointer-events-none"
+                }`}
               >
-                {!submittingComment && <Send size={14} />}
-              </Button>
+                {submittingComment ? (
+                  <Loader2 size={15} className="animate-spin text-white" />
+                ) : (
+                  <SendHorizontal size={15} className="translate-x-0.5" />
+                )}
+              </button>
             </div>
           </form>
         </div>
       </div>
+
+      {/* Share Post Modal Popup */}
+      <SharePostModal
+        post={post}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        onShared={() => {
+          onPostUpdated?.();
+        }}
+      />
     </Modal>
   );
 };

@@ -1,7 +1,7 @@
 import { User } from "../../auth/types/auth.types";
 import type { Poll } from "../../community/model/community-domain";
 
-import type { PostAudience } from "../model/post-policy";
+export type { PostAudience } from "../model/post-policy";
 
 export type PostType = "CASUAL" | "RECIPE" | "POLL" | "REPOST";
 
@@ -31,6 +31,7 @@ export interface Post {
   title?: string;
   content: string;
   image?: string | null;
+  images?: string[];
   cuisine?: string | null;
   cookingTime?: number | null;
   servings?: number | null;
@@ -43,6 +44,9 @@ export interface Post {
   likes?: Like[];
   comments?: Comment[];
   isLiked?: boolean;
+  caption?: string | null;
+  deletedAt?: string | null;
+  daysRemaining?: number;
   createdAt: string;
   updatedAt?: string;
 }
@@ -59,6 +63,7 @@ export interface CreatePostPayload {
   caption?: string;
   postType: PostType | string;
   image?: string | null;
+  images?: string[];
   cuisine?: string | null;
   cookingTime?: number | null;
   preparationTime?: number | null;

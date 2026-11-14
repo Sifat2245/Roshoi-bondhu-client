@@ -11,13 +11,15 @@ import { usePostLike } from "../model/usePostLike";
 import { useToast } from "../../../context/ToastContext";
 import Modal from "../../../components/ui/Modal";
 import { pinnedIn, canSharePost, type PinContext } from "../model/post-policy";
+import { isStepGalleryFullscreen, isShowNutritionOverlay } from "../../../lib/media-preferences";
 import SaveRecipeModal from "../../kitchen/components/SaveRecipeModal";
 import { useKitchen } from "../../kitchen/model/kitchen-store";
 import { useSocial } from "../../community/model/useSocial";
+import CommentIcon from "../../../components/ui/icons/CommentIcon";
+import ShareIcon from "../../../components/ui/icons/ShareIcon";
+import SharePostModal from "./SharePostModal";
 import {
   Heart,
-  MessageCircle,
-  Share2,
   ChefHat,
   Clock,
   Users,
@@ -69,6 +71,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
   // Post Actions Menu State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const isPinned = pinnedIn(post, social.pins, pinContext);
   const canPin =
     pinContext?.type === "profile"
@@ -175,7 +178,6 @@ const PostCard: React.FC<PostCardProps> = ({
       if (onUpdatePost) {
         onUpdatePost({ ...post, caption: caption.trim(), title: title.trim() });
       }
-      notify.success("Post updated successfully");
       setIsEditing(false);
     } catch (err: any) {
       notify.error(err.message || "Failed to update post");
@@ -195,7 +197,6 @@ const PostCard: React.FC<PostCardProps> = ({
       if (onDeletePost) {
         onDeletePost(post.id);
       }
-      notify.success("Post moved to trash");
     } catch (err: any) {
       notify.error(err.message || "Failed to move post to trash");
     } finally {
@@ -214,13 +215,13 @@ const PostCard: React.FC<PostCardProps> = ({
   return (
     <article
       data-post-id={post.id}
-      className={`bg-white dark:bg-[#242526] text-gray-900 dark:text-gray-100 rounded-2xl shadow-xs border border-gray-100 dark:border-gray-800 relative transition-shadow ${
+      className={`bg-white dark:bg-[#242526] text-gray-900 dark:text-gray-100 rounded-none sm:rounded-2xl shadow-none sm:shadow-xs border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 relative transition-shadow ${
         isMenuOpen ? "z-30" : "z-10"
       }`}
     >
       {/* Pinned Badge if pinned */}
       {showPinBadge && isPinned && (
-        <div className="bg-red-50/60 dark:bg-red-950/20 px-4 py-1.5 border-b border-red-100 dark:border-red-900/30 flex items-center justify-between rounded-t-2xl">
+        <div className="bg-red-50/60 dark:bg-red-950/20 px-4 py-1.5 border-b border-red-100 dark:border-red-900/30 flex items-center justify-between rounded-t-none sm:rounded-t-2xl">
           <div className="flex items-center gap-1.5 text-xs font-bold text-[#e02f21]">
             <Pin size={13} className="fill-[#e02f21]" />
             <span>
@@ -490,24 +491,164 @@ const PostCard: React.FC<PostCardProps> = ({
         </div>
       )}
 
-      {/* Media Photo */}
-      {post.image && !isRepost && (
-        <button
-          type="button"
-          aria-label={`View ${post.title || "post from " + post.author?.name}`}
-          onClick={() => onOpenComments && onOpenComments(post)}
-          className="block w-full cursor-pointer overflow-hidden max-h-[560px] bg-black/5 dark:bg-black/20"
-        >
-          <img
-            src={post.image}
-            alt={
-              post.title || "A kitchen moment shared by " + post.author?.name
-            }
-            loading="lazy"
-            className="w-full max-h-[560px] object-cover hover:opacity-95 transition"
-          />
-        </button>
-      )}
+      {/* Media Photos (Single or Multi-Image Grid) */}
+      {!isRepost && (() => {
+        const postImages: string[] =
+          Array.isArray(post.images) && post.images.length > 0
+            ? post.images
+            : post.image
+            ? [post.image]
+            : [];
+
+        if (postImages.length === 0) return null;
+
+        const handleImageClick = () => {
+          if (isStepGalleryFullscreen() && onOpenComments) {
+            onOpenComments(post);
+          }
+        };
+
+        const showNutrition = isShowNutritionOverlay() && (post.preparationTime || post.servings);
+
+        if (postImages.length === 1) {
+          return (
+            <div className="relative block w-full overflow-hidden max-h-[560px] bg-black/5 dark:bg-black/20">
+              <button
+                type="button"
+                aria-label={`View ${post.title || "post from " + post.author?.name}`}
+                onClick={handleImageClick}
+                className="block w-full cursor-pointer overflow-hidden max-h-[560px]"
+              >
+                <img
+                  src={postImages[0]}
+                  alt={
+                    post.title || "A kitchen moment shared by " + post.author?.name
+                  }
+                  loading="lazy"
+                  className="w-full max-h-[560px] object-cover hover:opacity-95 transition"
+                />
+              </button>
+              {showNutrition && (
+                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-2 shadow-md pointer-events-none">
+                  {post.preparationTime && <span>⏱️ {post.preparationTime}m</span>}
+                  {post.servings && <span>🍽️ Serves {post.servings}</span>}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        if (postImages.length === 2) {
+          return (
+            <div className="relative">
+              <div
+                onClick={handleImageClick}
+                className="grid grid-cols-2 gap-1 w-full max-h-[460px] cursor-pointer overflow-hidden bg-black/5 dark:bg-black/20"
+              >
+                {postImages.map((img, idx) => (
+                  <div key={idx} className="h-64 sm:h-80 w-full overflow-hidden">
+                    <img
+                      src={img}
+                      alt={`Photo ${idx + 1}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover hover:scale-[1.02] transition duration-200"
+                    />
+                  </div>
+                ))}
+              </div>
+              {showNutrition && (
+                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-2 shadow-md pointer-events-none">
+                  {post.preparationTime && <span>⏱️ {post.preparationTime}m</span>}
+                  {post.servings && <span>🍽️ Serves {post.servings}</span>}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        if (postImages.length === 3) {
+          return (
+            <div className="relative">
+              <div
+                onClick={handleImageClick}
+                className="grid grid-cols-2 gap-1 w-full max-h-[500px] cursor-pointer overflow-hidden bg-black/5 dark:bg-black/20"
+              >
+                <div className="row-span-2 h-full min-h-[260px] overflow-hidden">
+                  <img
+                    src={postImages[0]}
+                    alt="Photo 1"
+                    loading="lazy"
+                    className="w-full h-full object-cover hover:scale-[1.02] transition duration-200"
+                  />
+                </div>
+                <div className="h-36 sm:h-48 overflow-hidden">
+                  <img
+                    src={postImages[1]}
+                    alt="Photo 2"
+                    loading="lazy"
+                    className="w-full h-full object-cover hover:scale-[1.02] transition duration-200"
+                  />
+                </div>
+                <div className="h-36 sm:h-48 overflow-hidden">
+                  <img
+                    src={postImages[2]}
+                    alt="Photo 3"
+                    loading="lazy"
+                    className="w-full h-full object-cover hover:scale-[1.02] transition duration-200"
+                  />
+                </div>
+              </div>
+              {showNutrition && (
+                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-2 shadow-md pointer-events-none">
+                  {post.preparationTime && <span>⏱️ {post.preparationTime}m</span>}
+                  {post.servings && <span>🍽️ Serves {post.servings}</span>}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // 4 or more photos: 2x2 grid with overlay on 4th photo
+        const displayed = postImages.slice(0, 4);
+        const remainingCount = postImages.length - 4;
+
+        return (
+          <div className="relative">
+            <div
+              onClick={handleImageClick}
+              className="grid grid-cols-2 gap-1 w-full cursor-pointer overflow-hidden bg-black/5 dark:bg-black/20"
+            >
+              {displayed.map((img, idx) => {
+                const isLast = idx === 3 && remainingCount > 0;
+                return (
+                  <div
+                    key={idx}
+                    className="relative h-40 sm:h-52 w-full overflow-hidden"
+                  >
+                    <img
+                      src={img}
+                      alt={`Photo ${idx + 1}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover hover:scale-[1.02] transition duration-200"
+                    />
+                    {isLast && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-2xl font-black">
+                        +{remainingCount}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {showNutrition && (
+              <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-2 shadow-md pointer-events-none">
+                {post.preparationTime && <span>⏱️ {post.preparationTime}m</span>}
+                {post.servings && <span>🍽️ Serves {post.servings}</span>}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {showSave && (
         <SaveRecipeModal recipe={post} onClose={() => setShowSave(false)} />
@@ -540,13 +681,23 @@ const PostCard: React.FC<PostCardProps> = ({
           onClick={() => onOpenComments && onOpenComments(post)}
           className="py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
         >
-          <MessageCircle size={19} />
+          <CommentIcon size={19} />
           <span>Comment</span>
         </button>
 
         <button
           type="button"
-          onClick={() => onOpenShare && onOpenShare(post)}
+          onClick={() => {
+            if (!session?.user) {
+              onRequireAuth?.();
+              return;
+            }
+            if (onOpenShare) {
+              onOpenShare(post);
+            } else {
+              setIsShareModalOpen(true);
+            }
+          }}
           disabled={!canSharePost(post)}
           title={
             canSharePost(post)
@@ -555,28 +706,37 @@ const PostCard: React.FC<PostCardProps> = ({
           }
           className="py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <Share2 size={19} />
+          <ShareIcon size={19} />
           <span>Share</span>
         </button>
       </div>
+
+      {/* Share Post Modal Popup */}
+      <SharePostModal
+        post={post}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        onShared={() => {
+          onUpdatePost?.(post);
+        }}
+      />
 
       {/* Move to Trash Confirmation Dialog */}
       <Modal
         isOpen={showTrashConfirm}
         onClose={() => setShowTrashConfirm(false)}
-        title="Delete this post?"
+        title="Move to trash?"
         maxWidth="max-w-sm"
       >
         <div className="p-5 space-y-5">
           <p className="text-sm text-gray-500">
-            This removes the post and its conversation. This action cannot be
-            undone.
+            Items in your trash are permanently deleted after 30 days. You can restore this post anytime from Settings &gt; Trash.
           </p>
           <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setShowTrashConfirm(false)}
-              className="px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-semibold"
+              className="px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-semibold cursor-pointer"
             >
               Cancel
             </button>
@@ -584,9 +744,9 @@ const PostCard: React.FC<PostCardProps> = ({
               type="button"
               disabled={isDeleting}
               onClick={handleConfirmTrash}
-              className="px-4 py-2.5 rounded-xl bg-[#e02f21] text-white text-sm font-bold disabled:opacity-50"
+              className="px-4 py-2.5 rounded-xl bg-[#e02f21] text-white text-sm font-bold disabled:opacity-50 cursor-pointer"
             >
-              {isDeleting ? "Deleting…" : "Delete post"}
+              {isDeleting ? "Moving…" : "Move to trash"}
             </button>
           </div>
         </div>

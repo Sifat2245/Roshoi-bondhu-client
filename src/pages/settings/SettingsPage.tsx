@@ -3,6 +3,7 @@ import { useSession } from '../../lib/auth-client';
 import { useAuth } from '../../context/AuthContext';
 import { SettingsLayout } from '../../app/layouts/SettingsLayout';
 import SettingsSidebar from '../../features/settings/components/SettingsSidebar';
+import SettingsMobileMenu from '../../features/settings/components/SettingsMobileMenu';
 import SettingsHomeTab from '../../features/settings/components/SettingsHomeTab';
 import SettingsSecurityTab from '../../features/settings/components/SettingsSecurityTab';
 import SettingsManageAccountTab from '../../features/settings/components/SettingsManageAccountTab';
@@ -10,6 +11,9 @@ import { Link, useSearchParams } from 'react-router';
 import SettingsPersonalTab from '../../features/settings/components/SettingsPersonalTab';
 import SettingsPreferences from '../../features/settings/components/SettingsPreferences';
 import SettingsBlockingTab from '../../features/settings/components/SettingsBlockingTab';
+import SettingsMediaTab from '../../features/settings/components/SettingsMediaTab';
+import SettingsTrashTab from '../../features/settings/components/SettingsTrashTab';
+import { ArrowLeft } from 'lucide-react';
 
 const SettingsPage = () => {
   const { user: authUser, refetchUser } = useAuth();
@@ -17,9 +21,19 @@ const SettingsPage = () => {
   const user = authUser || session?.user;
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const requestedTab = searchParams.get('tab') || 'HOME';
-  const activeTab = ['HOME', 'PERSONAL', 'SECURITY', 'BLOCKING', 'MANAGE'].includes(requestedTab) ? requestedTab : 'HOME';
-  const setActiveTab = (tab: string) => setSearchParams(tab === 'HOME' ? {} : { tab });
+  const rawTab = searchParams.get('tab');
+  const allowedTabs = ['HOME', 'PERSONAL', 'SECURITY', 'MANAGE', 'MEDIA', 'BLOCKING', 'TRASH'];
+  const hasSelectedTab = Boolean(rawTab && allowedTabs.includes(rawTab));
+  const activeTab = hasSelectedTab ? rawTab! : 'HOME';
+  const isMobileSubpage = hasSelectedTab;
+
+  const setActiveTab = (tab: string) => {
+    if (!tab) {
+      setSearchParams({});
+    } else {
+      setSearchParams({ tab });
+    }
+  };
 
   if (!user) {
     return (
@@ -42,20 +56,45 @@ const SettingsPage = () => {
 
   return (
     <SettingsLayout
+      isMobileSubpage={isMobileSubpage}
       sidebar={
-        <SettingsSidebar
-          activeTab={activeTab}
-          onSelectTab={setActiveTab}
-        />
+        <>
+          <div className="lg:hidden">
+            <SettingsMobileMenu
+              user={user}
+              onSelectTab={setActiveTab}
+            />
+          </div>
+          <div className="hidden lg:block">
+            <SettingsSidebar
+              activeTab={activeTab}
+              onSelectTab={setActiveTab}
+            />
+          </div>
+        </>
       }
     >
+      {/* Mobile Back Button to Settings Menu */}
+      {isMobileSubpage && (
+        <div className="lg:hidden mb-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab('')}
+            className="inline-flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-[#e02f21] py-1 cursor-pointer transition"
+          >
+            <ArrowLeft size={16} />
+            <span>Settings</span>
+          </button>
+        </div>
+      )}
+
       {activeTab === 'HOME' && (
         <div className="space-y-6">
-        <SettingsHomeTab
-          user={user}
-          onNavigateTab={setActiveTab}
-        />
-        <SettingsPreferences />
+          <SettingsHomeTab
+            user={user}
+            onNavigateTab={setActiveTab}
+          />
+          <SettingsPreferences />
         </div>
       )}
       {activeTab === 'PERSONAL' && (
@@ -76,6 +115,14 @@ const SettingsPage = () => {
 
       {activeTab === 'BLOCKING' && (
         <SettingsBlockingTab />
+      )}
+
+      {activeTab === 'MEDIA' && (
+        <SettingsMediaTab />
+      )}
+
+      {activeTab === 'TRASH' && (
+        <SettingsTrashTab />
       )}
 
       {activeTab === 'MANAGE' && (

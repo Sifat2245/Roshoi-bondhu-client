@@ -6,7 +6,6 @@ import PostDetailsModal from "../../features/posts/components/PostDetailsModal";
 import postsApi from "../../features/posts/api/posts.api";
 import { useSession } from "../../lib/auth-client";
 import { PostSkeleton } from "../../components/ui/Skeleton";
-import { useToast } from "../../context/ToastContext";
 import { useSocial } from "../../features/community/model/useSocial";
 
 export default function PostPage() {
@@ -14,7 +13,6 @@ export default function PostPage() {
   const { data: session } = useSession();
   const { user } = useSocial();
   const navigate = useNavigate();
-  const { notify } = useToast();
   const [post, setPost] = useState<any>(null);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(true);
@@ -57,19 +55,6 @@ export default function PostPage() {
             <PostCard
               post={post}
               onOpenComments={() => setOpen(true)}
-              onOpenShare={async () => {
-                try {
-                  await postsApi.sharePost(
-                    post.id,
-                    "",
-                    session?.session?.token,
-                    user,
-                  );
-                  notify.success("Post shared to your feed");
-                } catch (e: any) {
-                  notify.error(e.message || "Could not share this post.");
-                }
-              }}
               onDeletePost={() => navigate("/")}
               onUpdatePost={setPost}
             />

@@ -20,7 +20,7 @@ const CreatePostTrigger = ({ onClick, onRequireAuth }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#242526] rounded-2xl p-3.5 sm:p-4 shadow-xs border border-gray-100 dark:border-gray-800">
+    <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl p-3.5 sm:p-4 shadow-none sm:shadow-xs border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800">
       {/* Top: Avatar & Rounded Input Button */}
       <div className="flex items-center gap-3">
         <Avatar src={user?.image} alt={user?.name || "Cook"} size="md" />

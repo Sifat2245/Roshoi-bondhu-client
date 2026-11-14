@@ -59,7 +59,7 @@ export const FeedPeopleYouMayKnow: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-gray-800 p-4 space-y-3 shadow-xs">
+      <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 p-4 space-y-3 shadow-none sm:shadow-xs">
         <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-44 animate-pulse"></div>
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map((i) => (
@@ -78,7 +78,7 @@ export const FeedPeopleYouMayKnow: React.FC = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 space-y-3 shadow-xs overflow-hidden">
+    <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 space-y-3 shadow-none sm:shadow-xs overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

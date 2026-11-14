@@ -14,6 +14,9 @@ import {
   Plus,
   Trash2,
   BarChart3,
+  ChevronDown,
+  Check,
+  X,
 } from "lucide-react";
 import { useToast } from "../../../context/ToastContext";
 import {
@@ -51,11 +54,28 @@ const CreatePostModal = ({
   const [savedAt, setSavedAt] = useState("");
   const [poll, setPoll] = useState(emptyPoll);
   const [audience, setAudience] = useState<PostAudience>("PUBLIC");
+  const [isAudienceDropdownOpen, setIsAudienceDropdownOpen] = useState(false);
+  const audienceDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isAudienceDropdownOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        audienceDropdownRef.current &&
+        !audienceDropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsAudienceDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isAudienceDropdownOpen]);
 
   const [mode, setMode] = useState(initialMode); // 'CASUAL' or 'RECIPE'
   const [caption, setCaption] = useState("");
-  const [image, setImage] = useState("");
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [mediaItems, setMediaItems] = useState<
+    { id: string; file?: File; previewUrl: string }[]
+  >([]);
 
   // Recipe Specific States
   const [title, setTitle] = useState("");
@@ -76,7 +96,22 @@ const CreatePostModal = ({
     setAudience(postAudience(initialDraft || {}));
     setTitle(initialDraft?.title || "");
     setCaption(initialDraft?.caption || "");
-    setImage(initialDraft?.image || "");
+    if (
+      initialDraft?.images &&
+      Array.isArray(initialDraft.images) &&
+      initialDraft.images.length > 0
+    ) {
+      setMediaItems(
+        initialDraft.images.map((url: string, i: number) => ({
+          id: `draft_${i}`,
+          previewUrl: url,
+        }))
+      );
+    } else if (initialDraft?.image) {
+      setMediaItems([{ id: "draft_0", previewUrl: initialDraft.image }]);
+    } else {
+      setMediaItems([]);
+    }
     setPreparationTime(initialDraft?.preparationTime || "30");
     setServings(initialDraft?.servings || "4");
     setCuisine(initialDraft?.cuisine || "Bangladeshi");
@@ -96,7 +131,7 @@ const CreatePostModal = ({
       ![
         title,
         caption,
-        image,
+        mediaItems[0]?.previewUrl || "",
         ...(mode === "POLL" ? [poll.question, ...poll.options] : []),
         ...ingredients,
         ...instructions.map((s) => s.title + s.details),
@@ -111,7 +146,8 @@ const CreatePostModal = ({
       poll: mode === "POLL" ? poll : undefined,
       title,
       caption,
-      image,
+      image: mediaItems[0]?.previewUrl || "",
+      images: mediaItems.map((m) => m.previewUrl),
       preparationTime,
       servings,
       cuisine,
@@ -137,7 +173,7 @@ const CreatePostModal = ({
     poll,
     title,
     caption,
-    image,
+    mediaItems,
     preparationTime,
     servings,
     cuisine,
@@ -163,39 +199,41 @@ const CreatePostModal = ({
 
   if (!isOpen || !user) return null;
 
-  // Upload image via API client
-  const handlePhotoUpload = async (file) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
-      notify.error("Choose an image smaller than 5 MB.");
-      return;
-    }
-    setUploadingPhoto(true);
-    try {
-      if (mode === "POLL" || (!groupId && audience !== "PUBLIC")) {
-        const preview = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result));
-          reader.onerror = () =>
-            reject(
-              new Error("This photo could not be opened. Try another image."),
-            );
-          reader.readAsDataURL(file);
-        });
-        setImage(preview);
-        return;
+  // Local-only photo selection: 0 network calls when picking images!
+  const handleSelectPhotos = (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList);
+    const validItems: { id: string; file: File; previewUrl: string }[] = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        notify.error(`${file.name} is not a valid image.`);
+        continue;
       }
-      const data = await postsApi.uploadImage(file, session?.session?.token);
-      if (data.data?.url) {
-        setImage(data.data.url);
-      } else {
-        throw new Error(data.message || "Image upload failed");
+      if (file.size > 10 * 1024 * 1024) {
+        notify.error(`${file.name} exceeds 10 MB limit.`);
+        continue;
       }
-    } catch (err) {
-      notify.error(err.message, "Upload Failed");
-    } finally {
-      setUploadingPhoto(false);
+      validItems.push({
+        id: `local_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        file,
+        previewUrl: URL.createObjectURL(file),
+      });
     }
+
+    if (validItems.length > 0) {
+      setMediaItems((prev) => [...prev, ...validItems]);
+    }
+  };
+
+  const handleRemoveMedia = (id: string) => {
+    setMediaItems((prev) => {
+      const removed = prev.find((m) => m.id === id);
+      if (removed?.previewUrl && removed.previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(removed.previewUrl);
+      }
+      return prev.filter((m) => m.id !== id);
+    });
   };
 
   const handleAddInstruction = () => {
@@ -226,7 +264,7 @@ const CreatePostModal = ({
       if (isRecipe && !title.trim()) {
         throw new Error("Please provide a recipe title.");
       }
-      if (mode === "CASUAL" && !caption.trim() && !image)
+      if (mode === "CASUAL" && !caption.trim() && mediaItems.length === 0)
         throw new Error("Add a story or photo before posting.");
       if (
         isRecipe &&
@@ -243,7 +281,6 @@ const CreatePostModal = ({
       const postMode = mode;
       const postCaption = caption.trim();
       const postTitle = isRecipe ? title.trim() : null;
-      const postImage = image;
       const postAudience = audience;
       const postPoll = poll;
       const postPreparationTime = preparationTime;
@@ -255,6 +292,7 @@ const CreatePostModal = ({
       const currentDraftId = draftId.current;
       const postUser = user;
       const postToken = session?.session?.token;
+      const postMedia = [...mediaItems];
 
       // Close modal immediately so user doesn't wait!
       onClose();
@@ -262,7 +300,7 @@ const CreatePostModal = ({
       // Reset form state
       setCaption("");
       setTitle("");
-      setImage("");
+      setMediaItems([]);
       setIngredients([]);
       setInstructions([{ title: "", details: "" }]);
 
@@ -284,28 +322,30 @@ const CreatePostModal = ({
               ? "created a poll."
               : "published a post.",
           caption: postCaption || postTitle || undefined,
-          previewUrl: postImage || undefined,
+          previewUrl: postMedia[0]?.previewUrl || undefined,
           userImage: postUser?.image,
           userName: postUser?.name || "You",
         },
         async (onProgress) => {
-          let publishedImage = postImage;
-          if (
-            postImage.startsWith("data:") &&
-            postMode !== "POLL" &&
-            (postGroupId || postAudience === "PUBLIC")
-          ) {
-            onProgress(35);
-            const blob = await (await fetch(postImage)).blob();
-            const uploaded = await postsApi.uploadImage(
-              new File([blob], "post-photo", { type: blob.type }),
-              postToken,
-            );
-            if (!uploaded.data?.url)
-              throw new Error("Photo upload failed. Your draft is still here.");
-            publishedImage = uploaded.data.url;
-            onProgress(70);
+          const uploadedUrls: string[] = [];
+
+          // Upload any local media files
+          if (postMedia.length > 0) {
+            for (let i = 0; i < postMedia.length; i++) {
+              const item = postMedia[i];
+              if (item.file) {
+                const uploaded = await postsApi.uploadImage(item.file, postToken);
+                if (uploaded?.data?.url) {
+                  uploadedUrls.push(uploaded.data.url);
+                }
+              } else if (item.previewUrl) {
+                uploadedUrls.push(item.previewUrl);
+              }
+              onProgress(Math.round(((i + 1) / postMedia.length) * 70));
+            }
           }
+
+          const primaryImage = uploadedUrls[0] || null;
 
           await postsApi.createPost(
             {
@@ -314,7 +354,8 @@ const CreatePostModal = ({
               ...(postMode === "POLL" ? { poll: postPoll } : {}),
               caption: postCaption,
               title: postTitle,
-              image: publishedImage || null,
+              image: primaryImage,
+              images: uploadedUrls,
               preparationTime: isRecipe ? parseInt(postPreparationTime) : null,
               servings: isRecipe ? parseInt(postServings) : null,
               cuisine: isRecipe ? postCuisine : null,
@@ -338,16 +379,6 @@ const CreatePostModal = ({
           }
 
           if (onPostCreated) onPostCreated();
-
-          notify.success(
-            !postGroupId && postAudience !== "PUBLIC"
-              ? "Post saved with your selected audience"
-              : postMode === "POLL"
-              ? "Your poll has been published!"
-              : isRecipe
-              ? "Your recipe has been shared!"
-              : "Your post has been shared!"
-          );
         }
       ).catch((err) => {
         notify.error(err.message || "Post Failed", "Post Failed");
@@ -373,12 +404,12 @@ const CreatePostModal = ({
               {user.name}
             </p>
             {groupId ? (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] text-sm font-semibold mt-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] text-xs font-semibold mt-1">
                 {(initialDraft?.group || defaultGroup)?.privacy ===
                 "PRIVATE" ? (
-                  <Lock size={14} />
+                  <Lock size={13} />
                 ) : (
-                  <Globe size={14} />
+                  <Globe size={13} />
                 )}
                 <span>
                   {(initialDraft?.group || defaultGroup)?.privacy === "PRIVATE"
@@ -387,49 +418,90 @@ const CreatePostModal = ({
                 </span>
               </div>
             ) : (
-              <label className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] px-2.5 mt-1 text-sm font-semibold">
-                {audience === "ONLY_ME" ? (
-                  <Lock size={14} />
-                ) : audience === "FRIENDS" ? (
-                  <Users size={14} />
-                ) : (
-                  <Globe size={14} />
-                )}
-                <select
-                  aria-label="Post audience"
-                  value={audience}
-                  onChange={(event) =>
-                    setAudience(event.target.value as PostAudience)
-                  }
-                  className="min-h-9 bg-transparent pr-1 outline-none focus-visible:ring-2 focus-visible:ring-[#e02f21] rounded-md dark:bg-[#3a3b3c]"
+              <div className="relative mt-1" ref={audienceDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsAudienceDropdownOpen((prev) => !prev)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-[#4e4f50] text-xs font-semibold text-gray-700 dark:text-gray-200 transition cursor-pointer select-none"
+                  aria-haspopup="listbox"
+                  aria-expanded={isAudienceDropdownOpen}
                 >
-                  <option value="PUBLIC">Public</option>
-                  <option value="FRIENDS">Friends</option>
-                  <option value="ONLY_ME">Only me</option>
-                </select>
-              </label>
+                  {audience === "ONLY_ME" ? (
+                    <Lock size={13} className="shrink-0" />
+                  ) : audience === "FRIENDS" ? (
+                    <Users size={13} className="shrink-0" />
+                  ) : (
+                    <Globe size={13} className="shrink-0" />
+                  )}
+                  <span>
+                    {audience === "ONLY_ME"
+                      ? "Only me"
+                      : audience === "FRIENDS"
+                      ? "Friends"
+                      : "Public"}
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    className={`shrink-0 transition-transform duration-150 ${
+                      isAudienceDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {isAudienceDropdownOpen && (
+                  <div
+                    role="listbox"
+                    className="absolute left-0 top-full mt-1.5 w-44 bg-white dark:bg-[#242526] rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  >
+                    {[
+                      { value: "PUBLIC", label: "Public", icon: Globe },
+                      { value: "FRIENDS", label: "Friends", icon: Users },
+                      { value: "ONLY_ME", label: "Only me", icon: Lock },
+                    ].map((opt) => {
+                      const Icon = opt.icon;
+                      const isSelected = audience === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => {
+                            setAudience(opt.value as PostAudience);
+                            setIsAudienceDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 text-xs text-left transition hover:bg-gray-50 dark:hover:bg-[#3a3b3c] cursor-pointer ${
+                            isSelected
+                              ? "bg-red-50/50 dark:bg-red-950/20 text-[#e02f21] font-bold"
+                              : "text-gray-700 dark:text-gray-200 font-medium"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Icon
+                              size={14}
+                              className={
+                                isSelected
+                                  ? "text-[#e02f21]"
+                                  : "text-gray-500 dark:text-gray-400"
+                              }
+                            />
+                            <span>{opt.label}</span>
+                          </div>
+                          {isSelected && (
+                            <Check
+                              size={14}
+                              className="text-[#e02f21] shrink-0"
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
-
-        {!groupId && (
-          <p
-            className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed"
-            role="status"
-          >
-            {audience === "PUBLIC"
-              ? "Anyone can see your post."
-              : audience === "FRIENDS"
-                ? "Your friends can see this post. Sharing is turned off."
-                : "Only you can see this post. Sharing is turned off."}
-            {audience !== "PUBLIC" && (
-              <span className="block mt-1 font-medium">
-                Device preview: this post stays on this device until audience
-                support is connected.
-              </span>
-            )}
-          </p>
-        )}
 
         {/* Text Area Caption */}
         <div>
@@ -666,22 +738,79 @@ const CreatePostModal = ({
           </div>
         )}
 
-        {/* Uploaded Photo Preview */}
-        {image && (
-          <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 max-h-56">
-            <img
-              src={image}
-              alt="Preview"
-              className="w-full h-full object-cover"
-            />
-            <button
-              type="button"
-              aria-label="Remove post photo"
-              onClick={() => setImage("")}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition cursor-pointer"
+        {/* Uploaded Photos Preview (Multiple Local Images Grid) */}
+        {mediaItems.length > 0 && (
+          <div className="space-y-2">
+            <div
+              className={`rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#18191a] p-1.5 ${
+                mediaItems.length === 1
+                  ? "block"
+                  : mediaItems.length === 2
+                  ? "grid grid-cols-2 gap-1.5"
+                  : mediaItems.length === 3
+                  ? "grid grid-cols-3 gap-1.5"
+                  : "grid grid-cols-2 sm:grid-cols-3 gap-1.5"
+              }`}
             >
-              <Trash2 size={14} />
-            </button>
+              {mediaItems.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className={`relative group rounded-xl overflow-hidden bg-black/10 dark:bg-black/40 ${
+                    mediaItems.length === 1
+                      ? "max-h-72 aspect-video w-full"
+                      : "aspect-square"
+                  }`}
+                >
+                  <img
+                    src={item.previewUrl}
+                    alt={`Preview ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    aria-label={`Remove photo ${idx + 1}`}
+                    onClick={() => handleRemoveMedia(item.id)}
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white transition cursor-pointer shadow-sm z-10"
+                  >
+                    <X size={14} />
+                  </button>
+                  <div className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded bg-black/50 text-[10px] text-white font-semibold">
+                    {idx + 1}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick action bar to add more photos or clear all */}
+            <div className="flex items-center justify-between px-1 text-xs">
+              <label className="inline-flex items-center gap-1.5 font-bold text-[#e02f21] hover:underline cursor-pointer">
+                <Plus size={14} />
+                <span>Add more photos</span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    handleSelectPhotos(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={() => {
+                  mediaItems.forEach((m) => {
+                    if (m.previewUrl.startsWith("blob:")) URL.revokeObjectURL(m.previewUrl);
+                  });
+                  setMediaItems([]);
+                }}
+                className="font-semibold text-gray-400 hover:text-red-500 transition cursor-pointer"
+              >
+                Clear all
+              </button>
+            </div>
           </div>
         )}
 
@@ -692,7 +821,7 @@ const CreatePostModal = ({
           </span>
 
           <div className="flex items-center gap-1 sm:gap-1.5">
-            {/* 1. Photo Upload */}
+            {/* 1. Photo Upload (Multiple file picker) */}
             <label
               title="Add photo"
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#3a3b3c] text-emerald-500 cursor-pointer transition flex items-center justify-center"
@@ -701,10 +830,13 @@ const CreatePostModal = ({
               <input
                 aria-label="Add a post photo"
                 type="file"
+                multiple
                 accept="image/*"
                 className="hidden"
-                disabled={uploadingPhoto}
-                onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
+                onChange={(e) => {
+                  handleSelectPhotos(e.target.files);
+                  e.target.value = "";
+                }}
               />
             </label>
 
@@ -739,12 +871,6 @@ const CreatePostModal = ({
             >
               <BarChart3 size={22} />
             </button>
-
-            {uploadingPhoto && (
-              <span className="text-xs font-semibold text-gray-500 ml-1">
-                Uploading...
-              </span>
-            )}
           </div>
         </div>
 
@@ -765,10 +891,9 @@ const CreatePostModal = ({
           </Link>
         </div>
         <div className="flex">
-          {/* Submit Post Button with Spinner */}
+          {/* Submit Post Button */}
           <Button
             type="submit"
-            loading={uploadingPhoto}
             className="w-full py-3.5 text-base font-bold rounded-xl shadow-xs"
           >
             <span>Post</span>

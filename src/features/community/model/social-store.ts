@@ -243,13 +243,14 @@ export function publishLocalPost(payload: any, actor: Person, group?: any) {
   });
   return { success: true, data: post };
 }
-export function shareLocalPost(post: any, actor: Person, caption: string) {
+export function shareLocalPost(post: any, actor: Person, caption: string, audience: "PUBLIC" | "FRIENDS" | "ONLY_ME" = "PUBLIC") {
   if (!actor?.id) throw new Error("Sign in to share a post.");
   const original = originalPost(post);
   const result = {
     id: `local-post-${socialId()}`,
     postType: "REPOST",
     caption,
+    audience,
     authorId: actor.id,
     author: actor,
     originalPost: original,

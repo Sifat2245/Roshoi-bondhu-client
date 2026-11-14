@@ -570,7 +570,6 @@ export const FriendsListPage = () => {
                           key={post.id}
                           post={post}
                           onOpenComments={(selected) => navigate(`/post/${selected.id}`)}
-                          onOpenShare={async (selected) => { try { await postsApi.sharePost(selected.id, '', token, session?.user); notify.success('Post shared to your feed'); } catch (error: any) { notify.error(error.message); } }}
                           onRequireAuth={() => navigate('/login')}
                         />
                       ))

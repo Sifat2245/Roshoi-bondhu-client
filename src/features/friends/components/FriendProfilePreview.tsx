@@ -20,13 +20,11 @@ import { useChatDock } from "../../../context/ChatDockContext";
 import { profileApi } from "../../profile/api/profile.api";
 import { postsApi } from "../../posts/api/posts.api";
 import { useNavigate } from "react-router";
-import { useToast } from "../../../context/ToastContext";
 
 const FriendProfilePreview = ({ friend, token }) => {
   const { user } = useSocial();
   const { startConversation } = useChatDock();
   const navigate = useNavigate();
-  const { notify } = useToast();
   const [profileData, setProfileData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -199,14 +197,6 @@ const FriendProfilePreview = ({ friend, token }) => {
                   key={post.id}
                   post={post}
                   onOpenComments={(post) => navigate(`/post/${post.id}`)}
-                  onOpenShare={async (post) => {
-                    try {
-                      await postsApi.sharePost(post.id, "", token, user);
-                      notify.success("Post shared to your feed");
-                    } catch (error: any) {
-                      notify.error(error.message);
-                    }
-                  }}
                   onRequireAuth={() => navigate("/login")}
                 />
               ))}

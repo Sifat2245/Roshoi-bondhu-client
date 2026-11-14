@@ -62,7 +62,6 @@ const LoginForm = () => {
         });
       }
 
-      notify.success("Logged in successfully!", "Welcome Back");
       const from = (location.state as any)?.from?.pathname;
       const target = from && from !== "/login" && from !== "/register" ? from : "/";
       navigate(target, { replace: true });
@@ -78,11 +77,10 @@ const LoginForm = () => {
     try {
       const res = await signIn.passkey();
       if (res?.error) {
-        if (res.error.code === 'AUTH_CANCELLED') return;
+        if ('code' in res.error && res.error.code === 'AUTH_CANCELLED') return;
         throw new Error(res.error.message || 'Passkey authentication failed.');
       }
       if (refetchUser) await refetchUser();
-      notify.success('Signed in with passkey successfully!', 'Welcome Back');
       const from = (location.state as any)?.from?.pathname;
       const target = from && from !== '/login' && from !== '/register' ? from : '/';
       navigate(target, { replace: true });
