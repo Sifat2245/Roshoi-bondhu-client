@@ -3,13 +3,45 @@ import { Globe, Lock, Users } from "lucide-react";
 import { postAudience, audienceLabels } from "../model/post-policy";
 import Avatar from "../../../components/ui/Avatar";
 
+function formatPostTime(dateString?: string | Date): string {
+  if (!dateString) return "View post";
+  const created = typeof dateString === "string" ? new Date(dateString) : dateString;
+  const time = created.getTime();
+  if (Number.isNaN(time)) return "View post";
+
+  const diffSec = Math.floor((Date.now() - time) / 1000);
+  if (diffSec < 0) return "Few seconds ago";
+
+  if (diffSec < 60) {
+    return "Few seconds ago";
+  }
+
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) {
+    return diffMin === 1 ? "1 minute ago" : `${diffMin} minutes ago`;
+  }
+
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) {
+    return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays <= 3) {
+    return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`;
+  }
+
+  const currentYear = new Date().getFullYear();
+  if (created.getFullYear() === currentYear) {
+    return created.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  return created.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
 export default function PostIdentity({ post }: { post: any }) {
   const group = post.group;
   const author = post.author;
-  const created = new Date(post.createdAt);
-  const date = Number.isNaN(created.getTime())
-    ? "View post"
-    : created.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const date = formatPostTime(post.createdAt);
   const audience = postAudience(post);
   const privacyLabel = group
     ? group.privacy === "PRIVATE"

@@ -10,7 +10,11 @@ import {
   UPDATE_POST_MUTATION,
   REPOST_MUTATION,
   TOGGLE_LIKE_MUTATION,
+  TOGGLE_COMMENT_LIKE_MUTATION,
+  TOGGLE_COMMENTS_DISABLED_MUTATION,
   CREATE_COMMENT_MUTATION,
+  UPDATE_COMMENT_MUTATION,
+  DELETE_COMMENT_MUTATION,
   DELETE_POST_MUTATION,
   RESTORE_POST_MUTATION,
   PERMANENT_DELETE_POST_MUTATION,
@@ -214,6 +218,33 @@ export const postsApi = {
       return publishLocalPost(postData, context?.user, context?.group);
     }
 
+    const normalizedInstructions = Array.isArray(postData.instructions)
+      ? postData.instructions
+          .filter(
+            (step: any) =>
+              step &&
+              (typeof step === "string"
+                ? step.trim()
+                : step.title?.trim() || step.details?.trim()),
+          )
+          .map((step: any) =>
+            typeof step === "string" ? step : JSON.stringify(step),
+          )
+      : [];
+
+    const normalizedIngredients = Array.isArray(postData.ingredients)
+      ? postData.ingredients
+          .filter(
+            (item: any) =>
+              item && (typeof item === "string" ? item.trim() : true),
+          )
+          .map((item: any) =>
+            typeof item === "string"
+              ? item
+              : item.text || item.name || JSON.stringify(item),
+          )
+      : [];
+
     const { data } = await apolloClient.mutate({
       mutation: CREATE_POST_MUTATION,
       variables: {
@@ -224,8 +255,8 @@ export const postsApi = {
           title: postData.title || null,
           image: postData.image || null,
           images: postData.images || [],
-          ingredients: postData.ingredients || [],
-          instructions: postData.instructions || [],
+          ingredients: normalizedIngredients,
+          instructions: normalizedInstructions,
           preparationTime: postData.preparationTime || postData.cookingTime || null,
           servings: postData.servings || null,
           cuisine: postData.cuisine || null,
@@ -267,6 +298,7 @@ export const postsApi = {
   addComment: async (
     postId: string,
     content: string,
+    parentId?: string | null,
     token: string | null = null,
     actor?: Person,
   ) => {
@@ -277,6 +309,7 @@ export const postsApi = {
         id: socialId(),
         postId,
         content,
+        parentId: parentId || null,
         authorId: actor.id,
         author: actor,
         createdAt: new Date().toISOString(),
@@ -292,10 +325,42 @@ export const postsApi = {
 
     const { data } = await apolloClient.mutate({
       mutation: CREATE_COMMENT_MUTATION,
-      variables: { postId, content },
+      variables: { postId, content, parentId: parentId || undefined },
     });
 
     return { success: true, data: data?.createComment };
+  },
+
+  updateComment: async (id: string, content: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: UPDATE_COMMENT_MUTATION,
+      variables: { id, content },
+    });
+    return { success: true, data: data?.updateComment };
+  },
+
+  deleteComment: async (id: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: DELETE_COMMENT_MUTATION,
+      variables: { id },
+    });
+    return { success: true, data: data?.deleteComment };
+  },
+
+  toggleCommentLike: async (commentId: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: TOGGLE_COMMENT_LIKE_MUTATION,
+      variables: { commentId },
+    });
+    return { success: true, data: data?.toggleCommentLike };
+  },
+
+  toggleCommentsDisabled: async (postId: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: TOGGLE_COMMENTS_DISABLED_MUTATION,
+      variables: { postId },
+    });
+    return { success: true, data: data?.toggleCommentsDisabled };
   },
 
   sharePost: async (

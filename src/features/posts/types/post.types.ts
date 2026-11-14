@@ -6,13 +6,36 @@ export type { PostAudience };
 
 export type PostType = "CASUAL" | "RECIPE" | "POLL" | "REPOST";
 
+export interface CommentReply {
+  id: string;
+  postId: string;
+  userId?: string;
+  authorId?: string;
+  user?: User;
+  author?: User;
+  content: string;
+  likeCount?: number;
+  hasLiked?: boolean;
+  isPosting?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Comment {
   id: string;
   postId: string;
-  authorId: string;
+  userId?: string;
+  authorId?: string;
+  user?: User;
   author?: User;
   content: string;
+  parentId?: string | null;
+  replies?: CommentReply[];
+  likeCount?: number;
+  hasLiked?: boolean;
+  isPosting?: boolean;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Like {
@@ -47,6 +70,7 @@ export interface Post {
   likes?: Like[];
   comments?: Comment[];
   isLiked?: boolean;
+  isCommentDisabled?: boolean;
   caption?: string | null;
   deletedAt?: string | null;
   daysRemaining?: number;

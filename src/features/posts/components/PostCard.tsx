@@ -33,6 +33,7 @@ import {
   X,
   AlertTriangle,
   Bookmark,
+  MessageSquareOff,
 } from "lucide-react";
 
 interface PostCardProps {
@@ -87,11 +88,32 @@ const PostCard: React.FC<PostCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [caption, setCaption] = useState(post.caption || "");
   const [title, setTitle] = useState(post.title || "");
-  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Trash / Delete Modal
   const [showTrashConfirm, setShowTrashConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Comments Disabled State
+  const [isCommentsDisabled, setIsCommentsDisabled] = useState(
+    Boolean(post.isCommentDisabled),
+  );
+
+  useEffect(() => {
+    setIsCommentsDisabled(Boolean(post.isCommentDisabled));
+  }, [post.isCommentDisabled]);
+
+  const handleToggleCommentsDisabled = async () => {
+    try {
+      setIsMenuOpen(false);
+      const res = await postsApi.toggleCommentsDisabled(post.id);
+      const nextStatus = res.data?.isCommentDisabled ?? !isCommentsDisabled;
+      setIsCommentsDisabled(nextStatus);
+      if (onUpdatePost) {
+        onUpdatePost({ ...post, isCommentDisabled: nextStatus });
+      }
+    } catch (err: any) {
+      notify.error(err.message || "Failed to change commenting settings");
+    }
+  };
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -162,45 +184,62 @@ const PostCard: React.FC<PostCardProps> = ({
     setIsEditing(true);
   };
 
-  // Save Edit
+  // Save Edit (Optimistic update: closes editor & updates UI immediately)
   const handleSaveEdit = async () => {
-    setIsSavingEdit(true);
+    const nextCaption = caption.trim();
+    const nextTitle = title.trim();
+    const prevCaption = post.caption || "";
+    const prevTitle = post.title || "";
+
+    // 1. Exit editor immediately
+    setIsEditing(false);
+
+    // 2. Notify parent immediately with updated content
+    if (onUpdatePost) {
+      onUpdatePost({ ...post, caption: nextCaption, title: nextTitle });
+    }
+
+    // 3. Persist via API in background
     try {
       await postsApi.updatePost(
         post.id,
         {
-          caption: caption.trim(),
-          title: title.trim(),
+          caption: nextCaption,
+          title: nextTitle,
         },
         session?.session?.token,
         user?.id,
       );
-      if (onUpdatePost) {
-        onUpdatePost({ ...post, caption: caption.trim(), title: title.trim() });
-      }
-      setIsEditing(false);
     } catch (err: any) {
+      // Rollback on failure
+      setCaption(prevCaption);
+      setTitle(prevTitle);
+      if (onUpdatePost) {
+        onUpdatePost({ ...post, caption: prevCaption, title: prevTitle });
+      }
       notify.error(err.message || "Failed to update post");
-    } finally {
-      setIsSavingEdit(false);
     }
   };
 
-  // Move to Trash (Delete)
+  // Move to Trash / Delete (Optimistic update: closes popup & removes post immediately)
   const handleConfirmTrash = async () => {
-    setIsDeleting(true);
+    // 1. Immediately close confirmation dialog & dropdown
+    setShowTrashConfirm(false);
+    setIsMenuOpen(false);
+
+    // 2. Immediately remove post from UI
+    setIsDeleted(true);
+    if (onDeletePost) {
+      onDeletePost(post.id);
+    }
+
+    // 3. Call API in background
     try {
       await postsApi.deletePost(post.id, session?.session?.token, user?.id);
-      setIsDeleted(true);
-      setShowTrashConfirm(false);
-      setIsMenuOpen(false);
-      if (onDeletePost) {
-        onDeletePost(post.id);
-      }
     } catch (err: any) {
+      // Rollback on failure
+      setIsDeleted(false);
       notify.error(err.message || "Failed to move post to trash");
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -210,7 +249,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const isRecipe = post.postType === "RECIPE";
   const isRepost = post.postType === "REPOST";
-  const isAuthor = user?.id === post.author?.id;
+  const isAuthor = Boolean(user?.id && (user.id === post.author?.id || user.id === post.authorId));
 
   return (
     <article
@@ -332,7 +371,30 @@ const PostCard: React.FC<PostCardProps> = ({
                 </button>
               )}
 
-              {/* 3. Copy Link */}
+              {/* 3. Turn off / Turn on commenting (for author) */}
+              {isAuthor && (
+                <button
+                  type="button"
+                  onClick={handleToggleCommentsDisabled}
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
+                >
+                  <MessageSquareOff size={18} className="text-gray-500" />
+                  <div>
+                    <p className="font-bold text-sm text-gray-900 dark:text-white">
+                      {isCommentsDisabled
+                        ? "Turn on commenting"
+                        : "Turn off commenting"}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                      {isCommentsDisabled
+                        ? "Allow people to comment on this post"
+                        : "Prevent people from commenting on this post"}
+                    </p>
+                  </div>
+                </button>
+              )}
+
+              {/* 4. Copy Link */}
               <button
                 type="button"
                 onClick={handleCopyLink}
@@ -349,7 +411,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 </div>
               </button>
 
-              {/* 4. Move to Trash (Delete) */}
+              {/* 5. Move to Trash (Delete) */}
               {isAuthor && (
                 <>
                   <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
@@ -415,11 +477,10 @@ const PostCard: React.FC<PostCardProps> = ({
             </button>
             <button
               type="button"
-              disabled={isSavingEdit}
               onClick={handleSaveEdit}
-              className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-[#e02f21] hover:bg-[#c92518] transition cursor-pointer disabled:opacity-50"
+              className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-[#e02f21] hover:bg-[#c92518] transition cursor-pointer"
             >
-              {isSavingEdit ? "Saving..." : "Save changes"}
+              Save changes
             </button>
           </div>
         </div>
@@ -442,7 +503,12 @@ const PostCard: React.FC<PostCardProps> = ({
               <button
                 type="button"
                 className="text-left hover:underline"
-                onClick={() => onOpenComments?.(post)}
+                onClick={() =>
+                  onOpenComments?.({
+                    ...post,
+                    isCommentDisabled: isCommentsDisabled,
+                  })
+                }
               >
                 {title || post.title}
               </button>
@@ -504,7 +570,10 @@ const PostCard: React.FC<PostCardProps> = ({
 
         const handleImageClick = () => {
           if (isStepGalleryFullscreen() && onOpenComments) {
-            onOpenComments(post);
+            onOpenComments({
+              ...post,
+              isCommentDisabled: isCommentsDisabled,
+            });
           }
         };
 
@@ -662,28 +731,66 @@ const PostCard: React.FC<PostCardProps> = ({
           </span>
           <span className="font-semibold">{likeCount}</span>
         </span>
-        <button
-          type="button"
-          onClick={() => onOpenComments && onOpenComments(post)}
-          className="hover:underline cursor-pointer font-medium"
-        >
-          {post.commentCount || 0} comments
-        </button>
+        {post.commentCount > 0 ? (
+          <button
+            type="button"
+            onClick={() =>
+              onOpenComments &&
+              onOpenComments({
+                ...post,
+                isCommentDisabled: isCommentsDisabled,
+              })
+            }
+            className="hover:underline cursor-pointer font-medium"
+          >
+            {post.commentCount} comments
+          </button>
+        ) : isCommentsDisabled ? (
+          <span className="font-medium text-xs text-gray-400">
+            Commenting is off
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() =>
+              onOpenComments &&
+              onOpenComments({
+                ...post,
+                isCommentDisabled: isCommentsDisabled,
+              })
+            }
+            className="hover:underline cursor-pointer font-medium"
+          >
+            0 comments
+          </button>
+        )}
       </div>
 
       {/* Facebook Action Row */}
-      <div className="px-2 py-1.5 grid grid-cols-3 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-b-2xl">
+      <div
+        className={`px-2 py-1.5 grid ${
+          isCommentsDisabled ? "grid-cols-2" : "grid-cols-3"
+        } text-sm font-bold text-gray-600 dark:text-gray-300 rounded-b-2xl`}
+      >
         <LikeButton liked={hasLiked} onClick={handleLike} />
 
-        {/* Comment Button opens Modal per user requirement */}
-        <button
-          type="button"
-          onClick={() => onOpenComments && onOpenComments(post)}
-          className="py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
-        >
-          <CommentIcon size={19} />
-          <span>Comment</span>
-        </button>
+        {/* Comment Button opens Modal per user requirement (hidden when comments are disabled) */}
+        {!isCommentsDisabled && (
+          <button
+            type="button"
+            onClick={() =>
+              onOpenComments &&
+              onOpenComments({
+                ...post,
+                isCommentDisabled: isCommentsDisabled,
+              })
+            }
+            className="py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
+          >
+            <CommentIcon size={19} />
+            <span>Comment</span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -742,11 +849,10 @@ const PostCard: React.FC<PostCardProps> = ({
             </button>
             <button
               type="button"
-              disabled={isDeleting}
               onClick={handleConfirmTrash}
-              className="px-4 py-2.5 rounded-xl bg-[#e02f21] text-white text-sm font-bold disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-[#e02f21] text-white text-sm font-bold cursor-pointer hover:bg-[#c92518] transition"
             >
-              {isDeleting ? "Moving…" : "Move to trash"}
+              Move to trash
             </button>
           </div>
         </div>

@@ -4,6 +4,7 @@ import Avatar from "../../../components/ui/Avatar";
 import { useSession } from "../../../lib/auth-client";
 import { useSocial } from "../../community/model/useSocial";
 import { useToast } from "../../../context/ToastContext";
+import { useUpload } from "../../../context/UploadContext";
 import postsApi from "../api/posts.api";
 import { Post, PostAudience } from "../types/post.types";
 import {
@@ -60,11 +61,11 @@ export const SharePostModal: React.FC<SharePostModalProps> = ({
   const { data: session } = useSession();
   const { user } = useSocial();
   const { notify } = useToast();
+  const { runUpload } = useUpload();
 
   const [caption, setCaption] = useState("");
   const [audience, setAudience] = useState<PostAudience>("PUBLIC");
   const [isAudienceOpen, setIsAudienceOpen] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
 
   if (!post) return null;
 
@@ -78,34 +79,54 @@ export const SharePostModal: React.FC<SharePostModalProps> = ({
     image: (targetPost as any).userPhoto || "",
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!session?.user && !user) {
       notify.error("Please sign in to share this post.");
       return;
     }
 
-    setIsSharing(true);
-    try {
-      await postsApi.sharePost(
-        post.id,
-        caption.trim(),
-        audience,
-        session?.session?.token,
-        user,
-      );
-      setCaption("");
-      onClose();
-      onShared?.();
-    } catch (err: any) {
+    const shareCaption = caption.trim();
+    const shareAudience = audience;
+    const shareToken = session?.session?.token;
+    const shareUser = user || session?.user;
+    const sharePostId = post.id;
+    const preview =
+      targetPost.image ||
+      (Array.isArray(targetPost.images) && targetPost.images[0]) ||
+      undefined;
+
+    // 1. Close modal immediately so user doesn't wait
+    setCaption("");
+    onClose();
+
+    // 2. Launch background share task with feed progress card
+    runUpload(
+      {
+        type: "POST",
+        title: "shared a post.",
+        caption: shareCaption || undefined,
+        previewUrl: preview,
+        userImage: shareUser?.image,
+        userName: shareUser?.name || "You",
+      },
+      async () => {
+        await postsApi.sharePost(
+          sharePostId,
+          shareCaption,
+          shareAudience,
+          shareToken,
+          shareUser,
+        );
+        onShared?.();
+      },
+    ).catch((err: any) => {
       notify.error(err.message || "Failed to share post.");
-    } finally {
-      setIsSharing(false);
-    }
+    });
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Share" maxWidth="max-w-lg">
-      <div className="space-y-4 select-none">
+      <div className="p-5 sm:p-6 space-y-4 select-none">
         {/* User Profile Header (Meta Style matching Image 2) */}
         <div className="flex items-center gap-3">
           <Avatar
@@ -265,17 +286,9 @@ export const SharePostModal: React.FC<SharePostModalProps> = ({
           <button
             type="button"
             onClick={handleShare}
-            disabled={isSharing}
-            className="w-full bg-[#e02f21] hover:bg-[#c22417] text-white font-bold text-sm py-2.5 rounded-xl shadow-xs transition duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#e02f21] hover:bg-[#c22417] text-white font-bold text-sm py-2.5 rounded-xl shadow-xs transition duration-150 flex items-center justify-center gap-2 cursor-pointer"
           >
-            {isSharing ? (
-              <>
-                <Loader2 size={16} className="animate-spin text-white" />
-                <span>Sharing...</span>
-              </>
-            ) : (
-              <span>Share now</span>
-            )}
+            <span>Share now</span>
           </button>
         </div>
       </div>

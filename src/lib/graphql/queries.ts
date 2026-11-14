@@ -60,6 +60,7 @@ export const POST_FRAGMENT = gql`
     commentCount
     repostCount
     hasLiked
+    isCommentDisabled
     daysRemaining
     deletedAt
     createdAt
@@ -92,6 +93,7 @@ export const POST_FRAGMENT = gql`
       servings
       ingredients
       instructions
+      isCommentDisabled
       createdAt
       author {
         id
@@ -153,7 +155,10 @@ export const POST_QUERY = gql`
         id
         postId
         userId
+        parentId
         content
+        likeCount
+        hasLiked
         createdAt
         updatedAt
         user {
@@ -166,7 +171,10 @@ export const POST_QUERY = gql`
           postId
           userId
           content
+          likeCount
+          hasLiked
           createdAt
+          updatedAt
           user {
             id
             name

@@ -10,6 +10,7 @@ import GroupMembersTab from '../../features/groups/components/GroupMembersTab';
 import GroupSettingsTab from '../../features/groups/components/GroupSettingsTab';
 import GroupCommunityTab from '../../features/groups/components/GroupCommunityTab';
 import CreatePostTrigger from '../../features/posts/components/CreatePostTrigger';
+import UploadProgressFeedCard from '../../features/posts/components/UploadProgressFeedCard';
 import { pinnedIn } from "../../features/posts/model/post-policy";
 import PostCard from '../../features/posts/components/PostCard';
 import CreatePostModal from '../../features/posts/components/CreatePostModal';
@@ -156,6 +157,9 @@ const GroupDetailPage = () => {
                     onRequireAuth={requireAuth}
                   />
                 )}
+
+                {/* Upload Progress Feed Card (Background upload tracker) */}
+                <UploadProgressFeedCard />
 
                 {/* Featured Section */}
                 <div className="bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3">

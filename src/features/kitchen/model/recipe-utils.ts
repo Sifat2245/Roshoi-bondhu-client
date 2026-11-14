@@ -27,15 +27,27 @@ export const recipeTime = (recipe: Recipe) =>
   Number(recipe.preparationTime || recipe.cookingTime || 0);
 export const recipeSteps = (recipe: Recipe) =>
   (recipe.instructions || [])
-    .map((step, index) =>
-      typeof step === "string"
-        ? { title: `Step ${index + 1}`, details: step }
-        : {
-            title: step.title || `Step ${index + 1}`,
-            details: step.details || "",
-          },
-    )
-    .filter((step) => step.details.trim());
+    .map((step, index) => {
+      if (typeof step === "string") {
+        try {
+          const parsed = JSON.parse(step);
+          if (parsed && typeof parsed === "object") {
+            return {
+              title: parsed.title || `Step ${index + 1}`,
+              details: parsed.details || "",
+            };
+          }
+        } catch {
+          // Plain string instruction
+        }
+        return { title: `Step ${index + 1}`, details: step };
+      }
+      return {
+        title: step.title || `Step ${index + 1}`,
+        details: step.details || "",
+      };
+    })
+    .filter((step) => step.details && step.details.trim());
 
 const fractions: Record<string, number> = {
   "¼": 0.25,
