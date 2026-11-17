@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router";
 import { BarChart3, Check, Lock } from "lucide-react";
 import {
@@ -12,20 +12,45 @@ import Modal from "../../../components/ui/Modal";
 import Button from "../../../components/ui/Button";
 import Avatar from "../../../components/ui/Avatar";
 import { useToast } from "../../../context/ToastContext";
+import { postsApi } from "../../posts/api/posts.api";
 
 export default function PostPoll({
   post,
   onRequireAuth,
+  onUpdatePoll,
 }: {
   post: any;
   onRequireAuth?: () => void;
+  onUpdatePoll?: (poll: Poll) => void;
 }) {
   const { state, update, user } = useSocial();
   const { notify } = useToast();
-  const poll: Poll = state.polls[post.poll?.id || post.id] || post.poll;
+  const [poll, setPoll] = useState<Poll>(() => {
+    return post.poll || state.polls[post.poll?.id || post.id];
+  });
+
+  const activePostId = useRef(post.id);
+  const activePollId = useRef(post.poll?.id);
+
+  useEffect(() => {
+    if (
+      post.id !== activePostId.current ||
+      post.poll?.id !== activePollId.current
+    ) {
+      activePostId.current = post.id;
+      activePollId.current = post.poll?.id;
+      if (post.poll) {
+        setPoll(post.poll);
+      } else if (state.polls[post.poll?.id || post.id]) {
+        setPoll(state.polls[post.poll?.id || post.id]);
+      }
+    }
+  }, [post.id, post.poll]);
+
   const [votersOpen, setVotersOpen] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [, refresh] = useState(0);
+
   useEffect(() => {
     if (!poll?.expiresAt || pollEnded(poll)) return;
     const timer = window.setTimeout(
@@ -34,26 +59,89 @@ export default function PostPoll({
     );
     return () => window.clearTimeout(timer);
   }, [poll]);
+
   if (!poll) return null;
   const ended = pollEnded(poll);
   const voters = pollVoters(poll);
   const memberRequired = post.group?.isMember === false;
-  const isAuthor = user?.id === poll.authorId;
-  const voted = poll.options.some((o) => o.voterIds.includes(user?.id));
-  function vote(optionId: string) {
+  const isAuthor = user?.id === (poll.authorId || post.authorId);
+  const voted = (poll.options || []).some(
+    (o) =>
+      (user?.id && (o.voterIds || []).includes(user.id)) || Boolean(o.hasVoted),
+  );
+
+  async function vote(optionId: string) {
     if (!user) return onRequireAuth?.();
     if (memberRequired) return;
+
+    const prevPoll = poll;
     try {
+      // 1. Optimistic UI update immediately
+      const nextPoll = castVote(poll, optionId, user.id);
+      setPoll(nextPoll);
+      onUpdatePoll?.(nextPoll);
       update((s) => {
-        s.polls[poll.id] = castVote(
-          s.polls[poll.id] || poll,
-          optionId,
-          user.id,
-        );
+        s.polls[poll.id] = nextPoll;
         s.people[user.id] = user;
       });
+
+      // 2. Call GraphQL API in background
+      const updated = await postsApi.votePoll(poll.id, optionId);
+      if (updated) {
+        setPoll(updated);
+        onUpdatePoll?.(updated);
+        update((s) => {
+          s.polls[poll.id] = updated;
+        });
+      }
     } catch (e: any) {
-      notify.error(e.message);
+      // Rollback on error
+      setPoll(prevPoll);
+      onUpdatePoll?.(prevPoll);
+      update((s) => {
+        s.polls[poll.id] = prevPoll;
+      });
+      notify.error(e.message || "Failed to submit vote");
+    }
+  }
+
+  async function handleToggleStatus() {
+    if (!isAuthor) return;
+    setConfirm(false);
+
+    const prevPoll = poll;
+    const nextEnded = !ended;
+    const nextPoll: Poll = {
+      ...poll,
+      closed: nextEnded,
+      expiresAt: nextEnded ? poll.expiresAt : undefined,
+    };
+
+    try {
+      // 1. Optimistic UI update immediately
+      setPoll(nextPoll);
+      onUpdatePoll?.(nextPoll);
+      update((s) => {
+        s.polls[poll.id] = nextPoll;
+      });
+
+      // 2. Call GraphQL API in background
+      const updated = await postsApi.togglePollStatus(poll.id);
+      if (updated) {
+        setPoll(updated);
+        onUpdatePoll?.(updated);
+        update((s) => {
+          s.polls[poll.id] = updated;
+        });
+      }
+    } catch (e: any) {
+      // Rollback on error
+      setPoll(prevPoll);
+      onUpdatePoll?.(prevPoll);
+      update((s) => {
+        s.polls[poll.id] = prevPoll;
+      });
+      notify.error(e.message || "Failed to update poll status");
     }
   }
   return (
@@ -78,10 +166,17 @@ export default function PostPoll({
       </h3>
       <div className="space-y-2" role="group" aria-label={poll.question}>
         {poll.options.map((option) => {
-          const selected = option.voterIds.includes(user?.id);
-          const percentage = voters.length
-            ? Math.round((option.voterIds.length / voters.length) * 100)
-            : 0;
+          const selected = Boolean(
+            (user?.id && (option.voterIds || []).includes(user.id)) ||
+              option.hasVoted,
+          );
+          const optionVotes =
+            (option.voterIds || []).length || option.voteCount || 0;
+          const totalVotesCount = voters.length || poll.totalVotes || 0;
+          const percentage =
+            totalVotesCount > 0
+              ? Math.round((optionVotes / totalVotesCount) * 100)
+              : 0;
           return (
             <button
               type="button"
@@ -89,21 +184,35 @@ export default function PostPoll({
               aria-pressed={selected}
               disabled={ended || memberRequired}
               onClick={() => vote(option.id)}
-              className={`relative w-full overflow-hidden border rounded-xl flex items-center gap-3 px-3 py-3 text-left ${selected ? "border-[#e02f21]" : "border-gray-200 dark:border-gray-700"} disabled:cursor-default`}
+              className={`relative w-full overflow-hidden border rounded-xl flex items-center gap-3 px-3.5 py-3 text-left transition-all ${
+                selected
+                  ? "border-[#e02f21] ring-1 ring-[#e02f21]/20 shadow-xs"
+                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+              } disabled:cursor-default cursor-pointer`}
             >
               <span
-                className={`absolute inset-y-0 left-0 ${selected ? "bg-red-50 dark:bg-red-950/30" : "bg-gray-50 dark:bg-[#18191a]"} transition-[width] duration-300`}
+                className={`absolute inset-y-0 left-0 ${
+                  selected
+                    ? "bg-red-50 dark:bg-red-950/30"
+                    : "bg-gray-50 dark:bg-[#18191a]"
+                } transition-[width] duration-300 ease-out`}
                 style={{ width: `${percentage}%` }}
               />
               <span
-                className={`relative shrink-0 h-5 w-5 border flex items-center justify-center ${poll.multiple ? "rounded-md" : "rounded-full"} ${selected ? "bg-[#e02f21] border-[#e02f21] text-white" : "border-gray-300 dark:border-gray-500"}`}
+                className={`relative shrink-0 h-5 w-5 border flex items-center justify-center transition-colors ${
+                  poll.multiple ? "rounded-md" : "rounded-full"
+                } ${
+                  selected
+                    ? "bg-[#e02f21] border-[#e02f21] text-white"
+                    : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800"
+                }`}
               >
-                {selected && <Check size={13} />}
+                {selected && <Check size={13} strokeWidth={3} />}
               </span>
-              <span className="relative flex-1 min-w-0 text-sm font-medium break-words">
+              <span className="relative flex-1 min-w-0 text-sm font-semibold break-words text-gray-900 dark:text-gray-100">
                 {option.text}
               </span>
-              <span className="relative text-xs font-semibold text-gray-500 dark:text-gray-400 shrink-0">
+              <span className="relative text-xs font-bold text-gray-600 dark:text-gray-400 shrink-0">
                 {percentage}%
               </span>
             </button>
@@ -168,7 +277,9 @@ export default function PostPoll({
                 <div className="space-y-2">
                   {option.voterIds.map((id) => {
                     const person =
-                      state.people[id] || (id === user?.id ? user : null);
+                      (option as any).voters?.find((v: any) => v.id === id) ||
+                      state.people[id] ||
+                      (id === user?.id ? user : null);
                     return (
                       <Link
                         key={id}
@@ -210,19 +321,7 @@ export default function PostPoll({
               <Button variant="secondary" onClick={() => setConfirm(false)}>
                 Cancel
               </Button>
-              <Button
-                onClick={() => {
-                  if (user?.id !== poll.authorId) return;
-                  update((s) => {
-                    s.polls[poll.id] = {
-                      ...(s.polls[poll.id] || poll),
-                      closed: !ended,
-                      expiresAt: ended ? undefined : poll.expiresAt,
-                    };
-                  });
-                  setConfirm(false);
-                }}
-              >
+              <Button onClick={handleToggleStatus}>
                 {ended ? "Reopen voting" : "End poll"}
               </Button>
             </div>

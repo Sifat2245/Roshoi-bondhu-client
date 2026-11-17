@@ -18,12 +18,16 @@ import { useSocial } from "../../community/model/useSocial";
 import CommentIcon from "../../../components/ui/icons/CommentIcon";
 import ShareIcon from "../../../components/ui/icons/ShareIcon";
 import SharePostModal from "./SharePostModal";
+import EditPostModal from "./EditPostModal";
+import SelectAudienceModal from "./SelectAudienceModal";
+import type { PostAudience } from "../model/post-policy";
 import {
   Heart,
   ChefHat,
   Clock,
   Users,
   Globe,
+  Lock,
   MoreHorizontal,
   Pin,
   Edit3,
@@ -31,6 +35,7 @@ import {
   Trash2,
   Check,
   X,
+  Plus,
   AlertTriangle,
   Bookmark,
   MessageSquareOff,
@@ -84,10 +89,16 @@ const PostCard: React.FC<PostCardProps> = ({
         );
   const [isDeleted, setIsDeleted] = useState(false);
 
-  // Edit State
-  const [isEditing, setIsEditing] = useState(false);
+  // Edit & Audience Modals State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAudienceModalOpen, setIsAudienceModalOpen] = useState(false);
   const [caption, setCaption] = useState(post.caption || "");
   const [title, setTitle] = useState(post.title || "");
+
+  useEffect(() => {
+    setCaption(post.caption || "");
+    setTitle(post.title || "");
+  }, [post.caption, post.title]);
 
   // Trash / Delete Modal
   const [showTrashConfirm, setShowTrashConfirm] = useState(false);
@@ -181,43 +192,133 @@ const PostCard: React.FC<PostCardProps> = ({
   // Trigger Edit
   const handleOpenEdit = () => {
     setIsMenuOpen(false);
-    setIsEditing(true);
+    setIsEditModalOpen(true);
   };
 
-  // Save Edit (Optimistic update: closes editor & updates UI immediately)
-  const handleSaveEdit = async () => {
-    const nextCaption = caption.trim();
-    const nextTitle = title.trim();
-    const prevCaption = post.caption || "";
-    const prevTitle = post.title || "";
+  // Save Edit via EditPostModal (Optimistic update)
+  const handleSaveEditModal = async (updates: {
+    caption?: string;
+    title?: string | null;
+    audience?: PostAudience;
+    images?: string[];
+    image?: string | null;
+    ingredients?: string[] | null;
+    instructions?: any;
+    preparationTime?: number | null;
+    servings?: number | null;
+    cuisine?: string | null;
+    poll?: any;
+  }) => {
+    const prevPost = { ...post };
+    const nextCaption = updates.caption !== undefined ? updates.caption : post.caption;
+    const nextTitle = updates.title !== undefined ? (updates.title || null) : post.title;
+    const nextAudience = updates.audience !== undefined ? updates.audience : post.audience;
+    const nextImages = updates.images !== undefined ? updates.images : post.images;
+    const nextImage = updates.image !== undefined ? updates.image : post.image;
+    const nextIngredients = updates.ingredients !== undefined ? updates.ingredients : post.ingredients;
+    const nextInstructions = updates.instructions !== undefined ? updates.instructions : post.instructions;
+    const nextPrepTime = updates.preparationTime !== undefined ? updates.preparationTime : post.preparationTime;
+    const nextServings = updates.servings !== undefined ? updates.servings : post.servings;
+    const nextCuisine = updates.cuisine !== undefined ? updates.cuisine : post.cuisine;
 
-    // 1. Exit editor immediately
-    setIsEditing(false);
-
-    // 2. Notify parent immediately with updated content
-    if (onUpdatePost) {
-      onUpdatePost({ ...post, caption: nextCaption, title: nextTitle });
+    let nextPoll = post.poll;
+    if (updates.poll && post.poll) {
+      nextPoll = {
+        ...post.poll,
+        question: updates.poll.question || post.poll.question,
+        options: updates.poll.options
+          ? updates.poll.options.map((text: string, idx: number) => ({
+              id: post.poll?.options?.[idx]?.id || `temp-opt-${idx}`,
+              text,
+              voterIds: post.poll?.options?.[idx]?.voterIds || [],
+            }))
+          : post.poll.options,
+      };
     }
 
-    // 3. Persist via API in background
+    const updatedPost = {
+      ...post,
+      caption: nextCaption,
+      title: nextTitle,
+      audience: nextAudience,
+      images: nextImages,
+      image: nextImage,
+      ingredients: nextIngredients,
+      instructions: nextInstructions,
+      preparationTime: nextPrepTime,
+      servings: nextServings,
+      cuisine: nextCuisine,
+      poll: nextPoll,
+    };
+
+    // 1. Optimistic UI update
+    setCaption(nextCaption);
+    setTitle(nextTitle || "");
+    if (onUpdatePost) {
+      onUpdatePost(updatedPost);
+    }
+
+    // 2. Persist to API
     try {
       await postsApi.updatePost(
         post.id,
         {
           caption: nextCaption,
-          title: nextTitle,
+          title: nextTitle || undefined,
+          audience: nextAudience,
+          images: nextImages,
+          image: nextImage,
+          ingredients: nextIngredients,
+          instructions: nextInstructions,
+          preparationTime: nextPrepTime,
+          servings: nextServings,
+          cuisine: nextCuisine,
+          poll: updates.poll,
         },
         session?.session?.token,
         user?.id,
       );
     } catch (err: any) {
       // Rollback on failure
-      setCaption(prevCaption);
-      setTitle(prevTitle);
+      setCaption(prevPost.caption || "");
+      setTitle(prevPost.title || "");
       if (onUpdatePost) {
-        onUpdatePost({ ...post, caption: prevCaption, title: prevTitle });
+        onUpdatePost(prevPost);
       }
       notify.error(err.message || "Failed to update post");
+      throw err;
+    }
+  };
+
+  // Save Audience via SelectAudienceModal (Optimistic update)
+  const handleSaveAudienceModal = async (newAudience: PostAudience) => {
+    if (post.audience === newAudience) return;
+
+    const prevAudience = post.audience;
+    const updatedPost = {
+      ...post,
+      audience: newAudience,
+    };
+
+    // 1. Optimistic UI update
+    if (onUpdatePost) {
+      onUpdatePost(updatedPost);
+    }
+
+    // 2. Persist to API
+    try {
+      await postsApi.updatePost(
+        post.id,
+        { audience: newAudience },
+        session?.session?.token,
+        user?.id,
+      );
+    } catch (err: any) {
+      // Rollback on failure
+      if (onUpdatePost) {
+        onUpdatePost({ ...post, audience: prevAudience });
+      }
+      notify.error(err.message || "Failed to update audience");
     }
   };
 
@@ -365,7 +466,39 @@ const PostCard: React.FC<PostCardProps> = ({
                     <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
                       {post.postType === "POLL"
                         ? "Update the text above this poll"
-                        : "Update title or description"}
+                        : "Update title, caption, or photos"}
+                    </p>
+                  </div>
+                </button>
+              )}
+
+              {/* 2b. Edit Audience (for author, when not in a group) */}
+              {isAuthor && !post.groupId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsAudienceModalOpen(true);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
+                >
+                  {post.audience === "ONLY_ME" ? (
+                    <Lock size={18} className="text-gray-500" />
+                  ) : post.audience === "FRIENDS" ? (
+                    <Users size={18} className="text-gray-500" />
+                  ) : (
+                    <Globe size={18} className="text-gray-500" />
+                  )}
+                  <div>
+                    <p className="font-bold text-sm text-gray-900 dark:text-white">
+                      Edit audience
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                      {post.audience === "ONLY_ME"
+                        ? "Only you can see this post"
+                        : post.audience === "FRIENDS"
+                        ? "Your friends on Hesheli"
+                        : "Anyone on or off Hesheli"}
                     </p>
                   </div>
                 </button>
@@ -440,59 +573,13 @@ const PostCard: React.FC<PostCardProps> = ({
         </div>
       </div>
 
-      {/* Inline Post Editor (when Edit is active) */}
-      {isEditing ? (
-        <div className="p-4 bg-gray-50/70 dark:bg-gray-800/40 border-y border-gray-200 dark:border-gray-800 space-y-3">
-          {isRecipe && (
-            <div>
-              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                Recipe Title
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-[#18191a] border border-gray-300 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e02f21]"
-              />
-            </div>
-          )}
-          <div>
-            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-              Caption
-            </label>
-            <textarea
-              rows={3}
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-[#18191a] border border-gray-300 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e02f21] resize-none"
-            />
-          </div>
-          <div className="flex items-center justify-end gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSaveEdit}
-              className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-[#e02f21] hover:bg-[#c92518] transition cursor-pointer"
-            >
-              Save changes
-            </button>
-          </div>
+      {/* Caption Text */}
+      {caption && (
+        <div className="px-4 pb-3">
+          <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">
+            {caption}
+          </p>
         </div>
-      ) : (
-        /* Caption Text */
-        caption && (
-          <div className="px-4 pb-3">
-            <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">
-              {caption}
-            </p>
-          </div>
-        )
       )}
 
       {/* Recipe Header (if RECIPE) */}
@@ -548,7 +635,13 @@ const PostCard: React.FC<PostCardProps> = ({
 
       {post.postType === "POLL" && (
         <div className="mx-4 mb-4">
-          <PostPoll post={post} onRequireAuth={onRequireAuth} />
+          <PostPoll
+            post={post}
+            onRequireAuth={onRequireAuth}
+            onUpdatePoll={(updatedPoll) =>
+              onUpdatePost?.({ ...post, poll: updatedPoll })
+            }
+          />
         </div>
       )}
       {isRepost && (
@@ -827,6 +920,26 @@ const PostCard: React.FC<PostCardProps> = ({
           onUpdatePost?.(post);
         }}
       />
+
+      {/* Edit Post Modal */}
+      {isEditModalOpen && (
+        <EditPostModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          post={post}
+          onSave={handleSaveEditModal}
+        />
+      )}
+
+      {/* Select Audience Modal */}
+      {isAudienceModalOpen && (
+        <SelectAudienceModal
+          isOpen={isAudienceModalOpen}
+          onClose={() => setIsAudienceModalOpen(false)}
+          currentAudience={post.audience || "PUBLIC"}
+          onSave={handleSaveAudienceModal}
+        />
+      )}
 
       {/* Move to Trash Confirmation Dialog */}
       <Modal

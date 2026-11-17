@@ -15,6 +15,10 @@ import {
   CREATE_COMMENT_MUTATION,
   UPDATE_COMMENT_MUTATION,
   DELETE_COMMENT_MUTATION,
+  VOTE_POLL_MUTATION,
+  TOGGLE_POLL_STATUS_MUTATION,
+  UPDATE_POLL_MUTATION,
+  DELETE_POLL_MUTATION,
   DELETE_POST_MUTATION,
   RESTORE_POST_MUTATION,
   PERMANENT_DELETE_POST_MUTATION,
@@ -207,15 +211,21 @@ export const postsApi = {
   createPost: async (
     postData: CreatePostPayload,
     _token: string | null = null,
-    context?: { user: Person; group?: any },
+    _context?: { user: Person; group?: any },
   ) => {
-    if (postData.postType === "POLL") {
+    let pollInput = undefined;
+    if (postData.postType === "POLL" || postData.poll) {
       const error = validatePoll(
         postData.poll?.question || "",
         postData.poll?.options || [],
       );
       if (error) throw new Error(error);
-      return publishLocalPost(postData, context?.user, context?.group);
+      pollInput = {
+        question: postData.poll!.question.trim(),
+        options: postData.poll!.options.map((o) => o.trim()).filter(Boolean),
+        multiple: Boolean(postData.poll!.multiple),
+        expiresAt: postData.poll!.expiresAt || null,
+      };
     }
 
     const normalizedInstructions = Array.isArray(postData.instructions)
@@ -262,11 +272,44 @@ export const postsApi = {
           cuisine: postData.cuisine || null,
           categories: postData.tags || [],
           groupId: postData.groupId || null,
+          poll: pollInput,
         },
       },
     });
 
     return data?.createPost;
+  },
+
+  votePoll: async (pollId: string, optionId: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: VOTE_POLL_MUTATION,
+      variables: { pollId, optionId },
+    });
+    return data?.votePoll;
+  },
+
+  togglePollStatus: async (pollId: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: TOGGLE_POLL_STATUS_MUTATION,
+      variables: { pollId },
+    });
+    return data?.togglePollStatus;
+  },
+
+  updatePoll: async (id: string, input: any) => {
+    const { data } = await apolloClient.mutate({
+      mutation: UPDATE_POLL_MUTATION,
+      variables: { id, input },
+    });
+    return data?.updatePoll;
+  },
+
+  deletePoll: async (id: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: DELETE_POLL_MUTATION,
+      variables: { id },
+    });
+    return data?.deletePoll;
   },
 
   toggleLikePost: async (
@@ -411,7 +454,19 @@ export const postsApi = {
 
   updatePost: async (
     postId: string,
-    data: { caption?: string; title?: string },
+    data: {
+      caption?: string;
+      title?: string;
+      audience?: "PUBLIC" | "FRIENDS" | "ONLY_ME";
+      image?: string | null;
+      images?: string[];
+      ingredients?: string[];
+      instructions?: any;
+      preparationTime?: number;
+      servings?: number;
+      cuisine?: string;
+      poll?: any;
+    },
     _token: string | null = null,
     actorId?: string,
   ) => {

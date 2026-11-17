@@ -35,7 +35,7 @@ const ProfileNavTabs: React.FC<ProfileNavTabsProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => onSelectTab(tab.id)}
-                className={`py-3.5 px-3.5 sm:px-4.5 border-b-[3px] transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                className={`py-2.5 sm:py-3 px-3.5 sm:px-4.5 border-b-[3px] transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                   isSelected
                     ? "border-[#e02f21] text-[#e02f21] font-extrabold"
                     : "border-transparent hover:bg-gray-100 dark:hover:bg-[#3a3b3c] rounded-lg text-gray-600 dark:text-gray-300"

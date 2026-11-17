@@ -133,6 +133,68 @@ export const DELETE_COMMENT_MUTATION = gql`
   }
 `;
 
+export const POLL_FIELDS = gql`
+  fragment PollFields on Poll {
+    id
+    postId
+    authorId
+    question
+    multiple
+    closed
+    expiresAt
+    totalVotes
+    createdAt
+    updatedAt
+    options {
+      id
+      pollId
+      text
+      voteCount
+      voterIds
+      hasVoted
+      voters {
+        id
+        name
+        image
+        role
+      }
+    }
+  }
+`;
+
+export const VOTE_POLL_MUTATION = gql`
+  ${POLL_FIELDS}
+  mutation VotePoll($pollId: ID!, $optionId: ID!) {
+    votePoll(pollId: $pollId, optionId: $optionId) {
+      ...PollFields
+    }
+  }
+`;
+
+export const TOGGLE_POLL_STATUS_MUTATION = gql`
+  ${POLL_FIELDS}
+  mutation TogglePollStatus($pollId: ID!) {
+    togglePollStatus(pollId: $pollId) {
+      ...PollFields
+    }
+  }
+`;
+
+export const UPDATE_POLL_MUTATION = gql`
+  ${POLL_FIELDS}
+  mutation UpdatePoll($id: ID!, $input: UpdatePollInput!) {
+    updatePoll(id: $id, input: $input) {
+      ...PollFields
+    }
+  }
+`;
+
+export const DELETE_POLL_MUTATION = gql`
+  mutation DeletePoll($id: ID!) {
+    deletePoll(id: $id)
+  }
+`;
+
 export const DELETE_POST_MUTATION = gql`
   mutation DeletePost($postId: ID!) {
     deletePost(postId: $postId) {

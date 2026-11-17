@@ -61,6 +61,32 @@ export const POST_FRAGMENT = gql`
     repostCount
     hasLiked
     isCommentDisabled
+    poll {
+      id
+      postId
+      authorId
+      question
+      multiple
+      closed
+      expiresAt
+      totalVotes
+      createdAt
+      updatedAt
+      options {
+        id
+        pollId
+        text
+        voteCount
+        voterIds
+        hasVoted
+        voters {
+          id
+          name
+          image
+          role
+        }
+      }
+    }
     daysRemaining
     deletedAt
     createdAt
@@ -94,6 +120,32 @@ export const POST_FRAGMENT = gql`
       ingredients
       instructions
       isCommentDisabled
+      poll {
+        id
+        postId
+        authorId
+        question
+        multiple
+        closed
+        expiresAt
+        totalVotes
+        createdAt
+        updatedAt
+        options {
+          id
+          pollId
+          text
+          voteCount
+          voterIds
+          hasVoted
+          voters {
+            id
+            name
+            image
+            role
+          }
+        }
+      }
       createdAt
       author {
         id

@@ -26,9 +26,9 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
   onOpenEditModal,
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* 1. Personal Details Card */}
-      <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-gray-800 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-4.5 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-black text-base sm:text-lg text-gray-900 dark:text-white">
             Personal details
@@ -47,13 +47,13 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
 
         {/* Bio */}
         {profile.bio && (
-          <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line border-b border-gray-100 dark:border-gray-800 pb-3.5">
+          <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line border-b border-gray-100 dark:border-gray-800 pb-2.5">
             {profile.bio}
           </p>
         )}
 
         {/* List of Details */}
-        <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+        <div className="space-y-2.5 text-sm text-gray-700 dark:text-gray-300">
           <div className="flex items-center gap-3">
             <MapPin size={18} className="text-[#e02f21] shrink-0" />
             <span>
@@ -86,7 +86,7 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
 
         {/* Edit Details Action Button */}
         {isOwnProfile && (
-          <div className="pt-2">
+          <div className="pt-1.5">
             <button
               type="button"
               onClick={onOpenEditModal}
@@ -99,7 +99,7 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
       </div>
 
       {/* 2. Work & Career Card */}
-      <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3.5">
+      <div className="bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-4.5 border border-gray-100 dark:border-gray-800 shadow-xs space-y-2.5">
         <div className="flex items-center justify-between">
           <h3 className="font-black text-base sm:text-lg text-gray-900 dark:text-white">
             Work
@@ -131,7 +131,7 @@ const ProfileIntroCard: React.FC<ProfileIntroCardProps> = ({
       </div>
 
       {/* 3. Education Card */}
-      <div className="bg-white dark:bg-[#242526] rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3.5">
+      <div className="bg-white dark:bg-[#242526] rounded-2xl p-4 sm:p-4.5 border border-gray-100 dark:border-gray-800 shadow-xs space-y-2.5">
         <div className="flex items-center justify-between">
           <h3 className="font-black text-lg sm:text-xl text-gray-900 dark:text-white">
             Education

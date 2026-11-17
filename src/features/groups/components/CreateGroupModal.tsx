@@ -5,6 +5,7 @@ import Modal from "../../../components/ui/Modal";
 import groupsApi from "../api/groups.api";
 import postsApi from "../../posts/api/posts.api";
 import { useToast } from "../../../context/ToastContext";
+import UpdatePhotoModal from "../../profile/components/UpdatePhotoModal";
 
 const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
   const { notify } = useToast();
@@ -15,6 +16,7 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
   const [requiresPostApproval, setRequiresPostApproval] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [pendingCoverCrop, setPendingCoverCrop] = useState<File | null>(null);
 
   if (!isOpen) return null;
 
@@ -186,7 +188,11 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(e) => handleUploadCover(e.target.files?.[0])}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) setPendingCoverCrop(f);
+                e.target.value = "";
+              }}
             />
           </label>
         </div>
@@ -200,6 +206,20 @@ const CreateGroupModal = ({ isOpen, onClose, token, onGroupCreated }) => {
           Create Group
         </Button>
       </form>
+
+      {pendingCoverCrop && (
+        <UpdatePhotoModal
+          isOpen={Boolean(pendingCoverCrop)}
+          onClose={() => setPendingCoverCrop(null)}
+          file={pendingCoverCrop}
+          type="cover"
+          hideFeedOptions={true}
+          onConfirm={(croppedFile) => {
+            setPendingCoverCrop(null);
+            handleUploadCover(croppedFile);
+          }}
+        />
+      )}
     </Modal>
   );
 };

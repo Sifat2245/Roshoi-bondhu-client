@@ -2,7 +2,7 @@ import { useSocial } from '../../features/community/model/useSocial';
 import { useAuth } from '../../context/AuthContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
-import { Utensils, List, LayoutGrid, SlidersHorizontal, Settings } from 'lucide-react';
+import { Utensils, List, LayoutGrid, SlidersHorizontal } from 'lucide-react';
 import { useSession } from '../../lib/auth-client';
 import SocialHeader from '../../widgets/navbar/SocialHeader';
 import ProfileHeader from '../../features/profile/components/ProfileHeader';
@@ -515,8 +515,8 @@ const UserProfilePage = () => {
           friendsCount={effectiveFriendsCount}
         />
 
-        {/* Main Content Area with generous gap (matching Image 1) */}
-        <div className="max-w-[1250px] mx-auto px-0 sm:px-6 pt-3 sm:pt-10 pb-16">
+        {/* Main Content Area */}
+        <div className="max-w-[1250px] mx-auto px-0 sm:px-6 pt-2.5 sm:pt-4 pb-12">
           {activeTab === 'ABOUT' ? (
             /* About View (Matching Image 2 & Image 3) */
             <div className="space-y-8 animate-in fade-in duration-200">
@@ -553,7 +553,7 @@ const UserProfilePage = () => {
             </div>
           ) : (
             /* Default 2-Column Feed: Intro Sidebar + Posts (Matching Image 1) */
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-start">
+            <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 items-start">
               {/* Left Column: Intro & Personal Details Card */}
               <div className="w-full lg:w-[360px] xl:w-[380px] shrink-0 lg:sticky lg:top-18 self-start">
                 <button type="button" aria-expanded={showMobileIntro} onClick={() => setShowMobileIntro((value) => !value)} className="lg:hidden w-full rounded-none sm:rounded-2xl bg-white dark:bg-[#242526] border-x-0 sm:border-x border-y border-gray-200 dark:border-gray-800 p-4 text-left"><span className="flex justify-between gap-3 font-bold text-sm">About {profile.name?.split(' ')[0]}<span className="text-[#e02f21] text-xs">{showMobileIntro ? 'Hide details' : 'See details'}</span></span><span className="block text-sm text-gray-500 mt-2 line-clamp-2">{profile.bio || 'A little more about this home cook.'}</span></button>
@@ -567,7 +567,7 @@ const UserProfilePage = () => {
               </div>
 
               {/* Right Column: User Stream / Posts Feed */}
-              <div className="flex-1 min-w-0 space-y-2.5 sm:space-y-4">
+              <div className="flex-1 min-w-0 space-y-2.5 sm:space-y-3">
                 {/* "What's on your mind?" Create Post Trigger (if own profile) */}
                 {isOwnProfile && (
                   <CreatePostTrigger
@@ -583,7 +583,7 @@ const UserProfilePage = () => {
                 <UploadProgressFeedCard />
 
                 {/* Facebook-style "Posts" Header Card */}
-                <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl p-4 sm:p-5 border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 shadow-none sm:shadow-xs space-y-3.5">
+                <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl p-3.5 sm:p-4 border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 shadow-none sm:shadow-xs space-y-2.5">
                   <div className="flex items-center justify-between">
                     <h3 className="font-extrabold text-lg sm:text-xl text-gray-900 dark:text-white">
                       Posts
@@ -614,21 +614,6 @@ const UserProfilePage = () => {
                             : 'Casual only'}
                         </span>
                       </button>
-
-                      {isOwner && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const navElem = document.getElementById('profile-nav-tabs');
-                            if (navElem) navElem.scrollIntoView({ behavior: 'smooth' });
-                          }}
-                          className="px-3.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition cursor-pointer"
-                          title="Manage posts"
-                        >
-                          <Settings size={15} />
-                          <span>Manage posts</span>
-                        </button>
-                      )}
                     </div>
                   </div>
 

@@ -7,12 +7,24 @@ export type Person = {
 export type MemberRole = "ADMIN" | "MODERATOR" | "MEMBER";
 export type Poll = {
   id: string;
+  postId?: string;
   question: string;
-  options: { id: string; text: string; voterIds: string[] }[];
+  options: {
+    id: string;
+    pollId?: string;
+    text: string;
+    voterIds: string[];
+    voteCount?: number;
+    hasVoted?: boolean;
+    voters?: Person[];
+  }[];
   multiple: boolean;
   authorId: string;
   closed: boolean;
   expiresAt?: string;
+  totalVotes?: number;
+  createdAt?: string;
+  updatedAt?: string;
 };
 export type PollDraft = {
   question: string;
@@ -68,7 +80,7 @@ export const pollEnded = (poll: Poll, now = Date.now()) =>
   poll.closed ||
   (!!poll.expiresAt && new Date(poll.expiresAt).getTime() <= now);
 export const pollVoters = (poll: Poll) => [
-  ...new Set(poll.options.flatMap((option) => option.voterIds)),
+  ...new Set((poll.options || []).flatMap((option) => option.voterIds || [])),
 ];
 export function castVote(
   poll: Poll,
@@ -78,23 +90,49 @@ export function castVote(
 ): Poll {
   if (!actorId || pollEnded(poll, now))
     throw new Error("Voting has ended for this poll.");
-  const target = poll.options.find((option) => option.id === optionId);
+  const target = (poll.options || []).find((option) => option.id === optionId);
   if (!target) throw new Error("This answer is no longer available.");
-  const selected = target.voterIds.includes(actorId);
+  const targetVoterIds = target.voterIds || [];
+  const selected = targetVoterIds.includes(actorId) || Boolean(target.hasVoted);
+
+  const updatedOptions = poll.options.map((option) => {
+    const currentVoterIds = option.voterIds || [];
+    let nextVoterIds: string[];
+
+    if (selected) {
+      nextVoterIds =
+        option.id === optionId
+          ? currentVoterIds.filter((id) => id !== actorId)
+          : currentVoterIds;
+    } else {
+      if (option.id === optionId) {
+        nextVoterIds = [
+          ...currentVoterIds.filter((id) => id !== actorId),
+          actorId,
+        ];
+      } else if (!poll.multiple) {
+        nextVoterIds = currentVoterIds.filter((id) => id !== actorId);
+      } else {
+        nextVoterIds = currentVoterIds;
+      }
+    }
+
+    return {
+      ...option,
+      voterIds: nextVoterIds,
+      voteCount: nextVoterIds.length,
+      hasVoted: nextVoterIds.includes(actorId),
+    };
+  });
+
+  const totalVoters = new Set(
+    updatedOptions.flatMap((option) => option.voterIds),
+  ).size;
+
   return {
     ...poll,
-    options: poll.options.map((option) => ({
-      ...option,
-      voterIds: selected
-        ? option.id === optionId
-          ? option.voterIds.filter((id) => id !== actorId)
-          : option.voterIds
-        : option.id === optionId
-          ? [...option.voterIds.filter((id) => id !== actorId), actorId]
-          : poll.multiple
-            ? option.voterIds
-            : option.voterIds.filter((id) => id !== actorId),
-    })),
+    totalVotes: totalVoters,
+    options: updatedOptions,
   };
 }
 export function resolveGroup(

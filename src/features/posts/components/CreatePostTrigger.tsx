@@ -20,14 +20,14 @@ const CreatePostTrigger = ({ onClick, onRequireAuth }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl p-3.5 sm:p-4 shadow-none sm:shadow-xs border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800">
+    <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl p-3 sm:p-3.5 shadow-none sm:shadow-xs border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800">
       {/* Top: Avatar & Rounded Input Button */}
       <div className="flex items-center gap-3">
         <Avatar src={user?.image} alt={user?.name || "Cook"} size="md" />
         <button
           type="button"
           onClick={() => handleClick("CASUAL")}
-          className="flex-1 bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200/70 dark:hover:bg-gray-700/70 rounded-full px-4 py-2.5 text-left text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium transition cursor-pointer"
+          className="flex-1 bg-[#f0f2f5] dark:bg-[#3a3b3c] hover:bg-gray-200/70 dark:hover:bg-gray-700/70 rounded-full px-4 py-2 text-left text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium transition cursor-pointer"
         >
           {user
             ? t("whatsCooking", { name: user.name.split(" ")[0] })
@@ -36,33 +36,33 @@ const CreatePostTrigger = ({ onClick, onRequireAuth }) => {
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-100 dark:border-gray-800 my-2.5"></div>
+      <div className="border-t border-gray-100 dark:border-gray-800 my-2"></div>
 
       {/* Bottom Icons Row */}
       <div className="grid grid-cols-3 text-xs sm:text-sm font-bold text-gray-600 dark:text-gray-300">
         <button
           type="button"
           onClick={() => handleClick("CASUAL")}
-          className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2.5 transition cursor-pointer"
+          className="py-1.5 sm:py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition cursor-pointer"
         >
-          <ImageIcon size={22} className="text-emerald-500" />
+          <ImageIcon size={20} className="text-emerald-500" />
           <span>Photo / Story</span>
         </button>
 
         <button
           type="button"
           onClick={() => handleClick("RECIPE")}
-          className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2.5 transition cursor-pointer text-[#e02f21]"
+          className="py-1.5 sm:py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition cursor-pointer text-[#e02f21]"
         >
-          <ChefHat size={22} />
+          <ChefHat size={20} />
           <span>Share Recipe</span>
         </button>
         <button
           type="button"
           onClick={() => handleClick("POLL")}
-          className="py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition"
+          className="py-1.5 sm:py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition cursor-pointer"
         >
-          <BarChart3 size={20} className="text-amber-600" />
+          <BarChart3 size={19} className="text-amber-600" />
           <span>Poll</span>
         </button>
       </div>

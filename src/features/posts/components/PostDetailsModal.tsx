@@ -513,7 +513,13 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
           )}
 
           {post.postType === "POLL" && (
-            <PostPoll post={post} onRequireAuth={onRequireAuth} />
+            <PostPoll
+              post={post}
+              onRequireAuth={onRequireAuth}
+              onUpdatePoll={(updatedPoll) => {
+                if (onPostUpdated) onPostUpdated();
+              }}
+            />
           )}
           {post.postType === "REPOST" && <SharedPostPreview post={post} />}
 
