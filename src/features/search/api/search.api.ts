@@ -46,10 +46,8 @@ export interface UserSearchResult {
   city?: string | null;
   work?: string | null;
   education?: string | null;
-  followersCount?: number;
   mutualFriendsCount?: number;
   friendshipStatus?: string;
-  isFollowing?: boolean;
   isMe?: boolean;
 }
 

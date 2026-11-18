@@ -493,10 +493,8 @@ export const SEARCH_SUGGESTIONS_QUERY = gql`
         city
         work
         education
-        followersCount
         mutualFriendsCount
         friendshipStatus
-        isFollowing
         isMe
       }
       groups {
@@ -530,10 +528,8 @@ export const SEARCH_ALL_QUERY = gql`
         city
         work
         education
-        followersCount
         mutualFriendsCount
         friendshipStatus
-        isFollowing
         isMe
       }
       groups {

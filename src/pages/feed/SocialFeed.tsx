@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { useSession } from "../../lib/auth-client";
 import { useAuth } from "../../context/AuthContext";
@@ -11,29 +11,20 @@ import SharePostModal from "../../features/posts/components/SharePostModal";
 import FeedPeopleYouMayKnow from "../../features/friends/components/FeedPeopleYouMayKnow";
 import UploadProgressFeedCard from "../../features/posts/components/UploadProgressFeedCard";
 import { PostSkeleton } from "../../components/ui/Skeleton";
+import { uniquePreservingOrder } from "../../features/posts/model/post-policy";
 import {
-  uniquePreservingOrder,
-  type FeedCursor,
-} from "../../features/posts/model/post-policy";
-import postsApi from "../../features/posts/api/posts.api";
+  useFeedInfiniteQuery,
+  useInvalidateFeedQueries,
+} from "../../features/posts/hooks/useFeedQueries";
 import { Utensils, X, RotateCcw } from "lucide-react";
 
 const SocialFeed = () => {
   const { data: session } = useSession();
   const { user: authUser } = useAuth();
   const activeUser = session?.user || authUser;
+  const token = session?.session?.token;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [feedError, setFeedError] = useState("");
-  const requestId = useRef(0);
-  const hasLoaded = useRef(false);
-  const [cursor, setCursor] = useState<FeedCursor | null>(null);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const morePending = useRef(false);
-  const retryCursor = useRef<FeedCursor | undefined>(undefined);
 
   // Active filters from query or local state
   const typeParam = searchParams.get("type") || ""; // 'RECIPE', 'CASUAL'
@@ -44,78 +35,48 @@ const SocialFeed = () => {
   const [activeTag, setActiveTag] = useState("");
   const [activeMaxTime, setActiveMaxTime] = useState("");
 
+  // TanStack Query Infinite Query with 10 minutes cache
+  const {
+    data: feedData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isFeedLoading,
+    isError: isFeedError,
+    refetch: refetchFeed,
+  } = useFeedInfiniteQuery({
+    type: typeParam,
+    filter: filterParam,
+    cuisine: activeCuisine,
+    tag: activeTag,
+    maxTime: activeMaxTime,
+    search: searchKeyword,
+    actorId: activeUser?.id,
+    token,
+  });
+
+  const {
+    invalidateFeed,
+    updatePostInFeed,
+    deletePostFromFeed,
+  } = useInvalidateFeedQueries();
+
+  // Flatten posts across pages
+  const posts = useMemo(() => {
+    if (!feedData?.pages) return [];
+    const all = feedData.pages.flatMap((page) => page.posts || []);
+    return uniquePreservingOrder(all);
+  }, [feedData]);
+
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createInitialMode, setCreateInitialMode] = useState("CASUAL");
-  const [selectedPostForComments, setSelectedPostForComments] = useState(null);
+  const [selectedPostForComments, setSelectedPostForComments] = useState<any>(null);
   const [sharingPost, setSharingPost] = useState<any>(null);
 
   const requireAuth = () => {
     navigate("/login");
   };
-
-  // Fetch feed with all filter parameters
-  const fetchFeed = useCallback(
-    async (next?: FeedCursor) => {
-      if (next && morePending.current) return;
-      morePending.current = Boolean(next);
-      retryCursor.current = next;
-      setLoadingMore(Boolean(next));
-      const currentRequest = ++requestId.current;
-      if (!hasLoaded.current) setLoading(true);
-      setFeedError("");
-      try {
-        const data = await postsApi.getFeedPage(
-          {
-            type: typeParam,
-            filter: filterParam,
-            cuisine: activeCuisine,
-            tag: activeTag,
-            maxTime: activeMaxTime,
-            search: searchKeyword,
-          },
-          null,
-          activeUser?.id,
-          next,
-        );
-        if (currentRequest === requestId.current) {
-          setPosts((previous) =>
-            next ? uniquePreservingOrder([...previous, ...data.posts]) : data.posts,
-          );
-          setCursor(data.cursor);
-        }
-      } catch {
-        if (currentRequest === requestId.current) {
-          setFeedError(
-            "Your feed could not be loaded. Please check your connection and try again.",
-          );
-        }
-      } finally {
-        if (currentRequest === requestId.current) {
-          setLoading(false);
-          setLoadingMore(false);
-          morePending.current = false;
-          hasLoaded.current = true;
-        }
-      }
-    },
-    [
-      typeParam,
-      filterParam,
-      activeCuisine,
-      activeTag,
-      activeMaxTime,
-      searchKeyword,
-      activeUser?.id,
-    ],
-  );
-
-  useEffect(() => {
-    setPosts([]);
-    setCursor(null);
-    setLoading(true);
-    fetchFeed();
-  }, [fetchFeed]);
 
   const clearSearch = () => {
     searchParams.delete("search");
@@ -170,19 +131,19 @@ const SocialFeed = () => {
         onSelectMaxTime={setActiveMaxTime}
         onResetFilters={handleResetFilters}
       >
-        {/* Create Post Trigger Box */}
-        {feedError && (
+        {/* Feed Error Alert */}
+        {isFeedError && (
           <div
             role="alert"
             className="rounded-2xl border border-red-200 dark:border-red-900 bg-white dark:bg-[#242526] p-4"
           >
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              {feedError}
+              Your feed could not be loaded. Please check your connection and try again.
             </p>
             <button
               type="button"
-              onClick={() => fetchFeed(retryCursor.current)}
-              className="mt-3 text-sm font-bold text-[#e02f21]"
+              onClick={() => refetchFeed()}
+              className="mt-3 text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
             >
               Try again
             </button>
@@ -263,7 +224,7 @@ const SocialFeed = () => {
         )}
 
         {/* Posts Stream / Skeleton Loading */}
-        {loading ? (
+        {isFeedLoading ? (
           <div className="space-y-4">
             <PostSkeleton />
             <PostSkeleton />
@@ -279,21 +240,13 @@ const SocialFeed = () => {
                 }
                 onOpenShare={handleSharePost}
                 onRequireAuth={requireAuth}
-                onDeletePost={(deletedId) =>
-                  setPosts((prev) => prev.filter((p) => p.id !== deletedId))
-                }
-                onUpdatePost={(updated) =>
-                  setPosts((prev) =>
-                    prev.map((p) =>
-                      p.id === updated.id ? { ...p, ...updated } : p,
-                    ),
-                  )
-                }
+                onDeletePost={(deletedId) => deletePostFromFeed(deletedId)}
+                onUpdatePost={(updated) => updatePostInFeed(updated)}
               />
               {index === 3 && <FeedPeopleYouMayKnow />}
             </React.Fragment>
           ))
-        ) : feedError ? null : (
+        ) : isFeedError ? null : (
           <div className="space-y-4">
             <div className="bg-white dark:bg-[#242526] rounded-2xl p-8 sm:p-12 text-center border border-gray-100 dark:border-gray-800 shadow-xs space-y-3">
               <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/40 text-[#e02f21] flex items-center justify-center mx-auto">
@@ -332,17 +285,17 @@ const SocialFeed = () => {
             <FeedPeopleYouMayKnow />
           </div>
         )}
-        {!loading && cursor && (
+        {!isFeedLoading && hasNextPage && (
           <button
             type="button"
-            onClick={() => fetchFeed(cursor)}
-            disabled={loadingMore}
-            className="w-full rounded-xl bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] disabled:opacity-60"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="w-full rounded-xl bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] disabled:opacity-60 cursor-pointer"
           >
-            {loadingMore ? "Loading more posts…" : "Load more posts"}
+            {isFetchingNextPage ? "Loading more posts…" : "Load more posts"}
           </button>
         )}
-        {!loading && !cursor && posts.length > 0 && (
+        {!isFeedLoading && !hasNextPage && posts.length > 0 && (
           <p
             role="status"
             className="py-4 text-center text-sm text-gray-500 dark:text-gray-400"
@@ -357,7 +310,7 @@ const SocialFeed = () => {
         isOpen={isCreateOpen}
         initialMode={createInitialMode}
         onClose={() => setIsCreateOpen(false)}
-        onPostCreated={fetchFeed}
+        onPostCreated={() => invalidateFeed()}
       />
 
       {/* Post Details Modal */}
@@ -368,17 +321,14 @@ const SocialFeed = () => {
           onClose={() => setSelectedPostForComments(null)}
           onPostUpdated={(change?: { comment?: any }) => {
             if (!change?.comment) {
-              fetchFeed();
+              invalidateFeed();
               return;
             }
             const postId = selectedPostForComments.id;
-            setPosts((previous) =>
-              previous.map((post) =>
-                post.id === postId
-                  ? { ...post, commentCount: (post.commentCount || 0) + 1 }
-                  : post,
-              ),
-            );
+            updatePostInFeed({
+              id: postId,
+              commentCount: (selectedPostForComments.commentCount || 0) + 1,
+            });
           }}
           onRequireAuth={requireAuth}
         />
@@ -388,7 +338,7 @@ const SocialFeed = () => {
         post={sharingPost}
         isOpen={Boolean(sharingPost)}
         onClose={() => setSharingPost(null)}
-        onShared={fetchFeed}
+        onShared={() => invalidateFeed()}
       />
     </>
   );

@@ -67,6 +67,7 @@ const UserProfilePage = () => {
 
   const [profile, setProfile] = useState<any>(cachedProfile || null);
   const [posts, setPosts] = useState([]);
+  const [isPostsLoading, setIsPostsLoading] = useState(true);
   const [loading, setLoading] = useState(!cachedProfile && isProfileQueryLoading);
   const [activeTab, setActiveTab] = useState('POSTS'); // 'POSTS', 'RECIPES', 'PHOTOS', 'ABOUT', 'FRIENDS'
 
@@ -242,6 +243,7 @@ const UserProfilePage = () => {
   }, [targetId, token]);
 
   const fetchUserPosts = useCallback(async (uid = targetId) => {
+    setIsPostsLoading(true);
     try {
       const authorQuery = uid === 'me' && currentUser?.id ? currentUser.id : uid;
       const data = await postsApi.getPosts({ authorId: authorQuery, limit: 50 }, token, currentUser?.id);
@@ -250,11 +252,14 @@ const UserProfilePage = () => {
       }
     } catch (err) {
       console.error('Error fetching user posts:', err);
+    } finally {
+      setIsPostsLoading(false);
     }
   }, [targetId, currentUser?.id, token]);
 
   useEffect(() => {
     if (targetId) {
+      setIsPostsLoading(true);
       fetchProfile(targetId);
       fetchUserPosts(targetId);
     }
@@ -647,7 +652,12 @@ const UserProfilePage = () => {
                 </div>
 
                 {/* Posts Stream */}
-                {filteredPosts.length > 0 ? (
+                {isPostsLoading ? (
+                  <div className="space-y-2.5 sm:space-y-3">
+                    <PostSkeleton />
+                    <PostSkeleton />
+                  </div>
+                ) : filteredPosts.length > 0 ? (
                   feedViewMode === 'grid' ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
                       {filteredPosts.map((post) => (

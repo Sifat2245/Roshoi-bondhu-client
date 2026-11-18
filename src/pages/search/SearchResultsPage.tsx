@@ -25,9 +25,12 @@ import searchApi, {
   type UserSearchResult,
   type GroupSearchResult,
 } from "../../features/search/api/search.api";
+import {
+  useSearchAllQuery,
+  useInvalidateSearchQueries,
+} from "../../features/search/hooks/useSearchQueries";
 import { friendsApi } from "../../features/friends/api/friends.api";
 import { groupsApi } from "../../features/groups/api/groups.api";
-import { profileApi } from "../../features/profile/api/profile.api";
 import { useSession } from "../../lib/auth-client";
 import defaultAvatar from "../../assets/user-image.png";
 
@@ -49,11 +52,28 @@ export const SearchResultsPage: React.FC = () => {
   const [postsFrom, setPostsFrom] = useState("ANYONE");
   const [taggedLocation, setTaggedLocation] = useState("");
 
-  // Results state
-  const [users, setUsers] = useState<UserSearchResult[]>([]);
-  const [groups, setGroups] = useState<GroupSearchResult[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // TanStack Query for 10-minute caching (instant back-navigation)
+  const { data: searchData, isLoading: isSearchLoading } = useSearchAllQuery(
+    query,
+    {
+      recentPosts,
+      datePosted,
+      postsFrom,
+      taggedLocation,
+    }
+  );
+
+  const {
+    updateUserInSearch,
+    updateGroupInSearch,
+    deletePostInSearch,
+    updatePostInSearch,
+  } = useInvalidateSearchQueries();
+
+  const users = searchData?.users || [];
+  const groups = searchData?.groups || [];
+  const posts = searchData?.posts || [];
+  const loading = !query.trim() ? false : isSearchLoading;
 
   // Modals state for post interactions
   const [selectedPostForComments, setSelectedPostForComments] = useState<any>(null);
@@ -73,50 +93,22 @@ export const SearchResultsPage: React.FC = () => {
     setSearchParams(nextParams);
   };
 
-  const fetchResults = useCallback(async () => {
-    if (!query.trim()) {
-      setUsers([]);
-      setGroups([]);
-      setPosts([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await searchApi.searchAll(query, {
-        recentPosts,
-        datePosted,
-        postsFrom,
-        taggedLocation,
-      });
-
-      setUsers(res.users);
-      setGroups(res.groups);
-      setPosts(res.posts);
-    } catch (err) {
-      console.warn("Failed to fetch search results:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [query, recentPosts, datePosted, postsFrom, taggedLocation]);
-
-  useEffect(() => {
-    fetchResults();
-  }, [fetchResults]);
-
-  // Friend Request Action
+  // Friend Request Action (optimistically cached in React Query)
   const handleSendFriendRequest = async (targetUserId: string) => {
     setPendingFriendIds((prev) => new Set(prev).add(targetUserId));
+    updateUserInSearch(targetUserId, (u) => ({
+      ...u,
+      friendshipStatus: "PENDING_SENT",
+    }));
+
     try {
       await friendsApi.sendFriendRequest(targetUserId, token);
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === targetUserId ? { ...u, friendshipStatus: "PENDING_SENT" } : u
-        )
-      );
     } catch (err) {
       console.warn("Failed to send friend request:", err);
+      updateUserInSearch(targetUserId, (u) => ({
+        ...u,
+        friendshipStatus: "NONE",
+      }));
     } finally {
       setPendingFriendIds((prev) => {
         const next = new Set(prev);
@@ -126,45 +118,30 @@ export const SearchResultsPage: React.FC = () => {
     }
   };
 
-  // Follow Action
-  const handleToggleFollow = async (targetUserId: string) => {
-    try {
-      await profileApi.toggleFollow(targetUserId, token);
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === targetUserId ? { ...u, isFollowing: !u.isFollowing } : u
-        )
-      );
-    } catch (err) {
-      console.warn("Failed to toggle follow:", err);
-    }
-  };
-
-  // Group Join / Leave Action
+  // Group Join / Leave Action (optimistically cached in React Query)
   const handleToggleGroupJoin = async (group: GroupSearchResult) => {
     setPendingGroupIds((prev) => new Set(prev).add(group.id));
+    const wasMember = group.isMember;
+
+    updateGroupInSearch(group.id, (g) => ({
+      ...g,
+      isMember: !wasMember,
+      membersCount: wasMember ? Math.max(0, g.membersCount - 1) : g.membersCount + 1,
+    }));
+
     try {
-      if (group.isMember) {
+      if (wasMember) {
         await groupsApi.leaveGroup(group.id, token);
-        setGroups((prev) =>
-          prev.map((g) =>
-            g.id === group.id
-              ? { ...g, isMember: false, membersCount: Math.max(0, g.membersCount - 1) }
-              : g
-          )
-        );
       } else {
         await groupsApi.joinGroup(group.id, token);
-        setGroups((prev) =>
-          prev.map((g) =>
-            g.id === group.id
-              ? { ...g, isMember: true, membersCount: g.membersCount + 1 }
-              : g
-          )
-        );
       }
     } catch (err) {
       console.warn("Failed to toggle group membership:", err);
+      updateGroupInSearch(group.id, (g) => ({
+        ...g,
+        isMember: wasMember,
+        membersCount: wasMember ? g.membersCount + 1 : Math.max(0, g.membersCount - 1),
+      }));
     } finally {
       setPendingGroupIds((prev) => {
         const next = new Set(prev);
@@ -220,7 +197,7 @@ export const SearchResultsPage: React.FC = () => {
 
               {/* Sub-filters under All (Facebook style) */}
               {activeTab === "all" && (
-                <div className="mt-2.5 ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-800 space-y-3.5 py-1">
+                <div className="mt-2.5 px-1 space-y-3.5 py-1">
                   {/* Recent Posts Toggle */}
                   <div className="flex items-center justify-between">
                     <div>
@@ -330,58 +307,44 @@ export const SearchResultsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleTabChange("people")}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition cursor-pointer select-none ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition cursor-pointer select-none ${
                 activeTab === "people"
                   ? "bg-red-50 dark:bg-red-950/30 text-[#e02f21]"
                   : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/60"
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                    activeTab === "people"
-                      ? "bg-[#e02f21] text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-500"
-                  }`}
-                >
-                  <Users size={18} />
-                </div>
-                <span>People</span>
+              <div
+                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                  activeTab === "people"
+                    ? "bg-[#e02f21] text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-500"
+                }`}
+              >
+                <Users size={18} />
               </div>
-              {users.length > 0 && (
-                <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-gray-500">
-                  {users.length}
-                </span>
-              )}
+              <span>People</span>
             </button>
 
             {/* 3. Groups Tab */}
             <button
               type="button"
               onClick={() => handleTabChange("groups")}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition cursor-pointer select-none ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition cursor-pointer select-none ${
                 activeTab === "groups"
                   ? "bg-red-50 dark:bg-red-950/30 text-[#e02f21]"
                   : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/60"
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                    activeTab === "groups"
-                      ? "bg-[#e02f21] text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-500"
-                  }`}
-                >
-                  <Layers size={18} />
-                </div>
-                <span>Groups</span>
+              <div
+                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                  activeTab === "groups"
+                    ? "bg-[#e02f21] text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-500"
+                }`}
+              >
+                <Layers size={18} />
               </div>
-              {groups.length > 0 && (
-                <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-gray-500">
-                  {groups.length}
-                </span>
-              )}
+              <span>Groups</span>
             </button>
           </div>
         </aside>
@@ -411,7 +374,7 @@ export const SearchResultsPage: React.FC = () => {
                     : "bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
                 }`}
               >
-                People ({users.length})
+                People
               </button>
               <button
                 type="button"
@@ -422,7 +385,7 @@ export const SearchResultsPage: React.FC = () => {
                     : "bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
                 }`}
               >
-                Groups ({groups.length})
+                Groups
               </button>
             </div>
 
@@ -552,18 +515,6 @@ export const SearchResultsPage: React.FC = () => {
                                     <span>{isPending ? "Adding…" : "Add friend"}</span>
                                   </button>
                                 )}
-
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleFollow(u.id)}
-                                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                                    u.isFollowing
-                                      ? "border-gray-200 dark:border-gray-700 bg-white dark:bg-[#323436] text-gray-700 dark:text-gray-200"
-                                      : "border-transparent bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200"
-                                  }`}
-                                >
-                                  {u.isFollowing ? "Following" : "Follow"}
-                                </button>
                               </div>
                             )}
                           </div>
@@ -688,14 +639,10 @@ export const SearchResultsPage: React.FC = () => {
                         }
                         onOpenShare={(selected) => setSharingPost(selected)}
                         onDeletePost={(deletedId) =>
-                          setPosts((prev) => prev.filter((p) => p.id !== deletedId))
+                          deletePostInSearch(deletedId)
                         }
                         onUpdatePost={(updated) =>
-                          setPosts((prev) =>
-                            prev.map((p) =>
-                              p.id === updated.id ? { ...p, ...updated } : p
-                            )
-                          )
+                          updatePostInSearch(updated)
                         }
                       />
                     ))}

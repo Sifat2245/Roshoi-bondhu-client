@@ -67,6 +67,10 @@ export interface Post {
   likesCount?: number;
   commentsCount?: number;
   sharesCount?: number;
+  likeCount?: number;
+  commentCount?: number;
+  repostCount?: number;
+  hasLiked?: boolean;
   likes?: Like[];
   comments?: Comment[];
   isLiked?: boolean;
