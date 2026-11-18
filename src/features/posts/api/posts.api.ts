@@ -23,6 +23,8 @@ import {
   RESTORE_POST_MUTATION,
   PERMANENT_DELETE_POST_MUTATION,
   EMPTY_TRASH_MUTATION,
+  HIDE_POST_MUTATION,
+  UNHIDE_POST_MUTATION,
 } from "../../../lib/graphql/mutations";
 import { optimizeImageForUpload } from "../../../lib/media-preferences";
 import { Post, CreatePostPayload, PostFilterParams } from "../types/post.types";
@@ -48,6 +50,7 @@ import {
   matchesPost,
   postAudience,
   uniqueRecent,
+  uniquePreservingOrder,
 } from "../model/post-policy";
 
 async function visiblePosts(
@@ -156,7 +159,7 @@ export const postsApi = {
         ? []
         : await visiblePosts(localPosts(params, actorId), actorId, token);
 
-      const combined = uniqueRecent([...devicePosts, ...visibleRemote]).filter((p) =>
+      const combined = uniquePreservingOrder([...devicePosts, ...visibleRemote]).filter((p) =>
         matchesPost(p, params)
       );
 
@@ -529,6 +532,22 @@ export const postsApi = {
       mutation: EMPTY_TRASH_MUTATION,
     });
     return { success: true, data: data?.emptyTrash };
+  },
+
+  hidePost: async (postId: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: HIDE_POST_MUTATION,
+      variables: { postId },
+    });
+    return Boolean(data?.hidePost);
+  },
+
+  unhidePost: async (postId: string) => {
+    const { data } = await apolloClient.mutate({
+      mutation: UNHIDE_POST_MUTATION,
+      variables: { postId },
+    });
+    return Boolean(data?.unhidePost);
   },
 };
 

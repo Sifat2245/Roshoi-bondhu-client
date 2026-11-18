@@ -95,6 +95,16 @@ export function uniqueRecent(posts: any[]): any[] {
     compareRecent,
   );
 }
+export function uniquePreservingOrder(posts: any[]): any[] {
+  const seen = new Set<string>();
+  const result: any[] = [];
+  for (const post of posts) {
+    if (!post?.id || seen.has(post.id)) continue;
+    seen.add(post.id);
+    result.push(post);
+  }
+  return result;
+}
 export function matchesPost(post: any, params: any): boolean {
   const text = [
     post.title,

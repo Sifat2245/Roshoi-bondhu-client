@@ -39,6 +39,7 @@ import {
   AlertTriangle,
   Bookmark,
   MessageSquareOff,
+  EyeOff,
 } from "lucide-react";
 
 interface PostCardProps {
@@ -48,6 +49,7 @@ interface PostCardProps {
   onRequireAuth?: () => void;
   onDeletePost?: (postId: string) => void;
   onUpdatePost?: (updatedPost: any) => void;
+  onHidePost?: (postId: string) => void;
   pinContext?: PinContext;
   canManageGroupPins?: boolean;
   showPinBadge?: boolean;
@@ -60,6 +62,7 @@ const PostCard: React.FC<PostCardProps> = ({
   onRequireAuth,
   onDeletePost,
   onUpdatePost,
+  onHidePost,
   pinContext,
   canManageGroupPins = false,
   showPinBadge = true,
@@ -88,6 +91,7 @@ const PostCard: React.FC<PostCardProps> = ({
           post.groupId === pinContext.groupId,
         );
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
 
   // Edit & Audience Modals State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -344,8 +348,46 @@ const PostCard: React.FC<PostCardProps> = ({
     }
   };
 
+  const handleHidePost = async () => {
+    setIsMenuOpen(false);
+    setIsHidden(true);
+    try {
+      await postsApi.hidePost(post.id);
+      onHidePost?.(post.id);
+    } catch (err: any) {
+      console.warn("Failed to hide post:", err);
+    }
+  };
+
+  const handleUndoHidePost = async () => {
+    setIsHidden(false);
+    try {
+      await postsApi.unhidePost(post.id);
+    } catch (err: any) {
+      console.warn("Failed to unhide post:", err);
+    }
+  };
+
   if (isDeleted) {
     return null;
+  }
+
+  if (isHidden) {
+    return (
+      <div className="bg-white dark:bg-[#242526] rounded-none sm:rounded-2xl border-x-0 sm:border-x border-y border-gray-100 dark:border-gray-800 p-4 shadow-none sm:shadow-xs flex items-center justify-between gap-3 text-sm transition-all duration-300">
+        <div className="flex items-center gap-2.5 text-gray-600 dark:text-gray-300 min-w-0">
+          <EyeOff size={18} className="text-gray-400 shrink-0" />
+          <span className="truncate">Post hidden. You’ll see fewer posts like this.</span>
+        </div>
+        <button
+          type="button"
+          onClick={handleUndoHidePost}
+          className="text-[#e02f21] font-bold hover:underline cursor-pointer text-xs sm:text-sm shrink-0 px-2.5 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+        >
+          Undo
+        </button>
+      </div>
+    );
   }
 
   const isRecipe = post.postType === "RECIPE";
@@ -543,6 +585,25 @@ const PostCard: React.FC<PostCardProps> = ({
                   </p>
                 </div>
               </button>
+
+              {/* 4b. Hide Post (for non-author posts on feed) */}
+              {!isAuthor && (
+                <button
+                  type="button"
+                  onClick={handleHidePost}
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
+                >
+                  <EyeOff size={18} className="text-gray-500" />
+                  <div>
+                    <p className="font-bold text-sm text-gray-900 dark:text-white">
+                      Hide post
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                      See fewer posts like this
+                    </p>
+                  </div>
+                </button>
+              )}
 
               {/* 5. Move to Trash (Delete) */}
               {isAuthor && (

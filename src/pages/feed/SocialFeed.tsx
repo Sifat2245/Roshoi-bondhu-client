@@ -12,7 +12,7 @@ import FeedPeopleYouMayKnow from "../../features/friends/components/FeedPeopleYo
 import UploadProgressFeedCard from "../../features/posts/components/UploadProgressFeedCard";
 import { PostSkeleton } from "../../components/ui/Skeleton";
 import {
-  uniqueRecent,
+  uniquePreservingOrder,
   type FeedCursor,
 } from "../../features/posts/model/post-policy";
 import postsApi from "../../features/posts/api/posts.api";
@@ -80,7 +80,7 @@ const SocialFeed = () => {
         );
         if (currentRequest === requestId.current) {
           setPosts((previous) =>
-            next ? uniqueRecent([...previous, ...data.posts]) : data.posts,
+            next ? uniquePreservingOrder([...previous, ...data.posts]) : data.posts,
           );
           setCursor(data.cursor);
         }
@@ -151,9 +151,7 @@ const SocialFeed = () => {
     activeCuisine ||
     activeTag ||
     activeMaxTime ||
-    searchKeyword ||
-    typeParam ||
-    filterParam,
+    searchKeyword,
   );
 
   if (!activeUser) {
@@ -201,32 +199,8 @@ const SocialFeed = () => {
           <div className="flex items-center justify-between gap-2 flex-wrap text-xs bg-red-50 dark:bg-red-950/30 p-2.5 rounded-xl border border-red-100 dark:border-red-900/40">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-bold text-gray-600 dark:text-gray-300">
-                Filtering:
+                Filters:
               </span>
-              {typeParam && (
-                <span className="bg-[#e02f21] text-white px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-                  {typeParam === "RECIPE" ? "Recipes Only" : "Foodie Thoughts"}
-                  <button
-                    type="button"
-                    onClick={() => navigate("/")}
-                    className="cursor-pointer"
-                  >
-                    <X size={12} />
-                  </button>
-                </span>
-              )}
-              {filterParam === "FOLLOWING" && (
-                <span className="bg-[#e02f21] text-white px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-                  Following Feed
-                  <button
-                    type="button"
-                    onClick={() => navigate("/")}
-                    className="cursor-pointer"
-                  >
-                    <X size={12} />
-                  </button>
-                </span>
-              )}
               {activeCuisine && (
                 <span className="bg-[#e02f21] text-white px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
                   Cuisine: {activeCuisine}
@@ -320,35 +294,42 @@ const SocialFeed = () => {
             </React.Fragment>
           ))
         ) : feedError ? null : (
-          <div className="bg-white dark:bg-[#242526] rounded-2xl p-12 text-center border border-gray-100 dark:border-gray-800 shadow-xs space-y-3">
-            <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/40 text-[#e02f21] flex items-center justify-center mx-auto">
-              <Utensils size={32} />
+          <div className="space-y-4">
+            <div className="bg-white dark:bg-[#242526] rounded-2xl p-8 sm:p-12 text-center border border-gray-100 dark:border-gray-800 shadow-xs space-y-3">
+              <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/40 text-[#e02f21] flex items-center justify-center mx-auto">
+                <Utensils size={32} />
+              </div>
+              <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white">
+                {hasAnyFilter ? "No Posts Match Your Filters" : "Welcome to Your Heshel Feed"}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
+                {hasAnyFilter
+                  ? "Try clearing some of your cuisine or tag filters to see more delicious food posts."
+                  : "Discover heirloom recipes, culinary tips, and food updates from friends and passionate cooks. Share your first recipe or add friends to see more!"}
+              </p>
+              <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
+                {hasAnyFilter ? (
+                  <button
+                    type="button"
+                    onClick={handleResetFilters}
+                    className="px-4 py-2 bg-[#e02f21] text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-[#c22417] transition cursor-pointer"
+                  >
+                    Reset Filters
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenCreateModal("RECIPE")}
+                    className="px-4 py-2 bg-[#e02f21] text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-[#c22417] transition cursor-pointer"
+                  >
+                    Share First Recipe
+                  </button>
+                )}
+              </div>
             </div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white">
-              No Posts or Recipes Found
-            </h3>
-            <p className="text-xs text-gray-500 max-w-sm mx-auto">
-              {hasAnyFilter
-                ? "Try clearing some of your cuisine or tag filters to see more delicious food posts."
-                : "Be the first to share an heirloom recipe or a delicious foodie story!"}
-            </p>
-            {hasAnyFilter ? (
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="px-4 py-2 bg-[#e02f21] text-white text-xs font-bold rounded-xl hover:bg-[#c22417] transition"
-              >
-                Reset Filters
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => handleOpenCreateModal("RECIPE")}
-                className="px-4 py-2 bg-[#e02f21] text-white text-xs font-bold rounded-xl hover:bg-[#c22417] transition"
-              >
-                Share First Recipe
-              </button>
-            )}
+
+            {/* Embedded People You May Know for new or caught-up users */}
+            <FeedPeopleYouMayKnow />
           </div>
         )}
         {!loading && cursor && (
