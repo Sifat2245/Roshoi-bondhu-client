@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate, useLocation, useSearchParams } from "react-router";
 import { useSession } from "../../lib/auth-client";
 import { useAuth } from "../../context/AuthContext";
@@ -33,15 +33,13 @@ import {
   ArrowLeft,
   Globe,
 } from "lucide-react";
-
-const RECENT_SEARCHES_KEY = "heshel_recent_searches";
-const DEFAULT_RECENT = [
-  "#KacchiBiryani",
-  "Chef Rahima",
-  "Shahi Morog Polao",
-  "Ilish Bhuna",
-  "Desserts",
-];
+import HeaderSearchDropdown from "./HeaderSearchDropdown";
+import {
+  searchApi,
+  type RecentSearchItem,
+  type UserSearchResult,
+  type GroupSearchResult,
+} from "../../features/search/api/search.api";
 
 export interface SocialHeaderProps {
   onToggleLeftSidebar?: () => void;
@@ -65,7 +63,12 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
   const [search, setSearch] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<RecentSearchItem[]>([]);
+  const [suggestions, setSuggestions] = useState<{
+    users: UserSearchResult[];
+    groups: GroupSearchResult[];
+  }>({ users: [], groups: [] });
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isMessengerOpen, setIsMessengerOpen] = useState(false);
@@ -146,19 +149,44 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
-  // Load recent searches from localStorage
-  useEffect(() => {
+  // Load recent searches from backend DB
+  const loadRecentSearches = useCallback(async () => {
+    if (!user) return;
     try {
-      const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
-      if (saved) {
-        setRecentSearches(JSON.parse(saved));
-      } else {
-        setRecentSearches(DEFAULT_RECENT);
-      }
-    } catch {
-      setRecentSearches(DEFAULT_RECENT);
+      const items = await searchApi.getRecentSearches(10);
+      setRecentSearches(items);
+    } catch (err) {
+      console.warn("Failed to load recent searches:", err);
     }
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    loadRecentSearches();
+  }, [loadRecentSearches]);
+
+  // Debounced search suggestions (Users & Groups ONLY, no posts)
+  useEffect(() => {
+    const q = search.trim();
+    if (!q) {
+      setSuggestions({ users: [], groups: [] });
+      setLoadingSuggestions(false);
+      return;
+    }
+
+    setLoadingSuggestions(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchApi.getSearchSuggestions(q);
+        setSuggestions(res);
+      } catch (err) {
+        console.warn("Failed to fetch search suggestions:", err);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   // Close search popover & notification popover on outside click
   useEffect(() => {
@@ -201,57 +229,48 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
     };
   }, []);
 
-  const saveSearchTerm = (term: string) => {
-    if (!term.trim()) return;
+  const handleSelectQuery = (term: string) => {
     const clean = term.trim();
-    const updated = [
-      clean,
-      ...recentSearches.filter((s) => s.toLowerCase() !== clean.toLowerCase()),
-    ].slice(0, 8);
-    setRecentSearches(updated);
-    try {
-      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.error(e);
-    }
+    if (!clean) return;
+    setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
+    setSearch("");
+    searchApi.saveRecentSearch(clean, "KEYWORD").then(() => loadRecentSearches());
+    navigate(`/search?q=${encodeURIComponent(clean)}`);
   };
 
-  const removeSearchTerm = (term: string, e: React.MouseEvent) => {
+  const handleSelectUser = (u: UserSearchResult) => {
+    setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
+    setSearch("");
+    searchApi.saveRecentSearch(u.name, "USER", u.id).then(() => loadRecentSearches());
+    navigate(`/profile/${u.id}`);
+  };
+
+  const handleSelectGroup = (g: GroupSearchResult) => {
+    setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
+    setSearch("");
+    searchApi.saveRecentSearch(g.name, "GROUP", g.id).then(() => loadRecentSearches());
+    navigate(`/group/${g.slug}`);
+  };
+
+  const handleRemoveRecent = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const updated = recentSearches.filter((s) => s !== term);
-    setRecentSearches(updated);
-    try {
-      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
-    } catch (err) {
-      console.error(err);
-    }
+    setRecentSearches((prev) => prev.filter((s) => s.id !== id));
+    await searchApi.removeRecentSearch(id);
   };
 
-  const clearAllRecent = () => {
+  const handleClearAllRecent = async () => {
     setRecentSearches([]);
-    try {
-      localStorage.removeItem(RECENT_SEARCHES_KEY);
-    } catch (err) {
-      console.error(err);
-    }
+    await searchApi.clearRecentSearches();
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
-      saveSearchTerm(search.trim());
-      setIsSearchOpen(false);
-      setIsMobileSearchOpen(false);
-      navigate(`/?search=${encodeURIComponent(search.trim())}`);
+      handleSelectQuery(search.trim());
     }
-  };
-
-  const handleSelectRecent = (term: string) => {
-    setSearch(term);
-    saveSearchTerm(term);
-    setIsSearchOpen(false);
-    setIsMobileSearchOpen(false);
-    navigate(`/?search=${encodeURIComponent(term)}`);
   };
 
   const handleLogout = () => {
@@ -351,56 +370,20 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
                 />
               </form>
 
-              {/* Desktop Recent Searches Dropdown */}
+              {/* Desktop Recent Searches & Autocomplete Dropdown */}
               {isSearchOpen && (
-                <div className="absolute left-0 top-12 w-80 sm:w-96 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="flex items-center justify-between pb-2.5 px-1.5 border-b border-gray-100 dark:border-gray-800">
-                    <span className="text-sm font-bold text-gray-900 dark:text-white">
-                      Recent searches
-                    </span>
-                    {recentSearches.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={clearAllRecent}
-                        className="text-xs sm:text-sm font-bold text-[#e02f21] hover:underline cursor-pointer"
-                      >
-                        Clear all
-                      </button>
-                    )}
-                  </div>
-
-                  {recentSearches.length > 0 ? (
-                    <div className="divide-y divide-gray-50 dark:divide-gray-800/50 mt-1.5 max-h-72 overflow-y-auto">
-                      {recentSearches.map((term) => (
-                        <div
-                          key={term}
-                          onClick={() => handleSelectRecent(term)}
-                          className="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800/80 cursor-pointer transition group"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <Clock
-                              size={16}
-                              className="text-gray-400 group-hover:text-[#e02f21] shrink-0 transition"
-                            />
-                            <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
-                              {term}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => removeSearchTerm(term, e)}
-                            className="p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-8 text-center text-sm text-gray-400">
-                      No recent searches
-                    </div>
-                  )}
+                <div className="absolute left-0 top-12 w-80 sm:w-96 bg-white dark:bg-[#242526] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 z-50 animate-in fade-in slide-in-from-top-2 duration-150 overflow-hidden">
+                  <HeaderSearchDropdown
+                    query={search}
+                    onSelectQuery={handleSelectQuery}
+                    onSelectUser={handleSelectUser}
+                    onSelectGroup={handleSelectGroup}
+                    recentSearches={recentSearches}
+                    onRemoveRecent={handleRemoveRecent}
+                    onClearAllRecent={handleClearAllRecent}
+                    suggestions={suggestions}
+                    loadingSuggestions={loadingSuggestions}
+                  />
                 </div>
               )}
             </div>
@@ -731,6 +714,23 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
                   </button>
                 )}
               </form>
+
+              {/* Mobile Search Dropdown Overlay */}
+              {isSearchOpen && (
+                <div className="absolute left-0 top-14 w-full bg-white dark:bg-[#242526] shadow-2xl border-b border-gray-100 dark:border-gray-800 z-50 animate-in fade-in max-h-[calc(100vh-60px)] overflow-y-auto">
+                  <HeaderSearchDropdown
+                    query={search}
+                    onSelectQuery={handleSelectQuery}
+                    onSelectUser={handleSelectUser}
+                    onSelectGroup={handleSelectGroup}
+                    recentSearches={recentSearches}
+                    onRemoveRecent={handleRemoveRecent}
+                    onClearAllRecent={handleClearAllRecent}
+                    suggestions={suggestions}
+                    loadingSuggestions={loadingSuggestions}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

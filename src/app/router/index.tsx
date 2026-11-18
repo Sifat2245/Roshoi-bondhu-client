@@ -20,6 +20,7 @@ function page(load: PageLoader, requiresAuth = true) {
 const protectedPages: [string, PageLoader][] = [
   ["/", () => import("../../pages/feed/SocialFeed")],
   ["/post/:id", () => import("../../pages/feed/PostPage")],
+  ["/search", () => import("../../pages/search/SearchResultsPage")],
   ["/groups", () => import("../../pages/group/GroupsPage")],
   ["/groups/create", () => import("../../pages/group/CreateGroupPage")],
   ["/group/:slug", () => import("../../pages/group/GroupDetailPage")],

@@ -450,3 +450,110 @@ export const GROUP_QUERY = gql`
     }
   }
 `;
+
+export const RECENT_SEARCHES_QUERY = gql`
+  query GetRecentSearches($limit: Int) {
+    recentSearches(limit: $limit) {
+      id
+      query
+      targetType
+      targetId
+      user {
+        id
+        name
+        image
+        role
+        username
+        city
+        work
+      }
+      group {
+        id
+        name
+        slug
+        avatar
+        privacy
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const SEARCH_SUGGESTIONS_QUERY = gql`
+  query GetSearchSuggestions($query: String!) {
+    searchSuggestions(query: $query) {
+      users {
+        id
+        name
+        username
+        email
+        image
+        role
+        city
+        work
+        education
+        followersCount
+        mutualFriendsCount
+        friendshipStatus
+        isFollowing
+        isMe
+      }
+      groups {
+        id
+        name
+        slug
+        avatar
+        coverImage
+        description
+        privacy
+        membersCount
+        isMember
+        membershipStatus
+      }
+    }
+  }
+`;
+
+export const SEARCH_ALL_QUERY = gql`
+  ${POST_FRAGMENT}
+  query SearchAll($query: String!, $postFilters: SearchPostsFilterInput) {
+    searchAll(query: $query, postFilters: $postFilters) {
+      users {
+        id
+        name
+        username
+        email
+        image
+        bio
+        role
+        city
+        work
+        education
+        followersCount
+        mutualFriendsCount
+        friendshipStatus
+        isFollowing
+        isMe
+      }
+      groups {
+        id
+        name
+        slug
+        avatar
+        coverImage
+        description
+        privacy
+        membersCount
+        isMember
+        membershipStatus
+      }
+      posts {
+        ...PostFields
+      }
+      totalUsers
+      totalGroups
+      totalPosts
+    }
+  }
+`;

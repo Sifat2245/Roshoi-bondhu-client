@@ -65,7 +65,7 @@ export const TwoFactorAuthPage: React.FC = () => {
     sessionStorage.setItem('heshel_2fa_otp_sent', String(now));
 
     // Silently send OTP without popping a toast on arrival
-    twoFactor.sendOtp().catch(() => {});
+    (twoFactor as any).sendOtp().catch(() => {});
   }, [activeMethod]);
 
   const switchMethod = (method: 'otp' | 'totp') => {
@@ -76,7 +76,7 @@ export const TwoFactorAuthPage: React.FC = () => {
       const lastSent = Number(sessionStorage.getItem('heshel_2fa_otp_sent') || '0');
       if (now - lastSent >= 25000) {
         sessionStorage.setItem('heshel_2fa_otp_sent', String(now));
-        twoFactor.sendOtp().catch(() => {});
+        (twoFactor as any).sendOtp().catch(() => {});
       }
     }
   };
@@ -124,7 +124,7 @@ export const TwoFactorAuthPage: React.FC = () => {
     if (cooldown > 0 || resending) return;
     setResending(true);
     try {
-      await twoFactor.sendOtp();
+      await (twoFactor as any).sendOtp();
       sessionStorage.setItem('heshel_2fa_otp_sent', String(Date.now()));
       setCooldown(60);
     } catch (err: any) {
