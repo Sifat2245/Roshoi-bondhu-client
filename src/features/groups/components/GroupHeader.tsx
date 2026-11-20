@@ -8,10 +8,12 @@ import {
   Share2,
   MoreHorizontal,
   Search,
+  Flag,
 } from "lucide-react";
 import Button from "../../../components/ui/Button";
 import { useToast } from "../../../context/ToastContext";
 import Modal from "../../../components/ui/Modal";
+import ReportModal from "../../reports/components/ReportModal";
 
 const GroupHeader = ({
   group,
@@ -28,6 +30,7 @@ const GroupHeader = ({
   const [showOptions, setShowOptions] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const handleAction = async () => {
     setLoading(true);
@@ -247,6 +250,19 @@ const GroupHeader = ({
               {item.label}
             </button>
           ))}
+          {!isAdmin && (
+            <button
+              type="button"
+              className="w-full rounded-xl p-3 text-left text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition cursor-pointer"
+              onClick={() => {
+                setShowOptions(false);
+                setIsReportModalOpen(true);
+              }}
+            >
+              <Flag size={16} />
+              <span>Report group</span>
+            </button>
+          )}
         </div>
       </Modal>
       <Modal
@@ -276,6 +292,16 @@ const GroupHeader = ({
           </div>
         </div>
       </Modal>
+
+      {/* Report Group Modal */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        targetType="GROUP"
+        targetId={group.id}
+        targetAuthorName={group.name}
+        onLeaveGroup={handleAction}
+      />
     </div>
   );
 };

@@ -17,10 +17,12 @@ import {
   Clock,
   MoreHorizontal,
   Share2,
+  Flag,
 } from "lucide-react";
 import Button from "../../../components/ui/Button";
 import defaultUserAvatar from "../../../assets/user-image.png";
 import { useToast } from "../../../context/ToastContext";
+import ReportModal from "../../reports/components/ReportModal";
 
 interface ProfileHeaderProps {
   profile: any;
@@ -70,6 +72,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const { notify } = useToast();
   const [isFriendsMenuOpen, setIsFriendsMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const friendsMenuRef = useRef<HTMLDivElement>(null);
   const moreMenuRef = useRef<HTMLDivElement>(null);
@@ -437,6 +440,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                           <Share2 size={16} />
                           <span>Copy link to profile</span>
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsMoreMenuOpen(false);
+                            setIsReportModalOpen(true);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-left transition"
+                        >
+                          <Flag size={16} />
+                          <span>Report profile</span>
+                        </button>
                         {onBlock && (
                           <button
                             type="button"
@@ -459,6 +473,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Report User Modal */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        targetType="USER"
+        targetId={profile?.id || profile?.userId}
+        targetAuthorName={profile?.name}
+        targetAuthorId={profile?.id || profile?.userId}
+        onBlock={onBlock}
+      />
     </div>
   );
 };

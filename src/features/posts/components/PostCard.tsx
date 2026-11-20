@@ -20,6 +20,7 @@ import ShareIcon from "../../../components/ui/icons/ShareIcon";
 import SharePostModal from "./SharePostModal";
 import EditPostModal from "./EditPostModal";
 import SelectAudienceModal from "./SelectAudienceModal";
+import ReportModal from "../../reports/components/ReportModal";
 import type { PostAudience } from "../model/post-policy";
 import {
   Heart,
@@ -92,6 +93,7 @@ const PostCard: React.FC<PostCardProps> = ({
         );
   const [isDeleted, setIsDeleted] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Edit & Audience Modals State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -588,21 +590,42 @@ const PostCard: React.FC<PostCardProps> = ({
 
               {/* 4b. Hide Post (for non-author posts on feed) */}
               {!isAuthor && (
-                <button
-                  type="button"
-                  onClick={handleHidePost}
-                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
-                >
-                  <EyeOff size={18} className="text-gray-500" />
-                  <div>
-                    <p className="font-bold text-sm text-gray-900 dark:text-white">
-                      Hide post
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                      See fewer posts like this
-                    </p>
-                  </div>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={handleHidePost}
+                    className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
+                  >
+                    <EyeOff size={18} className="text-gray-500" />
+                    <div>
+                      <p className="font-bold text-sm text-gray-900 dark:text-white">
+                        Hide post
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                        See fewer posts like this
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsReportModalOpen(true);
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-3 cursor-pointer"
+                  >
+                    <AlertTriangle size={18} className="text-gray-500" />
+                    <div>
+                      <p className="font-bold text-sm text-gray-900 dark:text-white">
+                        Report post
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                        We won't let {post.author?.name || 'them'} know who reported it
+                      </p>
+                    </div>
+                  </button>
+                </>
               )}
 
               {/* 5. Move to Trash (Delete) */}
@@ -1031,6 +1054,17 @@ const PostCard: React.FC<PostCardProps> = ({
           </div>
         </div>
       </Modal>
+
+      {/* Report Post Modal */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        targetType="POST"
+        targetId={post.id}
+        targetAuthorName={post.author?.name}
+        targetAuthorId={post.author?.id || post.authorId}
+        onHide={handleHidePost}
+      />
     </article>
   );
 };

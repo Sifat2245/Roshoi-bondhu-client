@@ -393,3 +393,18 @@ export const CLEAR_RECENT_SEARCHES_MUTATION = gql`
   }
 `;
 
+export const SUBMIT_REPORT_MUTATION = gql`
+  mutation SubmitReport($targetType: String!, $targetId: String!, $reason: String!) {
+    submitReport(targetType: $targetType, targetId: $targetId, reason: $reason) {
+      id
+      reporterId
+      targetType
+      targetId
+      reason
+      status
+      createdAt
+    }
+  }
+`;
+
+
