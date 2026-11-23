@@ -283,11 +283,15 @@ const CreateGroupPage: React.FC = () => {
           className={`w-full transition-all duration-300 bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden ${
             previewMode === 'DESKTOP'
               ? 'max-w-[940px]'
-              : 'max-w-[420px] ring-8 ring-gray-900/10 dark:ring-white/10 my-4'
+              : 'max-w-[400px] ring-8 ring-gray-900/10 dark:ring-white/10 my-4'
           }`}
         >
           {/* Cover Art Banner (Defaulting to group-default.png) */}
-          <div className="relative h-56 sm:h-72 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden flex items-center justify-center">
+          <div
+            className={`relative w-full bg-gray-100 dark:bg-gray-800 overflow-hidden flex items-center justify-center ${
+              previewMode === 'MOBILE' ? 'h-44 sm:h-48' : 'h-56 sm:h-72'
+            }`}
+          >
             <img
               src={defaultGroupCover}
               alt="Group cover preview"
@@ -296,8 +300,16 @@ const CreateGroupPage: React.FC = () => {
           </div>
 
           {/* Group Header Info */}
-          <div className="p-5 sm:p-7 border-b border-gray-100 dark:border-gray-800">
-            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight break-words">
+          <div
+            className={`${
+              previewMode === 'MOBILE' ? 'p-4 sm:p-5' : 'p-5 sm:p-7'
+            } border-b border-gray-100 dark:border-gray-800`}
+          >
+            <h2
+              className={`font-black text-gray-900 dark:text-white tracking-tight break-words ${
+                previewMode === 'MOBILE' ? 'text-xl' : 'text-2xl sm:text-3xl'
+              }`}
+            >
               {groupName.trim() || 'Group name'}
             </h2>
             <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 font-semibold mt-1">
@@ -311,11 +323,15 @@ const CreateGroupPage: React.FC = () => {
           </div>
 
           {/* Mock Navigation Tabs (Responsive with More ▾ on mobile) */}
-          <div className="px-5 sm:px-7 border-b border-gray-100 dark:border-gray-800 flex items-center gap-5 sm:gap-6 text-sm font-bold text-gray-500">
-            <span className="py-3.5 border-b-3 border-[#e02f21] text-[#e02f21] whitespace-nowrap">About</span>
-            <span className="py-3.5 whitespace-nowrap">Posts</span>
+          <div
+            className={`${
+              previewMode === 'MOBILE' ? 'px-4 sm:px-5' : 'px-5 sm:px-7'
+            } border-b border-gray-100 dark:border-gray-800 flex items-center gap-4 sm:gap-6 text-sm font-bold text-gray-500`}
+          >
+            <span className="py-3 border-b-3 border-[#e02f21] text-[#e02f21] whitespace-nowrap">About</span>
+            <span className="py-3 whitespace-nowrap">Posts</span>
             {previewMode === 'MOBILE' ? (
-              <span className="py-3.5 flex items-center gap-1 text-gray-600 dark:text-gray-400 whitespace-nowrap cursor-pointer">
+              <span className="py-3 flex items-center gap-1 text-gray-600 dark:text-gray-400 whitespace-nowrap cursor-pointer">
                 <span>More</span>
                 <ChevronDown size={14} />
               </span>
@@ -328,33 +344,54 @@ const CreateGroupPage: React.FC = () => {
           </div>
 
           {/* Mock Content Columns */}
-          <div className="p-5 sm:p-7 bg-[#f0f2f5]/40 dark:bg-[#18191a]/40 grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* Left 2 Cols: Mock Post Trigger */}
-            <div className="md:col-span-2 space-y-4">
-              <div className="bg-white dark:bg-[#242526] rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-xs space-y-3">
-                <div className="flex items-center gap-3">
+          <div
+            className={`bg-[#f0f2f5]/40 dark:bg-[#18191a]/40 ${
+              previewMode === 'MOBILE'
+                ? 'p-3.5 space-y-3.5 flex flex-col'
+                : 'p-5 sm:p-7 grid grid-cols-1 md:grid-cols-3 gap-5'
+            }`}
+          >
+            {/* Post Trigger: full width in mobile preview, 2 cols on desktop */}
+            <div className={previewMode === 'MOBILE' ? 'w-full' : 'md:col-span-2 space-y-4'}>
+              <div
+                className={`bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs ${
+                  previewMode === 'MOBILE' ? 'p-3 space-y-2.5' : 'p-4 space-y-3'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
                   <Avatar src={currentUser?.image} alt="" size="sm" />
-                  <div className="flex-1 bg-gray-100 dark:bg-[#3a3b3c] text-gray-400 rounded-full px-4 py-2 text-xs font-medium cursor-not-allowed">
+                  <div className="flex-1 bg-gray-100 dark:bg-[#3a3b3c] text-gray-400 rounded-full px-3.5 py-2 text-xs font-medium cursor-not-allowed truncate">
                     What's on your mind?
                   </div>
                 </div>
-                <div className="flex items-center justify-around pt-2 border-t border-gray-100 dark:border-gray-800 text-xs font-semibold text-gray-500">
-                  <span className="flex items-center gap-1.5 opacity-60">
-                    <Video size={16} className="text-red-500" /> Live video
+                <div
+                  className={`flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800 font-semibold text-gray-500 ${
+                    previewMode === 'MOBILE' ? 'text-[11px] px-1' : 'text-xs'
+                  }`}
+                >
+                  <span className="flex items-center gap-1 opacity-70 whitespace-nowrap">
+                    <Video size={previewMode === 'MOBILE' ? 14 : 16} className="text-red-500 shrink-0" />
+                    <span>{previewMode === 'MOBILE' ? 'Live' : 'Live video'}</span>
                   </span>
-                  <span className="flex items-center gap-1.5 opacity-60">
-                    <ImageIcon size={16} className="text-green-500" /> Photo/video
+                  <span className="flex items-center gap-1 opacity-70 whitespace-nowrap">
+                    <ImageIcon size={previewMode === 'MOBILE' ? 14 : 16} className="text-green-500 shrink-0" />
+                    <span>Photo/video</span>
                   </span>
-                  <span className="flex items-center gap-1.5 opacity-60">
-                    <Smile size={16} className="text-amber-500" /> Feeling/activity
+                  <span className="flex items-center gap-1 opacity-70 whitespace-nowrap">
+                    <Smile size={previewMode === 'MOBILE' ? 14 : 16} className="text-amber-500 shrink-0" />
+                    <span>{previewMode === 'MOBILE' ? 'Feeling' : 'Feeling/activity'}</span>
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Right 1 Col: Mock About Box */}
-            <div className="space-y-4">
-              <div className="bg-white dark:bg-[#242526] rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-xs space-y-2">
+            {/* About Box: full width stacked below in mobile preview, right col on desktop */}
+            <div className={previewMode === 'MOBILE' ? 'w-full' : 'space-y-4'}>
+              <div
+                className={`bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs ${
+                  previewMode === 'MOBILE' ? 'p-3.5 space-y-2' : 'p-4 space-y-2'
+                }`}
+              >
                 <h4 className="font-bold text-sm text-gray-900 dark:text-white">About</h4>
                 <p className="text-xs text-gray-500 leading-relaxed">
                   {privacy === 'PUBLIC'
