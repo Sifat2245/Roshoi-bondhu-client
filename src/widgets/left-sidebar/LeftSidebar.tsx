@@ -4,7 +4,8 @@ import { NavLink, Link } from "react-router";
 import { useSession } from "../../lib/auth-client";
 import { useLanguage } from "../../context/LanguageContext";
 import Avatar from "../../components/ui/Avatar";
-import groupsApi from "../../features/groups/api/groups.api";
+import { useGroupsListQuery } from "../../features/groups/hooks/useGroupQueries";
+import defaultGroupCover from "../../assets/group/group-default.png";
 import {
   Home,
   Users,
@@ -23,29 +24,11 @@ const LeftSidebar = ({ compact = false }: { compact?: boolean }) => {
   const { user: authUser } = useAuth();
   const user = session?.user || authUser;
 
-  const [groups, setGroups] = useState([]);
-  const [loadingGroups, setLoadingGroups] = useState(false);
-
-  // Fetch groups for "Your shortcuts"
-  useEffect(() => {
-    if (compact) return;
-    const fetchShortcuts = async () => {
-      setLoadingGroups(true);
-      try {
-        const data = await groupsApi.getGroups(
-          { limit: 8 },
-          session?.session?.token,
-        );
-        setGroups(data);
-      } catch (err) {
-        console.error("Failed to load shortcuts", err);
-      } finally {
-        setLoadingGroups(false);
-      }
-    };
-
-    fetchShortcuts();
-  }, [session, compact]);
+  const { data: rawGroups = [], isLoading: loadingGroups } = useGroupsListQuery(
+    { limit: 8 },
+    session?.session?.token
+  );
+  const groups = compact ? [] : rawGroups;
 
   if (compact)
     return (
@@ -227,7 +210,7 @@ const LeftSidebar = ({ compact = false }: { compact?: boolean }) => {
               <img
                 src={
                   g.coverImage ||
-                  "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100"
+                  defaultGroupCover
                 }
                 alt={g.name}
                 className="w-10 h-10 rounded-xl object-cover shrink-0 border border-gray-200 dark:border-gray-700 shadow-2xs"

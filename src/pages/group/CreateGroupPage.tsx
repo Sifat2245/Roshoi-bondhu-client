@@ -4,6 +4,7 @@ import { useSession } from '../../lib/auth-client';
 import { useToast } from '../../context/ToastContext';
 import groupsApi from '../../features/groups/api/groups.api';
 import Avatar from '../../components/ui/Avatar';
+import defaultGroupCover from '../../assets/group/group-default.png';
 import {
   X,
   Globe,
@@ -74,7 +75,7 @@ const CreateGroupPage: React.FC = () => {
       );
 
       notify.success('Group created successfully!');
-      const slug = res?.data?.slug || groupName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const slug = res?.slug || res?.data?.slug || groupName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       navigate(`/group/${slug}`);
     } catch (err: any) {
       notify.error(err.message || 'Failed to create group');
@@ -285,34 +286,13 @@ const CreateGroupPage: React.FC = () => {
               : 'max-w-[420px] ring-8 ring-gray-900/10 dark:ring-white/10 my-4'
           }`}
         >
-          {/* Cover Art Banner (Matching illustration style in Image 3) */}
-          <div className="relative h-56 sm:h-72 w-full bg-gradient-to-tr from-gray-100 via-red-50 to-orange-50 dark:from-gray-800 dark:via-gray-900 dark:to-black overflow-hidden flex items-center justify-center">
-            {/* Illustrated Community Graphics */}
-            <div className="absolute inset-0 opacity-80 flex items-center justify-center">
-              <svg
-                viewBox="0 0 800 400"
-                className="w-full h-full object-cover"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle cx="200" cy="200" r="160" fill="#e02f21" fillOpacity="0.08" />
-                <circle cx="600" cy="180" r="140" fill="#e02f21" fillOpacity="0.06" />
-                <path
-                  d="M100 350C250 280 350 320 500 290C650 260 750 350 800 360V400H100V350Z"
-                  fill="#e02f21"
-                  fillOpacity="0.12"
-                />
-              </svg>
-            </div>
-
-            <div className="relative z-10 text-center px-4 space-y-2">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/90 dark:bg-[#242526]/90 shadow-md backdrop-blur-xs flex items-center justify-center mx-auto text-[#e02f21]">
-                <Users size={36} />
-              </div>
-              <p className="text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400">
-                Group cover preview
-              </p>
-            </div>
+          {/* Cover Art Banner (Defaulting to group-default.png) */}
+          <div className="relative h-56 sm:h-72 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden flex items-center justify-center">
+            <img
+              src={defaultGroupCover}
+              alt="Group cover preview"
+              className="w-full h-full object-cover"
+            />
           </div>
 
           {/* Group Header Info */}
@@ -330,12 +310,21 @@ const CreateGroupPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Mock Navigation Tabs */}
-          <div className="px-5 sm:px-7 border-b border-gray-100 dark:border-gray-800 flex items-center gap-6 text-sm font-bold text-gray-500 overflow-x-auto no-scrollbar">
-            <span className="py-3.5 border-b-3 border-[#e02f21] text-[#e02f21]">About</span>
-            <span className="py-3.5">Posts</span>
-            <span className="py-3.5">Members</span>
-            <span className="py-3.5">Events</span>
+          {/* Mock Navigation Tabs (Responsive with More ▾ on mobile) */}
+          <div className="px-5 sm:px-7 border-b border-gray-100 dark:border-gray-800 flex items-center gap-5 sm:gap-6 text-sm font-bold text-gray-500">
+            <span className="py-3.5 border-b-3 border-[#e02f21] text-[#e02f21] whitespace-nowrap">About</span>
+            <span className="py-3.5 whitespace-nowrap">Posts</span>
+            {previewMode === 'MOBILE' ? (
+              <span className="py-3.5 flex items-center gap-1 text-gray-600 dark:text-gray-400 whitespace-nowrap cursor-pointer">
+                <span>More</span>
+                <ChevronDown size={14} />
+              </span>
+            ) : (
+              <>
+                <span className="py-3.5 whitespace-nowrap">Members</span>
+                <span className="py-3.5 whitespace-nowrap">Events</span>
+              </>
+            )}
           </div>
 
           {/* Mock Content Columns */}

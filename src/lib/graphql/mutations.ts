@@ -333,13 +333,19 @@ export const UNBLOCK_USER_MUTATION = gql`
 `;
 
 export const CREATE_GROUP_MUTATION = gql`
-  mutation CreateGroup($name: String!, $description: String, $privacy: String) {
-    createGroup(name: $name, description: $description, privacy: $privacy) {
+  mutation CreateGroup($name: String!, $description: String, $privacy: String, $coverImage: String, $avatar: String) {
+    createGroup(name: $name, description: $description, privacy: $privacy, coverImage: $coverImage, avatar: $avatar) {
       id
       name
       slug
       description
+      coverImage
+      avatar
       privacy
+      createdById
+      membersCount
+      isMember
+      currentUserRole
     }
   }
 `;
@@ -406,5 +412,55 @@ export const SUBMIT_REPORT_MUTATION = gql`
     }
   }
 `;
+
+export const UPDATE_GROUP_MEMBER_ROLE_MUTATION = gql`
+  mutation UpdateGroupMemberRole($groupId: ID!, $memberId: ID!, $role: String!) {
+    updateGroupMemberRole(groupId: $groupId, memberId: $memberId, role: $role) {
+      id
+      userId
+      role
+      isApproved
+      user {
+        id
+        name
+        image
+      }
+    }
+  }
+`;
+
+export const REMOVE_GROUP_MEMBER_MUTATION = gql`
+  mutation RemoveGroupMember($groupId: ID!, $memberId: ID!) {
+    removeGroupMember(groupId: $groupId, memberId: $memberId)
+  }
+`;
+
+export const ADD_GROUP_MEMBER_MUTATION = gql`
+  mutation AddGroupMember($groupId: ID!, $userId: ID!, $role: String) {
+    addGroupMember(groupId: $groupId, userId: $userId, role: $role) {
+      id
+      userId
+      role
+      isApproved
+      user {
+        id
+        name
+        image
+      }
+    }
+  }
+`;
+
+export const UPDATE_GROUP_COVER_MUTATION = gql`
+  mutation UpdateGroupCover($groupId: ID!, $coverImage: String!) {
+    updateGroupCover(groupId: $groupId, coverImage: $coverImage) {
+      id
+      slug
+      coverImage
+    }
+  }
+`;
+
+
 
 

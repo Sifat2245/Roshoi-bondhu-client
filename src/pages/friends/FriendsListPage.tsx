@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router';
 import { useSession } from '../../lib/auth-client';
 import SocialHeader from '../../widgets/navbar/SocialHeader';
@@ -34,6 +34,8 @@ import {
   Utensils,
   ExternalLink,
   Users,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
 
 export const FriendsListPage = () => {
@@ -108,6 +110,36 @@ export const FriendsListPage = () => {
 
   // Selected friend's detailed profile & posts
   const [activeTab, setActiveTab] = useState('ALL');
+  const [showMoreTabs, setShowMoreTabs] = useState(false);
+  const moreTabsRef = useRef<HTMLDivElement>(null);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!showMoreTabs) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (moreTabsRef.current && !moreTabsRef.current.contains(e.target as Node)) {
+        setShowMoreTabs(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowMoreTabs(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showMoreTabs]);
+
   const [friendProfile, setFriendProfile] = useState<any>(null);
   const [friendPosts, setFriendPosts] = useState<any[]>([]);
   const [loadingProfile, setLoadingProfile] = useState(false);
@@ -472,30 +504,94 @@ export const FriendsListPage = () => {
                   )}
 
                   {/* Navigation Tabs: All, About, Friends, Photos, Recipes */}
-                  <div className="flex items-center gap-2 border-t border-gray-100 dark:border-gray-800 mt-4 pt-1 overflow-x-auto no-scrollbar">
-                    {['ALL', 'ABOUT', 'FRIENDS', 'PHOTOS', 'RECIPES'].map((tab) => (
-                      <button
-                        key={tab}
-                        type="button"
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2.5 text-sm font-bold rounded-xl transition cursor-pointer shrink-0 ${
-                          activeTab === tab
-                            ? 'bg-[#e02f21] text-white shadow-xs'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                        }`}
-                      >
-                        {tab === 'ALL'
-                          ? 'All'
-                          : tab === 'ABOUT'
-                          ? 'About'
-                          : tab === 'FRIENDS'
-                          ? 'Friends'
-                          : tab === 'PHOTOS'
-                          ? 'Photos'
-                          : 'Recipes'}
-                      </button>
-                    ))}
-                  </div>
+                  {(() => {
+                    const allFriendTabs = [
+                      { id: 'ALL', label: 'All' },
+                      { id: 'ABOUT', label: 'About' },
+                      { id: 'FRIENDS', label: 'Friends' },
+                      { id: 'PHOTOS', label: 'Photos' },
+                      { id: 'RECIPES', label: 'Recipes' },
+                    ];
+
+                    const visibleCount = windowWidth < 640 ? 3 : allFriendTabs.length;
+                    const visibleTabs = allFriendTabs.slice(0, visibleCount);
+                    const overflowTabs = allFriendTabs.slice(visibleCount);
+                    const isOverflowActive = overflowTabs.some((t) => t.id === activeTab);
+                    const activeOverflowTab = overflowTabs.find((t) => t.id === activeTab);
+
+                    return (
+                      <div className="flex items-center gap-2 border-t border-gray-100 dark:border-gray-800 mt-4 pt-1 relative">
+                        {visibleTabs.map((tab) => (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => {
+                              setActiveTab(tab.id);
+                              setShowMoreTabs(false);
+                            }}
+                            className={`px-4 py-2.5 text-sm font-bold rounded-xl transition cursor-pointer shrink-0 ${
+                              activeTab === tab.id
+                                ? 'bg-[#e02f21] text-white shadow-xs'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        ))}
+
+                        {/* More ▾ Dropdown */}
+                        {overflowTabs.length > 0 && (
+                          <div ref={moreTabsRef} className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setShowMoreTabs((prev) => !prev)}
+                              className={`px-4 py-2.5 text-sm font-bold rounded-xl transition cursor-pointer shrink-0 flex items-center gap-1.5 ${
+                                isOverflowActive
+                                  ? 'bg-[#e02f21] text-white shadow-xs'
+                                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                              }`}
+                            >
+                              <span>{isOverflowActive ? activeOverflowTab?.label : 'More'}</span>
+                              <ChevronDown
+                                size={15}
+                                className={`transition-transform duration-200 ${
+                                  showMoreTabs ? 'rotate-180' : ''
+                                }`}
+                              />
+                            </button>
+
+                            {showMoreTabs && (
+                              <div className="absolute top-full left-0 mt-1 min-w-[170px] bg-white dark:bg-[#242526] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                                {overflowTabs.map((tab) => {
+                                  const isSelected = activeTab === tab.id;
+                                  return (
+                                    <button
+                                      key={tab.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setActiveTab(tab.id);
+                                        setShowMoreTabs(false);
+                                      }}
+                                      className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer flex items-center justify-between ${
+                                        isSelected
+                                          ? 'bg-red-50 dark:bg-red-950/40 text-[#e02f21] font-bold'
+                                          : 'text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#3a3b3c]'
+                                      }`}
+                                    >
+                                      <span>{tab.label}</span>
+                                      {isSelected && (
+                                        <Check size={16} className="text-[#e02f21]" />
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 

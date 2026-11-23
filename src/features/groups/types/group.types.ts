@@ -18,9 +18,15 @@ export interface Group {
   slug: string;
   description?: string;
   coverImage?: string | null;
+  avatar?: string | null;
   privacy: GroupPrivacy;
   membersCount: number;
-  creatorId: string;
+  postsCount?: number;
+  creatorId?: string;
+  createdById?: string;
+  isMember?: boolean;
+  currentUserRole?: GroupMemberRole | string | null;
+  canModerate?: boolean;
   members?: GroupMember[];
   createdAt: string;
 }
@@ -30,5 +36,6 @@ export interface CreateGroupPayload {
   description?: string;
   privacy?: GroupPrivacy | string;
   coverImage?: string | null;
+  avatar?: string | null;
   requiresPostApproval?: boolean;
 }

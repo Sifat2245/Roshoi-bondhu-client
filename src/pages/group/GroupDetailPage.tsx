@@ -18,6 +18,11 @@ import PostDetailsModal from '../../features/posts/components/PostDetailsModal';
 import { GroupHeaderSkeleton, PostSkeleton } from '../../components/ui/Skeleton';
 import groupsApi from '../../features/groups/api/groups.api';
 import postsApi from '../../features/posts/api/posts.api';
+import {
+  useGroupDetailQuery,
+  useGroupPostsQuery,
+  useInvalidateGroupQueries,
+} from '../../features/groups/hooks/useGroupQueries';
 import { useToast } from '../../context/ToastContext';
 import ImageViewer from '../../components/ui/ImageViewer';
 import { Utensils, Info, Image as ImageIcon } from 'lucide-react';
@@ -29,10 +34,6 @@ const GroupDetailPage = () => {
   const { state: social, user } = useSocial();
   const { notify } = useToast();
 
-  const [baseGroup, setGroup] = useState(null);
-  const group = baseGroup ? resolveGroup(baseGroup, social.members[baseGroup.id], user?.id) : null;
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('DISCUSSION'); // 'DISCUSSION', 'FEATURED', 'ABOUT', 'MEMBERS', 'SETTINGS'
 
   // Modals state
@@ -43,43 +44,51 @@ const GroupDetailPage = () => {
   const [sort, setSort] = useState('relevant');
   const [mediaIndex, setMediaIndex] = useState<number | null>(null);
 
+  // TanStack Query 10-minute caching
+  const {
+    data: baseGroup = null,
+    isLoading: loadingGroup,
+  } = useGroupDetailQuery(slug, session?.session?.token);
+
+  const group = baseGroup ? resolveGroup(baseGroup, social.members[baseGroup.id], user?.id) : null;
+
+  const {
+    data: posts = [],
+    isLoading: loadingPosts,
+  } = useGroupPostsQuery(baseGroup?.id, session?.session?.token, user?.id);
+
+  const {
+    invalidateGroupDetail,
+    invalidateGroupPosts,
+    updateGroupMembershipInCache,
+    prependPostToGroup,
+    deletePostFromGroup,
+    updatePostInGroup,
+  } = useInvalidateGroupQueries();
+
+  const loading = loadingGroup || (loadingPosts && !group);
+
   const requireAuth = () => {
     navigate('/login');
   };
 
-  const fetchGroupData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await groupsApi.getGroupBySlug(slug, session?.session?.token);
-      if (data) {
-        setGroup(data);
-
-        // Fetch Group Feed
-        const groupPosts = await postsApi.getPosts({ groupId: data.id }, session?.session?.token, user?.id);
-        setPosts(groupPosts);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [slug, session, user?.id]);
-
-  useEffect(() => {
-    fetchGroupData();
-  }, [fetchGroupData]);
-
   const handleJoinToggle = async () => {
-    if (!user) return requireAuth();
+    if (!user || !group) return requireAuth();
+
+    const nextIsMember = !group.isMember;
+    updateGroupMembershipInCache(group.id, nextIsMember);
 
     try {
       if (group.isMember) {
-        await groupsApi.leaveGroup(group.slug, session?.session?.token);
+        await groupsApi.leaveGroup(group.slug || group.id, session?.session?.token);
+        notify.info(`Left ${group.name}`);
       } else {
-        await groupsApi.joinGroup(group.slug, session?.session?.token);
+        await groupsApi.joinGroup(group.slug || group.id, session?.session?.token);
+        notify.success(`Joined ${group.name}!`);
       }
-      fetchGroupData();
-    } catch (err) {
+      invalidateGroupDetail(slug);
+    } catch (err: any) {
+      updateGroupMembershipInCache(group.id, group.isMember);
       notify.error(err.message || 'Could not update your group membership. Please try again.');
     }
   };
@@ -118,8 +127,10 @@ const GroupDetailPage = () => {
     );
   }
 
-  const isMember = group.isMember || false;
-  const isAdmin = group.membershipRole === 'ADMIN';
+  const currentRole = group.currentUserRole || group.membershipRole || (group.createdById === user?.id ? 'ADMIN' : null);
+  const isMember = Boolean(group.isMember || currentRole || group.createdById === user?.id);
+  const isAdmin = currentRole === 'ADMIN' || group.createdById === user?.id;
+  const canModerate = Boolean(group.canModerate || isAdmin || currentRole === 'MODERATOR');
   const visiblePosts = posts.filter((post) => (activeTab !== 'FEATURED' || pinnedIn(post, social.pins, { type: 'group', groupId: group.id })) && `${post.title || ''} ${post.caption || ''}`.toLowerCase().includes(search.toLowerCase())).sort((a, b) => sort === 'newest' ? +new Date(b.createdAt) - +new Date(a.createdAt) : (b.likeCount || 0) - (a.likeCount || 0));
 
   const recentMedia = [...new Set<string>(posts.map((post) => post.image).filter(Boolean))];
@@ -194,17 +205,15 @@ const GroupDetailPage = () => {
                       key={post.id}
                       post={post}
                       pinContext={{ type: "group", groupId: group.id }}
-                      canManageGroupPins={isMember && ['ADMIN', 'MODERATOR'].includes(group.membershipRole)}
+                      canManageGroupPins={canModerate}
                       showPinBadge={activeTab === 'FEATURED'}
                       onOpenComments={(selected) => setSelectedPostForComments(selected)}
                       onRequireAuth={requireAuth}
                       onDeletePost={(deletedId) =>
-                        setPosts((prev) => prev.filter((p) => p.id !== deletedId))
+                        deletePostFromGroup(group.id, deletedId)
                       }
                       onUpdatePost={(updated) =>
-                        setPosts((prev) =>
-                          prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
-                        )
+                        updatePostInGroup(group.id, updated)
                       }
                     />
                   ))
@@ -269,7 +278,7 @@ const GroupDetailPage = () => {
               <GroupSettingsTab
                 group={group}
                 token={session?.session?.token}
-                onGroupUpdated={fetchGroupData}
+                onGroupUpdated={() => invalidateGroupDetail(slug)}
               />
             </div>
           )}
@@ -282,7 +291,10 @@ const GroupDetailPage = () => {
         defaultGroupId={group.id}
         defaultGroup={group}
         onClose={() => setIsCreateOpen(false)}
-        onPostCreated={fetchGroupData}
+        onPostCreated={(newPost) => {
+          if (newPost) prependPostToGroup(group.id, newPost);
+          invalidateGroupPosts(group.id);
+        }}
       />
 
       {selectedPostForComments && (
@@ -290,7 +302,10 @@ const GroupDetailPage = () => {
           isOpen={Boolean(selectedPostForComments)}
           post={selectedPostForComments}
           onClose={() => setSelectedPostForComments(null)}
-          onPostUpdated={fetchGroupData}
+          onPostUpdated={(updated) => {
+            if (updated) updatePostInGroup(group.id, updated);
+            invalidateGroupPosts(group.id);
+          }}
           onRequireAuth={requireAuth}
         />
       )}

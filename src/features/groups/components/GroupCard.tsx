@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router";
 import { Users, Lock, Globe, Check } from "lucide-react";
 import Button from "../../../components/ui/Button";
+import defaultGroupCover from "../../../assets/group/group-default.png";
 
 const GroupCard = ({ group, onJoinToggle }) => {
   const [loading, setLoading] = useState(false);
@@ -21,17 +22,11 @@ const GroupCard = ({ group, onJoinToggle }) => {
       <div>
         {/* Cover Banner */}
         <div className="h-32 w-full bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
-          {group.coverImage ? (
-            <img
-              src={group.coverImage}
-              alt={group.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-red-500/20 to-orange-500/20">
-              <Users size={32} className="text-[#e02f21]/40" />
-            </div>
-          )}
+          <img
+            src={group.coverImage || defaultGroupCover}
+            alt={group.name}
+            className="w-full h-full object-cover"
+          />
           <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold flex items-center gap-1">
             {group.privacy === "PRIVATE" ? (
               <>

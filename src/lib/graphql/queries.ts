@@ -431,10 +431,16 @@ export const GROUP_QUERY = gql`
       privacy
       requiresPostApproval
       createdById
+      createdBy {
+        id
+        name
+        image
+      }
       membersCount
       postsCount
       isMember
       currentUserRole
+      canModerate
       createdAt
       members {
         id

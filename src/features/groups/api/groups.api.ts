@@ -4,6 +4,10 @@ import {
   CREATE_GROUP_MUTATION,
   JOIN_GROUP_MUTATION,
   LEAVE_GROUP_MUTATION,
+  UPDATE_GROUP_MEMBER_ROLE_MUTATION,
+  REMOVE_GROUP_MEMBER_MUTATION,
+  ADD_GROUP_MEMBER_MUTATION,
+  UPDATE_GROUP_COVER_MUTATION,
 } from "../../../lib/graphql/mutations";
 import { Group, CreateGroupPayload } from "../types/group.types";
 
@@ -53,8 +57,13 @@ export const groupsApi = {
         name: groupData.name,
         description: groupData.description,
         privacy: groupData.privacy,
+        coverImage: groupData.coverImage,
+        avatar: groupData.avatar,
       },
     });
+    // Evict groups query from cache so the new group is immediately listed
+    apolloClient.cache.evict({ fieldName: "groups" });
+    apolloClient.cache.gc();
     return data?.createGroup;
   },
 
@@ -72,6 +81,56 @@ export const groupsApi = {
       variables: { groupId },
     });
     return { success: data?.leaveGroup };
+  },
+
+  updateMemberRole: async (
+    groupId: string,
+    memberId: string,
+    role: string,
+    _token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: UPDATE_GROUP_MEMBER_ROLE_MUTATION,
+      variables: { groupId, memberId, role },
+    });
+    return data?.updateGroupMemberRole;
+  },
+
+  removeMember: async (
+    groupId: string,
+    memberId: string,
+    _token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: REMOVE_GROUP_MEMBER_MUTATION,
+      variables: { groupId, memberId },
+    });
+    return { success: data?.removeGroupMember };
+  },
+
+  addMember: async (
+    groupId: string,
+    userId: string,
+    role: string = "MEMBER",
+    _token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: ADD_GROUP_MEMBER_MUTATION,
+      variables: { groupId, userId, role },
+    });
+    return data?.addGroupMember;
+  },
+
+  updateGroupCover: async (
+    groupId: string,
+    coverImage: string,
+    _token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: UPDATE_GROUP_COVER_MUTATION,
+      variables: { groupId, coverImage },
+    });
+    return data?.updateGroupCover;
   },
 
   updateGroupSettings: async (

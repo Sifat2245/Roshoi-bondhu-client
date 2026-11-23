@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { Globe, Lock, Users } from "lucide-react";
 import { postAudience, audienceLabels } from "../model/post-policy";
 import Avatar from "../../../components/ui/Avatar";
+import defaultGroupCover from "../../../assets/group/group-default.png";
 
 function formatPostTime(dateString?: string | Date): string {
   if (!dateString) return "View post";
@@ -66,15 +67,11 @@ export default function PostIdentity({ post }: { post: any }) {
             aria-label={`Open ${group.name}`}
             className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 text-gray-500"
           >
-            {group.coverImage || group.avatar ? (
-              <img
-                src={group.avatar || group.coverImage}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Users size={23} />
-            )}
+            <img
+              src={group.avatar || group.coverImage || defaultGroupCover}
+              alt=""
+              className="h-full w-full object-cover"
+            />
           </Link>
           <Link
             to={`/profile/${author?.id}`}

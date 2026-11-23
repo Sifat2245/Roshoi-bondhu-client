@@ -8,7 +8,14 @@ import PostCard from '../../features/posts/components/PostCard';
 import { PostSkeleton, GroupCardSkeleton } from '../../components/ui/Skeleton';
 import groupsApi from '../../features/groups/api/groups.api';
 import postsApi from '../../features/posts/api/posts.api';
+import {
+  useGroupsListQuery,
+  useGroupFeedPostsQuery,
+  useInvalidateGroupQueries,
+  MOCK_FALLBACK_GROUPS,
+} from '../../features/groups/hooks/useGroupQueries';
 import { useToast } from '../../context/ToastContext';
+import defaultGroupCover from '../../assets/group/group-default.png';
 import {
   Users,
   Compass,
@@ -33,57 +40,6 @@ const DISCOVER_CATEGORIES = [
   'Healthy Diet',
 ];
 
-const MOCK_FALLBACK_GROUPS = [
-  {
-    id: 'g-grandma',
-    name: 'Secret Grandma Recipes (দাদীর গোপন রেসিপি)',
-    slug: 'secret-grandma-recipes',
-    avatar: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=200',
-    coverImage: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800',
-    description: 'Preserving heirloom recipes from Bengali grandmothers across generations.',
-    membersCount: 1420,
-    privacy: 'PUBLIC',
-    isMember: true,
-    lastActive: '5 hours ago',
-  },
-  {
-    id: 'g-baking',
-    name: 'Baking & Sweet Tooth Club',
-    slug: 'baking-sweet-tooth-club',
-    avatar: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200',
-    coverImage: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800',
-    description: 'From shondesh to cheesecakes - the ultimate haven for dessert creators.',
-    membersCount: 890,
-    privacy: 'PUBLIC',
-    isMember: true,
-    lastActive: '1 day ago',
-  },
-  {
-    id: 'g-curries',
-    name: 'Desi Spices & Curries (দেশি মশলা ও তরকারি)',
-    slug: 'desi-spices-curries',
-    avatar: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=200',
-    coverImage: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=800',
-    description: 'Master the art of mustard oil, panch phoron, and robust slow-cooked curries.',
-    membersCount: 2310,
-    privacy: 'PUBLIC',
-    isMember: false,
-    lastActive: '18 mins ago',
-  },
-  {
-    id: 'g-biryani',
-    name: 'Old Dhaka Biryani & Mughlai Guild',
-    slug: 'old-dhaka-biryani-guild',
-    avatar: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200',
-    coverImage: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=800',
-    description: 'Kacchi biryani enthusiasts exploring authentic spices and clay pot cooking.',
-    membersCount: 3120,
-    privacy: 'PUBLIC',
-    isMember: false,
-    lastActive: '2 days ago',
-  },
-];
-
 const GroupsPage: React.FC = () => {
   const { data: session } = useSession();
   const navigate = useNavigate();
@@ -96,61 +52,30 @@ const GroupsPage: React.FC = () => {
   const initialView = (searchParams.get('tab') as GroupView) || 'FEED';
   const [activeView, setActiveView] = useState<GroupView>(initialView);
 
-  const [baseGroups, setGroups] = useState<any[]>([]);
-  const groups = baseGroups.map((group) => resolveGroup(group, social.members[group.id], user?.id));
-  const [groupPosts, setGroupPosts] = useState<any[]>([]);
-  const [loadingGroups, setLoadingGroups] = useState(true);
-  const [loadingPosts, setLoadingPosts] = useState(true);
   const [groupSearch, setGroupSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Fetch all groups
-  const fetchGroups = useCallback(async () => {
-    setLoadingGroups(true);
-    try {
-      const data = await groupsApi.getGroups({}, token);
-      if (data && data.length > 0) {
-        setGroups(data);
-      } else {
-        setGroups(MOCK_FALLBACK_GROUPS);
-      }
-    } catch {
-      setGroups(MOCK_FALLBACK_GROUPS);
-    } finally {
-      setLoadingGroups(false);
-    }
-  }, [token]);
+  // TanStack Query 10-min caching
+  const {
+    data: rawGroups = MOCK_FALLBACK_GROUPS,
+    isLoading: loadingGroups,
+  } = useGroupsListQuery({}, token);
 
-  // Fetch all group posts (Requirement 3: "in the middle. it will show all the posts of all the groups")
-  const fetchGroupPosts = useCallback(async () => {
-    setLoadingPosts(true);
-    try {
-      const data = await postsApi.getPosts({ limit: 50 }, token, user?.id);
-      if (data) {
-        // Show all posts, giving priority to posts with groups
-        const groupTagged = data.filter((p: any) => p.group || p.groupId);
-        if (groupTagged.length > 0) {
-          setGroupPosts(groupTagged);
-        } else {
-          // If no posts are tagged with groups yet, show the posts with fallback group tags
-          const augmented = data.map((p: any, idx: number) => ({
-            ...p,
-            group: p.group || MOCK_FALLBACK_GROUPS[idx % MOCK_FALLBACK_GROUPS.length],
-          }));
-          setGroupPosts(augmented);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load group posts', err);
-    } finally {
-      setLoadingPosts(false);
-    }
-  }, [token, user?.id]);
+  const {
+    data: groupPosts = [],
+    isLoading: loadingPosts,
+  } = useGroupFeedPostsQuery(token, user?.id);
 
-  useEffect(() => {
-    fetchGroups();
-    fetchGroupPosts();
-  }, [fetchGroups, fetchGroupPosts]);
+  const {
+    updateGroupMembershipInCache,
+    invalidateAllGroups,
+    deletePostFromGroup,
+    updatePostInGroup,
+  } = useInvalidateGroupQueries();
+
+  const groups = rawGroups.map((group) =>
+    resolveGroup(group, social.members[group.id], user?.id)
+  );
 
   const handleSelectView = (view: GroupView) => {
     setActiveView(view);
@@ -163,6 +88,9 @@ const GroupsPage: React.FC = () => {
       return;
     }
 
+    const nextIsMember = !group.isMember;
+    updateGroupMembershipInCache(group.id, nextIsMember);
+
     try {
       if (group.isMember) {
         await groupsApi.leaveGroup(group.slug || group.id, token);
@@ -171,19 +99,9 @@ const GroupsPage: React.FC = () => {
         await groupsApi.joinGroup(group.slug || group.id, token);
         notify.success(`Joined ${group.name}!`);
       }
-
-      setGroups((prev) =>
-        prev.map((g) =>
-          g.id === group.id
-            ? {
-                ...g,
-                isMember: !g.isMember,
-                membersCount: g.isMember ? Math.max(1, g.membersCount - 1) : g.membersCount + 1,
-              }
-            : g
-        )
-      );
+      invalidateAllGroups();
     } catch (err: any) {
+      updateGroupMembershipInCache(group.id, group.isMember);
       notify.error(err.message || 'Action failed');
     }
   };
@@ -483,12 +401,10 @@ const GroupsPage: React.FC = () => {
                     onOpenComments={(post) => navigate(`/post/${post.id}`)}
                     onRequireAuth={() => navigate('/login')}
                     onDeletePost={(deletedId) =>
-                      setGroupPosts((prev) => prev.filter((p) => p.id !== deletedId))
+                      deletePostFromGroup(post.groupId || '', deletedId)
                     }
                     onUpdatePost={(updated) =>
-                      setGroupPosts((prev) =>
-                        prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
-                      )
+                      updatePostInGroup(post.groupId || '', updated)
                     }
                   />
                 ))
@@ -575,7 +491,7 @@ const GroupsPage: React.FC = () => {
                       <img
                         src={
                           group.coverImage ||
-                          'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600'
+                          defaultGroupCover
                         }
                         alt=""
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
