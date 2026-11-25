@@ -1,5 +1,5 @@
 import { apolloClient } from "../../../lib/graphql/client";
-import { SUBMIT_REPORT_MUTATION } from "../../../lib/graphql/mutations";
+import { SUBMIT_REPORT_MUTATION } from "../../../lib/mutations/report.mutations";
 import apiClient from "../../../lib/api-client";
 
 export interface SubmitReportPayload {

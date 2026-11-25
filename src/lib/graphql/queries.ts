@@ -341,6 +341,7 @@ export const FRIENDS_QUERY = gql`
     friends(userId: $userId, search: $search) {
       id
       name
+      username
       email
       image
       bio
@@ -410,10 +411,16 @@ export const GROUPS_QUERY = gql`
       privacy
       requiresPostApproval
       createdById
+      createdBy {
+        id
+        name
+        image
+      }
       membersCount
       postsCount
       isMember
       currentUserRole
+      canModerate
       createdAt
     }
   }

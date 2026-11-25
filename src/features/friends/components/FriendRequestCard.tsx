@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router";
 import { Users } from "lucide-react";
 import Button from "../../../components/ui/Button";
+import defaultUserAvatar from "../../../assets/user-image.png";
 
 const FriendRequestCard = ({
   request,
@@ -16,8 +17,11 @@ const FriendRequestCard = ({
   isProcessing?: boolean;
   processingAction?: "confirm" | "delete" | null;
 }) => {
-  const profileId = request.userId || request.id;
-  const mutuals = request.mutualFriends ?? request.mutualCount ?? 0;
+  const profileId = request.userId || request.senderId || request.sender?.id || request.id;
+  const senderName = request.name || request.sender?.name || "Chef";
+  const senderImage = request.image ?? request.sender?.image ?? null;
+  const senderCity = request.city ?? request.sender?.city ?? null;
+  const mutuals = request.mutualFriends ?? request.mutualFriendsCount ?? request.mutualCount ?? 0;
 
   return (
     <div className="bg-white dark:bg-[#242526] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-xs hover:shadow-md transition flex flex-col">
@@ -27,11 +31,8 @@ const FriendRequestCard = ({
         className="block aspect-square w-full bg-gray-100 dark:bg-gray-800 relative overflow-hidden group"
       >
         <img
-          src={
-            request.image ||
-            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400"
-          }
-          alt={request.name}
+          src={senderImage || defaultUserAvatar}
+          alt={senderName}
           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
         />
       </Link>
@@ -43,7 +44,7 @@ const FriendRequestCard = ({
             to={`/profile/${profileId}`}
             className="font-bold text-base text-gray-900 dark:text-white hover:underline truncate block"
           >
-            {request.name}
+            {senderName}
           </Link>
 
           {/* Mutual Friends or Location indicator */}
@@ -55,8 +56,8 @@ const FriendRequestCard = ({
                   {mutuals} mutual {mutuals === 1 ? "friend" : "friends"}
                 </span>
               </span>
-            ) : request.city ? (
-              <span className="truncate">{request.city}</span>
+            ) : senderCity ? (
+              <span className="truncate">{senderCity}</span>
             ) : (
               <span>Sent you a friend request</span>
             )}

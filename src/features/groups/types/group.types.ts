@@ -24,10 +24,12 @@ export interface Group {
   postsCount?: number;
   creatorId?: string;
   createdById?: string;
+  createdBy?: { id: string; name: string; image?: string | null };
   isMember?: boolean;
   currentUserRole?: GroupMemberRole | string | null;
   canModerate?: boolean;
   members?: GroupMember[];
+  lastActive?: string;
   createdAt: string;
 }
 
@@ -38,4 +40,5 @@ export interface CreateGroupPayload {
   coverImage?: string | null;
   avatar?: string | null;
   requiresPostApproval?: boolean;
+  invitedUserIds?: string[];
 }

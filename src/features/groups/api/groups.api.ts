@@ -8,13 +8,13 @@ import {
   REMOVE_GROUP_MEMBER_MUTATION,
   ADD_GROUP_MEMBER_MUTATION,
   UPDATE_GROUP_COVER_MUTATION,
-} from "../../../lib/graphql/mutations";
+} from "../../../lib/mutations/group.mutations";
 import { Group, CreateGroupPayload } from "../types/group.types";
 
 export const groupsApi = {
   getGroups: async (
     params?: string | { search?: string; limit?: number; myGroups?: boolean },
-    _token: string | null = null,
+    token: string | null = null,
   ): Promise<Group[]> => {
     let search: string | undefined = undefined;
     let myGroups: boolean | undefined = undefined;
@@ -30,6 +30,13 @@ export const groupsApi = {
       query: GROUPS_QUERY,
       variables: { search, myGroups },
       fetchPolicy: "network-only",
+      context: token
+        ? {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        : undefined,
     });
 
     return data?.groups || [];
@@ -37,19 +44,26 @@ export const groupsApi = {
 
   getGroupBySlug: async (
     slug: string,
-    _token: string | null = null,
+    token: string | null = null,
   ): Promise<Group> => {
     const { data } = await apolloClient.query({
       query: GROUP_QUERY,
       variables: { slug },
       fetchPolicy: "network-only",
+      context: token
+        ? {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        : undefined,
     });
     return data?.group;
   },
 
   createGroup: async (
     groupData: CreateGroupPayload,
-    _token: string | null = null,
+    token: string | null = null,
   ) => {
     const { data } = await apolloClient.mutate({
       mutation: CREATE_GROUP_MUTATION,
@@ -59,7 +73,16 @@ export const groupsApi = {
         privacy: groupData.privacy,
         coverImage: groupData.coverImage,
         avatar: groupData.avatar,
+        invitedUserIds: groupData.invitedUserIds,
       },
+      context: token
+        ? {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        : undefined,
+      refetchQueries: [{ query: GROUPS_QUERY }],
     });
     // Evict groups query from cache so the new group is immediately listed
     apolloClient.cache.evict({ fieldName: "groups" });
@@ -67,19 +90,39 @@ export const groupsApi = {
     return data?.createGroup;
   },
 
-  joinGroup: async (groupId: string, _token: string | null = null) => {
+  joinGroup: async (groupId: string, token: string | null = null) => {
     const { data } = await apolloClient.mutate({
       mutation: JOIN_GROUP_MUTATION,
       variables: { groupId },
+      context: token
+        ? {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        : undefined,
+      refetchQueries: [{ query: GROUPS_QUERY }],
     });
+    apolloClient.cache.evict({ fieldName: "groups" });
+    apolloClient.cache.gc();
     return { success: data?.joinGroup };
   },
 
-  leaveGroup: async (groupId: string, _token: string | null = null) => {
+  leaveGroup: async (groupId: string, token: string | null = null) => {
     const { data } = await apolloClient.mutate({
       mutation: LEAVE_GROUP_MUTATION,
       variables: { groupId },
+      context: token
+        ? {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        : undefined,
+      refetchQueries: [{ query: GROUPS_QUERY }],
     });
+    apolloClient.cache.evict({ fieldName: "groups" });
+    apolloClient.cache.gc();
     return { success: data?.leaveGroup };
   },
 

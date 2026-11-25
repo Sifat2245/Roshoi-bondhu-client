@@ -7,8 +7,8 @@ import {
 import {
   UPDATE_PROFILE_MUTATION,
   UPDATE_PREFERENCES_MUTATION,
-  TOGGLE_FOLLOW_MUTATION,
-} from "../../../lib/graphql/mutations";
+} from "../../../lib/mutations/profile.mutations";
+import { TOGGLE_FOLLOW_MUTATION } from "../../../lib/mutations/user.mutations";
 import {
   UserProfile,
   UpdateProfilePayload,

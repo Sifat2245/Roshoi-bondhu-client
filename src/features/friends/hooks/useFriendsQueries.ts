@@ -20,7 +20,8 @@ export const BLOCKED_USERS_QUERY_KEY = "blockedUsers";
 export function useFriendsQuery(
   token?: string | null,
   search?: string,
-  userId?: string
+  userId?: string,
+  options?: { enabled?: boolean }
 ) {
   const normalizedUserId = userId && userId !== "me" ? userId : undefined;
   return useQuery<Friend[]>({
@@ -28,6 +29,8 @@ export function useFriendsQuery(
     queryFn: () => friendsApi.getAllFriends(token, search, normalizedUserId),
     staleTime: 10 * 60 * 1000, // 10 minutes fresh
     gcTime: 20 * 60 * 1000,    // 20 minutes in cache
+    placeholderData: (previousData) => previousData,
+    enabled: options?.enabled ?? true,
   });
 }
 

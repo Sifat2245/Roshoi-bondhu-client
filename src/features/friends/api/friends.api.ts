@@ -12,9 +12,11 @@ import {
   DECLINE_FRIEND_REQUEST_MUTATION,
   CANCEL_FRIEND_REQUEST_MUTATION,
   UNFRIEND_MUTATION,
+} from "../../../lib/mutations/friend.mutations";
+import {
   BLOCK_USER_MUTATION,
   UNBLOCK_USER_MUTATION,
-} from "../../../lib/graphql/mutations";
+} from "../../../lib/mutations/user.mutations";
 import {
   Friend,
   FriendSuggestion,
@@ -28,6 +30,7 @@ const SUGGESTIONS_QUERY = gql`
     friendSuggestions(limit: $limit) {
       id
       name
+      username
       email
       image
       bio
@@ -36,55 +39,79 @@ const SUGGESTIONS_QUERY = gql`
   }
 `;
 
+const authContext = (token?: string | null) =>
+  token ? { headers: { authorization: `Bearer ${token}` } } : undefined;
+
 export const friendsApi = {
   getAllFriends: async (
     token: string | null = null,
     search?: string,
     userId?: string
   ): Promise<Friend[]> => {
-    void token;
     const targetId = userId && userId !== "me" && userId !== "undefined" && userId !== "null" ? userId : undefined;
     const { data } = await apolloClient.query({
       query: FRIENDS_QUERY,
       variables: { userId: targetId, search: search?.trim() || undefined },
       fetchPolicy: "network-only",
+      context: authContext(token),
     });
-    return data?.friends || [];
+    return (data?.friends || []).map((f: any) => ({
+      ...f,
+      mutualFriends: f.mutualCount ?? f.mutualFriends ?? 0,
+    }));
   },
 
   getFriendRequests: async (
     token: string | null = null
   ): Promise<FriendRequest[]> => {
-    void token;
     const { data } = await apolloClient.query({
       query: FRIEND_REQUESTS_QUERY,
       fetchPolicy: "network-only",
+      context: authContext(token),
     });
-    return data?.friendRequests || [];
+    return (data?.friendRequests || []).map((r: any) => ({
+      id: r.id,
+      userId: r.sender?.id || r.senderId || r.userId || r.id,
+      senderId: r.senderId || r.sender?.id || r.userId,
+      receiverId: r.receiverId,
+      status: r.status,
+      name: r.sender?.name || r.name || "Chef",
+      username: r.sender?.username || r.username || "",
+      image: r.sender?.image ?? r.image ?? null,
+      city: r.sender?.city ?? r.city ?? null,
+      bio: r.sender?.bio ?? r.bio ?? null,
+      mutualFriends: r.mutualFriendsCount ?? r.mutualFriends ?? 0,
+      createdAt: r.createdAt,
+      sender: r.sender || null,
+    }));
   },
 
   getSuggestions: async (
     token: string | null = null,
     limit: number = 25
   ): Promise<FriendSuggestion[]> => {
-    void token;
     const { data } = await apolloClient.query({
       query: SUGGESTIONS_QUERY,
       variables: { limit },
       fetchPolicy: "network-only",
+      context: authContext(token),
     });
-    return data?.friendSuggestions || [];
+    return (data?.friendSuggestions || []).map((s: any) => ({
+      ...s,
+      mutualFriends: s.mutualCount ?? s.mutualFriends ?? 0,
+    }));
   },
 
   getRelationshipStatus: async (
     targetUserId: string,
-    _token: string | null = null
+    token: string | null = null
   ): Promise<RelationshipStatusResponse> => {
     try {
       const { data } = await apolloClient.query({
         query: RELATIONSHIP_STATUS_QUERY,
         variables: { targetUserId },
         fetchPolicy: "network-only",
+        context: authContext(token),
       });
       return data?.relationshipStatus || { status: "NONE" };
     } catch {
@@ -96,10 +123,10 @@ export const friendsApi = {
     targetUserId: string,
     token: string | null = null
   ) => {
-    void token;
     const { data } = await apolloClient.mutate({
       mutation: SEND_FRIEND_REQUEST_MUTATION,
       variables: { receiverId: targetUserId },
+      context: authContext(token),
     });
     return data?.sendFriendRequest;
   },
@@ -108,10 +135,10 @@ export const friendsApi = {
     requestIdOrUserId: string,
     token: string | null = null
   ) => {
-    void token;
     const { data } = await apolloClient.mutate({
       mutation: ACCEPT_FRIEND_REQUEST_MUTATION,
       variables: { requestId: requestIdOrUserId },
+      context: authContext(token),
     });
     return { success: data?.acceptFriendRequest };
   },
@@ -120,10 +147,10 @@ export const friendsApi = {
     requestIdOrUserId: string,
     token: string | null = null
   ) => {
-    void token;
     const { data } = await apolloClient.mutate({
       mutation: DECLINE_FRIEND_REQUEST_MUTATION,
       variables: { requestId: requestIdOrUserId },
+      context: authContext(token),
     });
     return { success: data?.declineFriendRequest };
   },
@@ -132,10 +159,10 @@ export const friendsApi = {
     targetUserId: string,
     token: string | null = null
   ) => {
-    void token;
     const { data } = await apolloClient.mutate({
       mutation: CANCEL_FRIEND_REQUEST_MUTATION,
       variables: { receiverId: targetUserId },
+      context: authContext(token),
     });
     return { success: data?.cancelFriendRequest };
   },
@@ -144,10 +171,10 @@ export const friendsApi = {
     targetUserId: string,
     token: string | null = null
   ) => {
-    void token;
     const { data } = await apolloClient.mutate({
       mutation: UNFRIEND_MUTATION,
       variables: { friendId: targetUserId },
+      context: authContext(token),
     });
     return { success: data?.unfriend };
   },
@@ -156,10 +183,10 @@ export const friendsApi = {
     targetUserId: string,
     token: string | null = null
   ) => {
-    void token;
     const { data } = await apolloClient.mutate({
       mutation: BLOCK_USER_MUTATION,
       variables: { userId: targetUserId },
+      context: authContext(token),
     });
     return { success: data?.blockUser };
   },
@@ -168,10 +195,10 @@ export const friendsApi = {
     targetUserId: string,
     token: string | null = null
   ) => {
-    void token;
     const { data } = await apolloClient.mutate({
       mutation: UNBLOCK_USER_MUTATION,
       variables: { userId: targetUserId },
+      context: authContext(token),
     });
     return { success: data?.unblockUser };
   },
@@ -179,10 +206,10 @@ export const friendsApi = {
   getBlockedUsers: async (
     token: string | null = null
   ): Promise<BlockedUser[]> => {
-    void token;
     const { data } = await apolloClient.query({
       query: BLOCKED_USERS_QUERY,
       fetchPolicy: "network-only",
+      context: authContext(token),
     });
     return data?.blockedUsers || [];
   },

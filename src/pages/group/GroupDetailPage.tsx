@@ -60,6 +60,7 @@ const GroupDetailPage = () => {
   const {
     invalidateGroupDetail,
     invalidateGroupPosts,
+    invalidateAllGroups,
     updateGroupMembershipInCache,
     prependPostToGroup,
     deletePostFromGroup,
@@ -80,13 +81,14 @@ const GroupDetailPage = () => {
 
     try {
       if (group.isMember) {
-        await groupsApi.leaveGroup(group.slug || group.id, session?.session?.token);
+        await groupsApi.leaveGroup(group.id || group.slug, session?.session?.token);
         notify.info(`Left ${group.name}`);
       } else {
-        await groupsApi.joinGroup(group.slug || group.id, session?.session?.token);
+        await groupsApi.joinGroup(group.id || group.slug, session?.session?.token);
         notify.success(`Joined ${group.name}!`);
       }
       invalidateGroupDetail(slug);
+      invalidateAllGroups();
     } catch (err: any) {
       updateGroupMembershipInCache(group.id, group.isMember);
       notify.error(err.message || 'Could not update your group membership. Please try again.');

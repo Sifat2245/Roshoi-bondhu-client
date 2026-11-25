@@ -26,6 +26,9 @@ export interface FriendSuggestion {
 export interface FriendRequest {
   id: string;
   userId: string;
+  senderId?: string;
+  receiverId?: string;
+  status?: string;
   name: string;
   username?: string;
   image?: string | null;
@@ -34,6 +37,14 @@ export interface FriendRequest {
   bio?: string | null;
   mutualFriends?: number;
   createdAt?: string;
+  sender?: {
+    id: string;
+    name: string;
+    image?: string | null;
+    username?: string;
+    city?: string | null;
+    bio?: string | null;
+  } | null;
 }
 
 export type RelationshipStatus =

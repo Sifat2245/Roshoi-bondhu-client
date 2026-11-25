@@ -23,9 +23,11 @@ import {
   RESTORE_POST_MUTATION,
   PERMANENT_DELETE_POST_MUTATION,
   EMPTY_TRASH_MUTATION,
+} from "../../../lib/mutations/post.mutations";
+import {
   HIDE_POST_MUTATION,
   UNHIDE_POST_MUTATION,
-} from "../../../lib/graphql/mutations";
+} from "../../../lib/mutations/feed.mutations";
 import { optimizeImageForUpload } from "../../../lib/media-preferences";
 import { Post, CreatePostPayload, PostFilterParams } from "../types/post.types";
 import {

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useSession } from '../../lib/auth-client';
 import { useToast } from '../../context/ToastContext';
 import groupsApi from '../../features/groups/api/groups.api';
+import { useInvalidateGroupQueries } from '../../features/groups/hooks/useGroupQueries';
+import { useFriendsQuery } from '../../features/friends/hooks/useFriendsQueries';
+import type { Friend } from '../../features/friends/types/friends.types';
 import Avatar from '../../components/ui/Avatar';
 import defaultGroupCover from '../../assets/group/group-default.png';
 import {
@@ -12,48 +15,105 @@ import {
   ChevronDown,
   Monitor,
   Smartphone,
-  Plus,
   Users,
   Image as ImageIcon,
   Smile,
-  Tag,
   Video,
+  Search,
+  Check,
+  Loader2,
+  UserPlus,
 } from 'lucide-react';
-
-const SUGGESTED_FRIENDS = [
-  'Umama Nammi',
-  'Sadia Farheen',
-  'Maksuda Sultana',
-  'Tanvir Hasan',
-  'Mohsin Islam',
-  'Md Rezaul Korim',
-];
 
 const CreateGroupPage: React.FC = () => {
   const { data: session } = useSession();
   const navigate = useNavigate();
   const { notify } = useToast();
+  const { invalidateAllGroups } = useInvalidateGroupQueries();
   const currentUser = session?.user;
+  const token = session?.session?.token;
 
   // Form states
   const [groupName, setGroupName] = useState('');
   const [privacy, setPrivacy] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
   const [description, setDescription] = useState('');
-  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
+  const [invitedFriends, setInvitedFriends] = useState<Friend[]>([]);
   const [friendInput, setFriendInput] = useState('');
+  const [debouncedFriendSearch, setDebouncedFriendSearch] = useState('');
+  const [isFriendsDropdownOpen, setIsFriendsDropdownOpen] = useState(false);
+  const [hasOpenedFriendsDropdown, setHasOpenedFriendsDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const friendPickerRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Preview Mode: 'DESKTOP' | 'MOBILE'
   const [previewMode, setPreviewMode] = useState<'DESKTOP' | 'MOBILE'>('DESKTOP');
 
-  const handleAddFriend = (name: string) => {
-    if (!invitedFriends.includes(name)) {
-      setInvitedFriends([...invitedFriends, name]);
+  // Debounce search text for GraphQL friends query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFriendSearch(friendInput.trim());
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [friendInput]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (friendPickerRef.current && !friendPickerRef.current.contains(event.target as Node)) {
+        setIsFriendsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Scroll dropdown into view inside the sidebar form when opened
+  useEffect(() => {
+    if (isFriendsDropdownOpen) {
+      requestAnimationFrame(() => {
+        dropdownRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    }
+  }, [isFriendsDropdownOpen]);
+
+  // Fetch user's friends from GraphQL GET API once dropdown is opened
+  const {
+    data: friendsList = [],
+    isLoading: isLoadingFriends,
+    isFetching: isFetchingFriends,
+  } = useFriendsQuery(token, debouncedFriendSearch, currentUser?.id, {
+    enabled: hasOpenedFriendsDropdown && Boolean(currentUser?.id),
+  });
+
+  const displayedFriends = useMemo(() => {
+    const q = friendInput.trim().toLowerCase();
+    if (!q) return friendsList;
+    return friendsList.filter(
+      (f) =>
+        (f.name || '').toLowerCase().includes(q) ||
+        (f.username || '').toLowerCase().includes(q)
+    );
+  }, [friendsList, friendInput]);
+
+  const invitedIds = useMemo(() => new Set(invitedFriends.map((f) => f.id)), [invitedFriends]);
+
+  const handleToggleFriend = (friend: Friend) => {
+    if (invitedIds.has(friend.id)) {
+      setInvitedFriends((prev) => prev.filter((f) => f.id !== friend.id));
+    } else {
+      setInvitedFriends((prev) => [...prev, friend]);
     }
   };
 
-  const handleRemoveFriend = (name: string) => {
-    setInvitedFriends(invitedFriends.filter((f) => f !== name));
+  const handleRemoveFriend = (friendId: string) => {
+    setInvitedFriends((prev) => prev.filter((f) => f.id !== friendId));
+  };
+
+  const handleOpenFriendsDropdown = () => {
+    setHasOpenedFriendsDropdown(true);
+    setIsFriendsDropdownOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,11 +130,13 @@ const CreateGroupPage: React.FC = () => {
           name: groupName.trim(),
           description: description.trim() || `Welcome to ${groupName.trim()}! A community for passionate cooks and food lovers on Heshel.`,
           privacy,
+          invitedUserIds: invitedFriends.map((f) => f.id),
         },
         session?.session?.token
       );
 
       notify.success('Group created successfully!');
+      invalidateAllGroups();
       const slug = res?.slug || res?.data?.slug || groupName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       navigate(`/group/${slug}`);
     } catch (err: any) {
@@ -175,33 +237,27 @@ const CreateGroupPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Field 3: Invite Friends */}
-          <div className="space-y-2">
+          {/* Field 3: Invite Friends (GraphQL Friends Dropdown) */}
+          <div className="space-y-2 pb-4" ref={friendPickerRef}>
             <label className="block text-sm font-bold text-gray-800 dark:text-gray-200">
               Invite friends (optional)
             </label>
-            <input
-              type="text"
-              value={friendInput}
-              onChange={(e) => setFriendInput(e.target.value)}
-              onKeyDown={(event) => { if (event.key === 'Enter' && friendInput.trim()) { event.preventDefault(); handleAddFriend(friendInput.trim()); setFriendInput(''); } }}
-              placeholder="Type a friend's name to invite..."
-              className="w-full px-4 py-3.5 bg-white dark:bg-[#18191a] border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e02f21] transition"
-            />
 
             {/* Selected Friend Chips */}
             {invitedFriends.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex flex-wrap gap-1.5 pb-1">
                 {invitedFriends.map((friend) => (
                   <span
-                    key={friend}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-950/40 text-[#e02f21] text-sm font-bold rounded-lg"
+                    key={friend.id}
+                    className="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 bg-red-50 dark:bg-red-950/40 text-[#e02f21] text-xs sm:text-sm font-bold rounded-full border border-red-100 dark:border-red-900/40"
                   >
-                    <span>{friend}</span>
+                    <Avatar src={friend.image} alt={friend.name} size="xs" />
+                    <span className="max-w-[140px] truncate">{friend.name}</span>
                     <button
                       type="button"
-                      onClick={() => handleRemoveFriend(friend)}
-                      className="hover:text-red-800 cursor-pointer"
+                      onClick={() => handleRemoveFriend(friend.id)}
+                      title={`Remove ${friend.name}`}
+                      className="hover:text-red-800 dark:hover:text-red-300 cursor-pointer ml-0.5"
                     >
                       <X size={14} />
                     </button>
@@ -210,23 +266,158 @@ const CreateGroupPage: React.FC = () => {
               </div>
             )}
 
-            {/* Suggested Friends */}
-            <div className="pt-2">
-              <p className="text-xs sm:text-sm text-gray-400 font-semibold mb-2">Suggested:</p>
-              <div className="flex flex-wrap gap-2">
-                {SUGGESTED_FRIENDS.filter((f) => !invitedFriends.includes(f)).map((friend) => (
+            {/* Searchable Friends Input */}
+            <div className="relative">
+              <Search
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              />
+              <input
+                type="text"
+                value={friendInput}
+                onFocus={handleOpenFriendsDropdown}
+                onClick={handleOpenFriendsDropdown}
+                onChange={(e) => {
+                  setFriendInput(e.target.value);
+                  if (!isFriendsDropdownOpen) {
+                    handleOpenFriendsDropdown();
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') {
+                    setIsFriendsDropdownOpen(false);
+                  } else if (event.key === 'Enter') {
+                    event.preventDefault();
+                    if (displayedFriends.length > 0 && friendInput.trim()) {
+                      const firstMatch =
+                        displayedFriends.find((f) => !invitedIds.has(f.id)) || displayedFriends[0];
+                      handleToggleFriend(firstMatch);
+                      setFriendInput('');
+                      setDebouncedFriendSearch('');
+                    }
+                  }
+                }}
+                placeholder="Type a friend's name to invite..."
+                className="w-full pl-10 pr-16 py-3.5 bg-white dark:bg-[#18191a] border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e02f21] transition"
+              />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {friendInput && (
                   <button
-                    key={friend}
                     type="button"
-                    onClick={() => handleAddFriend(friend)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 transition cursor-pointer"
+                    onClick={() => {
+                      setFriendInput('');
+                      setDebouncedFriendSearch('');
+                    }}
+                    title="Clear search"
+                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
                   >
-                    <Plus size={14} />
-                    <span>{friend}</span>
+                    <X size={15} />
                   </button>
-                ))}
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isFriendsDropdownOpen) {
+                      setIsFriendsDropdownOpen(false);
+                    } else {
+                      handleOpenFriendsDropdown();
+                    }
+                  }}
+                  aria-label="Toggle friends dropdown"
+                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
+                >
+                  <ChevronDown
+                    size={18}
+                    className={`transition-transform duration-200 ${
+                      isFriendsDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
               </div>
             </div>
+
+            {/* Friends Dropdown List */}
+            {isFriendsDropdownOpen && (
+              <div
+                ref={dropdownRef}
+                className="mt-1.5 bg-white dark:bg-[#18191a] border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden"
+              >
+                <div className="px-3.5 py-2 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-semibold text-gray-500">
+                  <span>Your Friends</span>
+                  {isFetchingFriends && (
+                    <span className="inline-flex items-center gap-1 text-[#e02f21]">
+                      <Loader2 size={12} className="animate-spin" />
+                      <span>Searching...</span>
+                    </span>
+                  )}
+                </div>
+
+                <div className="max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800/70">
+                  {!currentUser?.id ? (
+                    <div className="py-6 px-4 text-center text-sm text-gray-500">
+                      Please sign in to see your friends list.
+                    </div>
+                  ) : isLoadingFriends && displayedFriends.length === 0 ? (
+                    <div className="py-8 flex flex-col items-center justify-center gap-2 text-sm text-gray-400">
+                      <Loader2 size={20} className="animate-spin text-[#e02f21]" />
+                      <span>Loading friends...</span>
+                    </div>
+                  ) : displayedFriends.length > 0 ? (
+                    displayedFriends.map((friend) => {
+                      const isSelected = invitedIds.has(friend.id);
+                      return (
+                        <button
+                          key={friend.id}
+                          type="button"
+                          onClick={() => handleToggleFriend(friend)}
+                          className={`w-full px-3.5 py-2.5 flex items-center justify-between gap-3 text-left transition cursor-pointer ${
+                            isSelected
+                              ? 'bg-red-50/70 dark:bg-red-950/25'
+                              : 'hover:bg-gray-50 dark:hover:bg-[#242526]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Avatar src={friend.image} alt={friend.name} size="sm" />
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                {friend.name}
+                              </p>
+                              {(friend.username || friend.bio) && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                  {friend.username ? `@${friend.username}` : friend.bio}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {isSelected ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#e02f21] text-white text-xs font-bold shrink-0">
+                              <Check size={13} />
+                              <span>Invited</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-200 text-xs font-semibold shrink-0">
+                              <UserPlus size={13} />
+                              <span>Invite</span>
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })
+                  ) : friendInput.trim() ? (
+                    <div className="py-7 px-4 text-center text-sm text-gray-500 space-y-1">
+                      <Users size={22} className="mx-auto text-gray-300 dark:text-gray-600" />
+                      <p>No friends found matching &quot;{friendInput.trim()}&quot;</p>
+                    </div>
+                  ) : (
+                    <div className="py-7 px-4 text-center text-sm text-gray-500 space-y-1">
+                      <Users size={22} className="mx-auto text-gray-300 dark:text-gray-600" />
+                      <p>No friends found in your friend list yet.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </form>
 
@@ -318,7 +509,10 @@ const CreateGroupPage: React.FC = () => {
                 <span>{privacy === 'PUBLIC' ? 'Public group' : 'Private group'}</span>
               </span>
               <span>•</span>
-              <span>1 member</span>
+              <span>
+                {1 + invitedFriends.length}{' '}
+                {invitedFriends.length === 0 ? 'member' : 'members'}
+              </span>
             </div>
           </div>
 

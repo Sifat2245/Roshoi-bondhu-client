@@ -145,7 +145,7 @@ export function resolveGroup(
   const all = (group.members || []).map((member) => ({
     ...member,
     role:
-      member.userId === group.creatorId
+      member.userId === (group.creatorId || group.createdById)
         ? "ADMIN"
         : changes.roles[member.userId] || member.role,
   }));
@@ -162,8 +162,9 @@ export function resolveGroup(
       (group.membersCount ?? all.length) -
         all.filter((member) => excluded.has(member.userId)).length,
     ),
-    isMember: excluded.has(actorId) ? false : group.isMember,
-    membershipRole: me?.role || group.membershipRole,
+    isMember: excluded.has(actorId) ? false : (group.isMember ?? Boolean(me)),
+    currentUserRole: me?.role || group.currentUserRole || (group.createdById === actorId ? "ADMIN" : null),
+    membershipRole: me?.role || group.membershipRole || group.currentUserRole || (group.createdById === actorId ? "ADMIN" : undefined),
   };
 }
 export function memberActions(

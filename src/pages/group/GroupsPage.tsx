@@ -93,10 +93,10 @@ const GroupsPage: React.FC = () => {
 
     try {
       if (group.isMember) {
-        await groupsApi.leaveGroup(group.slug || group.id, token);
+        await groupsApi.leaveGroup(group.id || group.slug, token);
         notify.info(`Left ${group.name}`);
       } else {
-        await groupsApi.joinGroup(group.slug || group.id, token);
+        await groupsApi.joinGroup(group.id || group.slug, token);
         notify.success(`Joined ${group.name}!`);
       }
       invalidateAllGroups();
@@ -106,12 +106,51 @@ const GroupsPage: React.FC = () => {
     }
   };
 
-  // Groups managed by the user
-  const managedGroups = groups.filter(
-    (g) => g.isCreator || g.creatorId === user?.id || g.creator?.id === user?.id
-  );
+  const currentUserId = user?.id || session?.user?.id;
+
+  const isGroupManaged = (g: any) => {
+    // 1. Role-based: admin or moderator
+    const role = (g.currentUserRole || g.membershipRole || g.role || '').toUpperCase();
+    if (role === 'ADMIN' || role === 'MODERATOR') return true;
+
+    // 2. Permission-based: canModerate flag from GraphQL
+    if (g.canModerate) return true;
+
+    // 3. Creator-based
+    if (g.isCreator) return true;
+    if (currentUserId) {
+      if (g.createdById === currentUserId) return true;
+      if (g.createdBy?.id === currentUserId) return true;
+      if (g.creatorId === currentUserId) return true;
+      if (g.creator?.id === currentUserId) return true;
+    }
+
+    // 4. Nested members check if present
+    if (currentUserId && Array.isArray(g.members)) {
+      const myMember = g.members.find(
+        (m: any) => m.userId === currentUserId || m.user?.id === currentUserId
+      );
+      if (myMember) {
+        const memRole = (myMember.role || '').toUpperCase();
+        if (memRole === 'ADMIN' || memRole === 'MODERATOR') return true;
+      }
+    }
+
+    return false;
+  };
+
+  // Groups managed by the user (Admin or Moderator)
+  const managedGroups = groups.filter(isGroupManaged);
   // Joined groups
   const joinedGroups = groups.filter((g) => g.isMember);
+  // Joined groups excluding the ones managed by user (to prevent duplication in sidebar)
+  const nonManagedJoinedGroups = groups.filter((g) => g.isMember && !isGroupManaged(g));
+  const joinedGroupsSidebar = nonManagedJoinedGroups.length > 0
+    ? nonManagedJoinedGroups
+    : (managedGroups.length === 0 ? joinedGroups : []);
+  // All your groups (managed + joined communities)
+  const allYourGroups = groups.filter((g) => g.isMember || isGroupManaged(g));
+
   // Filtered groups by search
   const filteredGroups = groups.filter((g) =>
     g.name.toLowerCase().includes(groupSearch.toLowerCase()) && (selectedCategory === 'All' || g.category === selectedCategory || `${g.name} ${g.description}`.toLowerCase().includes(selectedCategory.split(' & ')[0].toLowerCase()))
@@ -249,27 +288,33 @@ const GroupsPage: React.FC = () => {
               </h3>
               {managedGroups.length > 0 ? (
                 <div className="space-y-1">
-                  {managedGroups.map((group) => (
-                    <Link
-                      key={group.id}
-                      to={`/group/${group.slug}`}
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                    >
-                      <img
-                        src={group.avatar || 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=100'}
-                        alt={group.name}
-                        className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-xs"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-base text-gray-900 dark:text-white truncate">
-                          {group.name}
-                        </p>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                          Last active {group.lastActive || 'recently'}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
+                  {managedGroups.map((group) => {
+                    const roleLabel =
+                      group.currentUserRole === 'MODERATOR' ? 'Moderator' : 'Admin';
+                    return (
+                      <Link
+                        key={group.id}
+                        to={`/group/${group.slug}`}
+                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                      >
+                        <img
+                          src={group.avatar || group.coverImage || defaultGroupCover}
+                          alt={group.name}
+                          className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-xs"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-base text-gray-900 dark:text-white truncate">
+                            {group.name}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+                            <span className="font-bold text-[#e02f21]">{roleLabel}</span>
+                            <span>•</span>
+                            <span>Last active {group.lastActive || 'recently'}</span>
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-sm text-gray-400 py-1">
@@ -293,16 +338,16 @@ const GroupsPage: React.FC = () => {
                 </button>
               </div>
 
-              {joinedGroups.length > 0 ? (
+              {joinedGroupsSidebar.length > 0 ? (
                 <div className="space-y-1">
-                  {joinedGroups.map((group) => (
+                  {joinedGroupsSidebar.map((group) => (
                     <Link
                       key={group.id}
                       to={`/group/${group.slug}`}
                       className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                     >
                       <img
-                        src={group.avatar || 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=100'}
+                        src={group.avatar || group.coverImage || defaultGroupCover}
                         alt={group.name}
                         className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-xs"
                       />
@@ -553,40 +598,57 @@ const GroupsPage: React.FC = () => {
                 </p>
               </div>
 
-              {joinedGroups.length > 0 ? (
+              {allYourGroups.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {joinedGroups.map((group) => (
-                    <div
-                      key={group.id}
-                      className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-xs flex items-center justify-between gap-4"
-                    >
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <img
-                          src={group.avatar || 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=100'}
-                          alt={group.name}
-                          className="w-14 h-14 rounded-xl object-cover shrink-0 shadow-xs"
-                        />
-                        <div className="min-w-0">
-                          <Link
-                            to={`/group/${group.slug}`}
-                            className="font-bold text-base text-gray-900 dark:text-white hover:underline truncate block"
-                          >
-                            {group.name}
-                          </Link>
-                          <p className="text-sm text-gray-500 mt-0.5">
-                            {group.membersCount || 100} members
-                          </p>
-                        </div>
-                      </div>
-
-                      <Link
-                        to={`/group/${group.slug}`}
-                        className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-sm font-bold text-gray-800 dark:text-gray-200 transition shrink-0"
+                  {allYourGroups.map((group) => {
+                    const isManaged = isGroupManaged(group);
+                    const roleLabel =
+                      group.currentUserRole === 'MODERATOR'
+                        ? 'Moderator'
+                        : isManaged
+                        ? 'Admin'
+                        : null;
+                    return (
+                      <div
+                        key={group.id}
+                        className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-xs flex items-center justify-between gap-4"
                       >
-                        Visit
-                      </Link>
-                    </div>
-                  ))}
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <img
+                            src={group.avatar || group.coverImage || defaultGroupCover}
+                            alt={group.name}
+                            className="w-14 h-14 rounded-xl object-cover shrink-0 shadow-xs"
+                          />
+                          <div className="min-w-0">
+                            <Link
+                              to={`/group/${group.slug}`}
+                              className="font-bold text-base text-gray-900 dark:text-white hover:underline truncate block"
+                            >
+                              {group.name}
+                            </Link>
+                            <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1.5">
+                              {roleLabel && (
+                                <>
+                                  <span className="font-bold text-xs px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-[#e02f21]">
+                                    {roleLabel}
+                                  </span>
+                                  <span>•</span>
+                                </>
+                              )}
+                              <span>{group.membersCount || 1} members</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <Link
+                          to={`/group/${group.slug}`}
+                          className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-sm font-bold text-gray-800 dark:text-gray-200 transition shrink-0"
+                        >
+                          Visit
+                        </Link>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="bg-white dark:bg-[#242526] rounded-2xl p-10 text-center border border-gray-100 dark:border-gray-800 space-y-3">

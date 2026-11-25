@@ -8,7 +8,7 @@ import {
   SAVE_RECENT_SEARCH_MUTATION,
   REMOVE_RECENT_SEARCH_MUTATION,
   CLEAR_RECENT_SEARCHES_MUTATION,
-} from "../../../lib/graphql/mutations";
+} from "../../../lib/mutations/search.mutations";
 
 export interface RecentSearchItem {
   id: string;
