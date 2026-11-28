@@ -75,7 +75,6 @@ export default function GroupMembersTab({
     : group.currentUserRole || myMemberRecord?.role || "MEMBER";
   const isAdmin = isCreator || viewerRole === "ADMIN";
   const isModerator = viewerRole === "MODERATOR";
-  const isStaff = isAdmin || isModerator;
 
   const visibleMembers = members.filter((member: any) => {
     const nameMatch = `${member.user?.name || ""} ${member.user?.username || ""}`

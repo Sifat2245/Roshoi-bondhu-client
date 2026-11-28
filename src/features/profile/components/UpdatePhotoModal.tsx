@@ -775,7 +775,7 @@ export const UpdatePhotoModal: React.FC<UpdatePhotoModalProps> = ({
               >
                 Cancel
               </button>
-              {/* Roshoi Bondhu Primary Brand Action Button */}
+              {/* Heshel Primary Brand Action Button */}
               <button
                 type="button"
                 disabled={isUploading}

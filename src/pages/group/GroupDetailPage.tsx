@@ -27,7 +27,6 @@ import CreatePostModal from '../../features/posts/components/CreatePostModal';
 import PostDetailsModal from '../../features/posts/components/PostDetailsModal';
 import { GroupHeaderSkeleton, PostSkeleton } from '../../components/ui/Skeleton';
 import groupsApi from '../../features/groups/api/groups.api';
-import postsApi from '../../features/posts/api/posts.api';
 import {
   useGroupDetailQuery,
   useGroupPostsQuery,

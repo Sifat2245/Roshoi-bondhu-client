@@ -1,6 +1,6 @@
 import { useSocial } from '../../features/community/model/useSocial';
 import { resolveGroup } from '../../features/community/model/community-domain';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useSession } from '../../lib/auth-client';
 import SocialHeader from '../../widgets/navbar/SocialHeader';
@@ -13,7 +13,6 @@ import {
 } from '../../components/ui/Skeleton';
 import ResponsiveTabs from '../../components/ui/ResponsiveTabs';
 import groupsApi from '../../features/groups/api/groups.api';
-import postsApi from '../../features/posts/api/posts.api';
 import {
   useGroupsListQuery,
   useGroupFeedPostsQuery,

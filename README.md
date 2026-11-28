@@ -1,8 +1,6 @@
-# 🧑‍🍳 Roshoi Bondhu
+# 🧑‍🍳 Heshel
 
-**Roshoi Bondhu** is an engaging recipe-sharing platform where users can create accounts, post their favorite recipes, browse and like others’ dishes, and manage their personal recipe collection.
-
-🌐 **Live Site**: [https://roshoi-bondhu-app-8e8ae.web.app/](https://roshoi-bondhu-app-8e8ae.web.app/)
+**Heshel** is an engaging culinary social platform where users can create accounts, share recipes, join cooking groups, connect with friends, and manage their personal kitchen collection.
 
 ---
 

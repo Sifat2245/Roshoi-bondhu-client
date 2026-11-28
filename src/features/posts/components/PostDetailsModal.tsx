@@ -635,7 +635,7 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
             <PostPoll
               post={post}
               onRequireAuth={onRequireAuth}
-              onUpdatePoll={(updatedPoll) => {
+              onUpdatePoll={(_updatedPoll) => {
                 if (onPostUpdated) onPostUpdated();
               }}
             />

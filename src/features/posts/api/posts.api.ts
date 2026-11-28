@@ -32,7 +32,6 @@ import { optimizeImageForUpload } from "../../../lib/media-preferences";
 import { Post, CreatePostPayload, PostFilterParams } from "../types/post.types";
 import {
   localPost,
-  publishLocalPost,
   readSocial,
   shareLocalPost,
   socialId,

@@ -63,14 +63,16 @@ export const CommentMentionInput: React.FC<CommentMentionInputProps> = ({
     setActiveMention(getMentionMatch(value, pos));
   }, [value, inputRef]);
 
+  const mentionQuery = activeMention ? activeMention.query.trim() : null;
+
   useEffect(() => {
-    if (!activeMention) {
+    if (mentionQuery === null) {
       setRemoteResults([]);
       setSearching(false);
       return;
     }
 
-    const q = activeMention.query.trim();
+    const q = mentionQuery;
     if (!q) {
       setRemoteResults([]);
       setSearching(false);
@@ -104,7 +106,7 @@ export const CommentMentionInput: React.FC<CommentMentionInputProps> = ({
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [activeMention?.query]);
+  }, [mentionQuery]);
 
   const suggestions = useMemo(() => {
     if (!activeMention) return [];

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router";
 import {
   Compass,
@@ -22,7 +22,7 @@ import PostDetailsModal from "../../features/posts/components/PostDetailsModal";
 import SharePostModal from "../../features/posts/components/SharePostModal";
 import { PostSkeleton } from "../../components/ui/Skeleton";
 import ResponsiveTabs from "../../components/ui/ResponsiveTabs";
-import searchApi, {
+import {
   type UserSearchResult,
   type GroupSearchResult,
 } from "../../features/search/api/search.api";

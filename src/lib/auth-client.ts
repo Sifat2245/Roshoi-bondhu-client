@@ -6,8 +6,7 @@ import { exitDemo, getDemoSession, getDemoSnapshot, isDemoMode, subscribeDemo } 
 
 import { apolloClient } from './graphql/client';
 import { ME_QUERY } from './graphql/queries';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_BASE_URL } from './env';
 
 export const authClient = createAuthClient({
   baseURL: API_BASE_URL,

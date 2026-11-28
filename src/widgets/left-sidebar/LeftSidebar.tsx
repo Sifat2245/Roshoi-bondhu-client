@@ -1,5 +1,5 @@
 import { useAuth } from "../../context/AuthContext";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { NavLink, Link } from "react-router";
 import { useSession } from "../../lib/auth-client";
 import { useLanguage } from "../../context/LanguageContext";

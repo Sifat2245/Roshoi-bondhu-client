@@ -45,7 +45,7 @@ export default function PostPoll({
         setPoll(state.polls[post.poll?.id || post.id]);
       }
     }
-  }, [post.id, post.poll]);
+  }, [post.id, post.poll, state.polls]);
 
   const [votersOpen, setVotersOpen] = useState(false);
   const [confirm, setConfirm] = useState(false);

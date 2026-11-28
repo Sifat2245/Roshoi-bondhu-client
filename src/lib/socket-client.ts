@@ -1,9 +1,6 @@
 import { io, type Socket } from "socket.io-client";
+import { SOCKET_URL } from "./env";
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ||
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000";
 const SOCKET_PATH = import.meta.env.VITE_SOCKET_PATH || "/socket.io";
 export const SOCKET_ENABLED = import.meta.env.VITE_SOCKET_ENABLED !== "false";
 
