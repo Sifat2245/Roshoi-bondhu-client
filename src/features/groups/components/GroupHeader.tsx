@@ -162,6 +162,9 @@ const GroupHeader = ({
 
   const handleShare = handleInvite;
 
+  const myMembershipStatus = group.myMembershipStatus;
+  const isPendingApproval = !isMember && myMembershipStatus === "PENDING";
+
   const memberList = (group.members || []).map((member: any) => ({
     id: member.user?.id || member.userId,
     name: member.user?.name || "Member",
@@ -313,10 +316,10 @@ const GroupHeader = ({
             <Button
               size="none"
               onClick={() =>
-                isMember ? setConfirmLeave(true) : handleAction()
+                isMember || isPendingApproval ? setConfirmLeave(true) : handleAction()
               }
               loading={loading}
-              variant={isMember ? "secondary" : "primary"}
+              variant={isMember || isPendingApproval ? "secondary" : "primary"}
               className="px-3.5 py-1.5 text-sm font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
             >
               {isMember ? (
@@ -325,6 +328,8 @@ const GroupHeader = ({
                   <span>Joined</span>
                   <ChevronDown size={14} className="text-gray-500 ml-0.5" />
                 </>
+              ) : isPendingApproval ? (
+                <span>Pending approval</span>
               ) : (
                 <span>Join Group</span>
               )}
@@ -527,17 +532,18 @@ const GroupHeader = ({
       <Modal
         isOpen={confirmLeave}
         onClose={() => setConfirmLeave(false)}
-        title="Leave this group?"
+        title={isPendingApproval ? "Cancel join request?" : "Leave this group?"}
         maxWidth="max-w-sm"
       >
         <div className="p-5">
           <p className="text-sm text-gray-500">
-            You’ll stop seeing {group.name} in your groups feed. You can join
-            again later.
+            {isPendingApproval
+              ? `Withdraw your pending request to join ${group.name}?`
+              : `You’ll stop seeing ${group.name} in your groups feed. You can join again later.`}
           </p>
           <div className="mt-5 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setConfirmLeave(false)}>
-              Stay
+              {isPendingApproval ? "Keep request" : "Stay"}
             </Button>
             <Button
               loading={loading}
@@ -546,7 +552,7 @@ const GroupHeader = ({
                 setConfirmLeave(false);
               }}
             >
-              Leave group
+              {isPendingApproval ? "Cancel request" : "Leave group"}
             </Button>
           </div>
         </div>

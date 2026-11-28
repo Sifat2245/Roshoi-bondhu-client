@@ -254,17 +254,21 @@ export function useInvalidateGroupQueries() {
         queryClient.invalidateQueries({ queryKey: [GROUP_POSTS_QUERY_KEY] });
       }
     },
-    updateGroupMembershipInCache: (groupId: string, isMember: boolean) => {
+    updateGroupMembershipInCache: (groupId: string, isMember: boolean, isPending = false) => {
+      const nextStatus = isMember ? "APPROVED" : isPending ? "PENDING" : "NONE";
       // Update in groupsList queries
       queryClient.setQueriesData({ queryKey: [GROUPS_LIST_QUERY_KEY] }, (oldGroups: any) => {
         if (!Array.isArray(oldGroups)) return oldGroups;
         return oldGroups.map((g: any) => {
           if (g.id === groupId || g.slug === groupId) {
             const currentCount = g.membersCount ?? 0;
+            const wasMember = Boolean(g.isMember);
+            const delta = isMember === wasMember ? 0 : isMember ? 1 : -1;
             return {
               ...g,
               isMember,
-              membersCount: isMember ? currentCount + 1 : Math.max(0, currentCount - 1),
+              myMembershipStatus: nextStatus,
+              membersCount: Math.max(0, currentCount + delta),
             };
           }
           return g;
@@ -277,10 +281,13 @@ export function useInvalidateGroupQueries() {
           return oldGroup;
         }
         const currentCount = oldGroup.membersCount ?? 0;
+        const wasMember = Boolean(oldGroup.isMember);
+        const delta = isMember === wasMember ? 0 : isMember ? 1 : -1;
         return {
           ...oldGroup,
           isMember,
-          membersCount: isMember ? currentCount + 1 : Math.max(0, currentCount - 1),
+          myMembershipStatus: nextStatus,
+          membersCount: Math.max(0, currentCount + delta),
         };
       });
     },

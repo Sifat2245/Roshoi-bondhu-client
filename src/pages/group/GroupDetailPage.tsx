@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useNavigate, useMatch } from 'react-router';
+import { useParams, Link, useNavigate, useMatch, useSearchParams } from 'react-router';
 import { useSession } from '../../lib/auth-client';
 import SocialHeader from '../../widgets/navbar/SocialHeader';
 import GroupHeader from '../../features/groups/components/GroupHeader';
+import GroupInviteBanner from '../../features/groups/components/GroupInviteBanner';
 import GroupAboutCard from '../../features/groups/components/GroupAboutCard';
 import { useSocial } from '../../features/community/model/useSocial';
 import { resolveGroup } from '../../features/community/model/community-domain';
@@ -43,6 +44,8 @@ const GroupDetailPage = () => {
     manageSection?: string;
   }>();
   const isManageRoute = Boolean(useMatch('/group/:slug/manage/*'));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const inviteToken = searchParams.get('invite') || '';
   const { data: session } = useSession();
   const navigate = useNavigate();
   const { state: social, user } = useSocial();
@@ -75,6 +78,39 @@ const GroupDetailPage = () => {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('relevant');
   const [mediaIndex, setMediaIndex] = useState<number | null>(null);
+  const [invitePreview, setInvitePreview] = useState<any>(null);
+  const [loadingInvitePreview, setLoadingInvitePreview] = useState(false);
+
+  useEffect(() => {
+    if (!slug || !inviteToken) {
+      setInvitePreview(null);
+      setLoadingInvitePreview(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingInvitePreview(true);
+    groupsApi
+      .getInvitePreview(slug, inviteToken, session?.session?.token)
+      .then((res) => {
+        if (!cancelled) setInvitePreview(res);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setInvitePreview({
+            valid: false,
+            reason: 'Could not validate this invitation link.',
+          });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingInvitePreview(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, inviteToken, session?.session?.token]);
 
   // TanStack Query + localStorage SWR 10-minute caching
   const {
@@ -111,16 +147,37 @@ const GroupDetailPage = () => {
   const handleJoinToggle = async () => {
     if (!user || !group) return requireAuth();
 
-    const nextIsMember = !group.isMember;
-    updateGroupMembershipInCache(group.id, nextIsMember);
+    const isPending = group.myMembershipStatus === 'PENDING';
+    const wasMember = Boolean(group.isMember);
+
+    if (wasMember || isPending) {
+      updateGroupMembershipInCache(group.id, false, false);
+      try {
+        await groupsApi.leaveGroup(group.id || group.slug, session?.session?.token);
+        notify.info(isPending ? `Cancelled request to join ${group.name}` : `Left ${group.name}`);
+        invalidateGroupDetail(slug);
+        invalidateGroupPosts(group.id);
+        invalidateGroupFeed();
+        invalidateAllGroups();
+        invalidateFeed();
+      } catch (err: any) {
+        updateGroupMembershipInCache(group.id, wasMember, isPending);
+        notify.error(err.message || 'Could not update your group membership. Please try again.');
+      }
+      return;
+    }
+
+    const willAwaitApproval = group.joinMode === 'ADMIN_APPROVAL' && !group.myPendingInvite;
+    updateGroupMembershipInCache(group.id, !willAwaitApproval, willAwaitApproval);
 
     try {
-      if (group.isMember) {
-        await groupsApi.leaveGroup(group.id || group.slug, session?.session?.token);
-        notify.info(`Left ${group.name}`);
+      const res = await groupsApi.joinGroup(group.id || group.slug, session?.session?.token);
+      if (res?.isApproved === false) {
+        updateGroupMembershipInCache(group.id, false, true);
+        notify.info(`Join request sent for ${group.name}. Waiting for admin approval.`);
       } else {
-        await groupsApi.joinGroup(group.id || group.slug, session?.session?.token);
-        notify.success(`Joined ${group.name}!`);
+        updateGroupMembershipInCache(group.id, true, false);
+        notify.success(`Joined ${group.name}!`, 'Joined', true);
       }
       invalidateGroupDetail(slug);
       invalidateGroupPosts(group.id);
@@ -128,8 +185,70 @@ const GroupDetailPage = () => {
       invalidateAllGroups();
       invalidateFeed();
     } catch (err: any) {
-      updateGroupMembershipInCache(group.id, group.isMember);
+      updateGroupMembershipInCache(group.id, false, false);
       notify.error(err.message || 'Could not update your group membership. Please try again.');
+    }
+  };
+
+  const clearInviteParam = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('invite');
+    setSearchParams(next, { replace: true });
+    setInvitePreview(null);
+  };
+
+  const handleAcceptInviteLink = async () => {
+    if (!user || !group) return requireAuth();
+    if (!inviteToken) return;
+    try {
+      const res = await groupsApi.acceptInviteLink(inviteToken, session?.session?.token);
+      clearInviteParam();
+      if (res?.isApproved) {
+        updateGroupMembershipInCache(group.id, true, false);
+        notify.success(`Joined ${group.name}!`, 'Welcome', true);
+      } else {
+        updateGroupMembershipInCache(group.id, false, true);
+        notify.info(`Join request submitted for ${group.name}. Waiting for admin approval.`);
+      }
+      invalidateGroupDetail(slug);
+      invalidateGroupPosts(group.id);
+      invalidateGroupFeed();
+      invalidateAllGroups();
+      invalidateFeed();
+    } catch (err: any) {
+      notify.error(err?.message || 'Could not accept this invitation link.');
+    }
+  };
+
+  const handleRespondDirectInvite = async (
+    invitationId: string,
+    action: 'ACCEPT' | 'DECLINE'
+  ) => {
+    if (!user || !group) return requireAuth();
+    try {
+      const res = await groupsApi.respondToInvitation(
+        invitationId,
+        action,
+        session?.session?.token
+      );
+      if (action === 'ACCEPT') {
+        if (res?.isApproved === false) {
+          updateGroupMembershipInCache(group.id, false, true);
+          notify.info(`Request submitted for ${group.name}. Waiting for admin approval.`);
+        } else {
+          updateGroupMembershipInCache(group.id, true, false);
+          notify.success(`Joined ${group.name}!`, 'Welcome', true);
+        }
+      } else {
+        notify.info('Group invitation declined.');
+      }
+      invalidateGroupDetail(slug);
+      invalidateGroupPosts(group.id);
+      invalidateGroupFeed();
+      invalidateAllGroups();
+      invalidateFeed();
+    } catch (err: any) {
+      notify.error(err?.message || 'Could not respond to the invitation.');
     }
   };
 
@@ -262,6 +381,19 @@ const GroupDetailPage = () => {
                 onOpenManage={(sec = 'MOBILE_HUB') => navigateToManageSection(sec)}
                 search={search}
                 onSearch={(value) => { setSearch(value); setActiveTab('DISCUSSION'); }}
+              />
+
+              {/* Group Invitation Link / Direct Invite / Pending Approval Banner */}
+              <GroupInviteBanner
+                group={group}
+                isMember={isMember}
+                invitePreview={invitePreview}
+                loadingPreview={loadingInvitePreview}
+                hasInviteToken={Boolean(inviteToken)}
+                onAcceptInviteLink={handleAcceptInviteLink}
+                onDismissInviteLink={clearInviteParam}
+                onRespondDirectInvite={handleRespondDirectInvite}
+                onCancelPendingRequest={handleJoinToggle}
               />
 
               {/* Paused Group Banner */}

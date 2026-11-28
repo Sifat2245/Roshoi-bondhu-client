@@ -1,10 +1,12 @@
 import { canSharePost } from "../model/post-policy";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router";
 import { useSession } from "../../../lib/auth-client";
 import Avatar from "../../../components/ui/Avatar";
 import Modal from "../../../components/ui/Modal";
 import postsApi from "../api/posts.api";
+import friendsApi from "../../friends/api/friends.api";
+import CommentMentionInput, { type MentionCandidate } from "./CommentMentionInput";
 import LikeButton from "./LikeButton";
 import { usePostLike } from "../model/usePostLike";
 import { useToast } from "../../../context/ToastContext";
@@ -52,14 +54,74 @@ const formatRelativeTime = (dateString?: string) => {
   return `${Math.floor(diffDays / 365)}y`;
 };
 
-const renderCommentContent = (content: string) => {
+const renderCommentContent = (content: string, mentionedUsers: any[] = []) => {
   if (!content) return null;
+
+  // Build list of known mentioned users sorted by longest name first
+  const knownUsers = Array.isArray(mentionedUsers)
+    ? [...mentionedUsers]
+        .filter((u) => u?.id && u?.name)
+        .sort((a, b) => b.name.length - a.name.length)
+    : [];
+
+  if (knownUsers.length > 0) {
+    const escaped = knownUsers.map((u) =>
+      `@${u.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`
+    );
+    const regex = new RegExp(`(${escaped.join("|")})`, "gi");
+    const parts = content.split(regex);
+    if (parts.length > 1) {
+      return (
+        <span className="leading-relaxed">
+          {parts.map((part, idx) => {
+            const matchedUser = knownUsers.find(
+              (u) => `@${u.name}`.toLowerCase() === part.toLowerCase()
+            );
+            if (matchedUser) {
+              return (
+                <Link
+                  key={`${matchedUser.id}-${idx}`}
+                  to={`/profile/${matchedUser.id}`}
+                  className="font-bold text-[#e02f21] dark:text-red-400 hover:underline mr-0.5"
+                >
+                  {part}
+                </Link>
+              );
+            }
+            return <React.Fragment key={idx}>{part}</React.Fragment>;
+          })}
+        </span>
+      );
+    }
+  }
+
+  // Fallback highlight for leading @ReplyName or @handle tokens
+  const handleParts = content.split(/(@[a-zA-Z0-9._-]{2,40})/g);
+  if (handleParts.length > 1) {
+    return (
+      <span className="leading-relaxed">
+        {handleParts.map((part, idx) =>
+          part.startsWith("@") ? (
+            <span
+              key={idx}
+              className="font-bold text-gray-900 dark:text-white mr-0.5"
+            >
+              {part}
+            </span>
+          ) : (
+            <React.Fragment key={idx}>{part}</React.Fragment>
+          )
+        )}
+      </span>
+    );
+  }
+
   const match = content.match(/^(@[^\s]+(?:\s+[^\s]+){0,2})\s*(.*)$/s);
   if (match) {
     const [, mention, rest] = match;
     return (
       <span className="leading-relaxed">
-        <span className="font-bold text-gray-900 dark:text-white mr-1 hover:underline cursor-pointer">
+        <span className="font-bold text-gray-900 dark:text-white mr-1">
           {mention}
         </span>
         <span>{rest}</span>
@@ -84,6 +146,8 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
   const [comments, setComments] = useState<any[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [commentInput, setCommentInput] = useState("");
+  const [mentionedMap, setMentionedMap] = useState<Record<string, MentionCandidate>>({});
+  const [friendCandidates, setFriendCandidates] = useState<MentionCandidate[]>([]);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Threading and Replies State
@@ -111,10 +175,28 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
     if (isOpen && post?.id) {
       setComments([]);
       setCommentInput("");
+      setMentionedMap({});
       setReplyingTo(null);
       setEditingCommentId(null);
       setEditingText("");
       setCommentToDelete(null);
+
+      if (user?.id) {
+        friendsApi
+          .getAllFriends(session?.session?.token)
+          .then((list) => {
+            setFriendCandidates(
+              (list || []).map((f: any) => ({
+                id: f.id,
+                name: f.name,
+                image: f.image,
+                username: f.username,
+                subtitle: f.username ? `@${f.username}` : "Friend",
+              }))
+            );
+          })
+          .catch(() => {});
+      }
 
       const fetchComments = async () => {
         setLoadingComments(true);
@@ -137,6 +219,34 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
       fetchComments();
     }
   }, [isOpen, post?.id, session?.session?.token, user?.id]);
+
+  const mentionCandidates = useMemo(() => {
+    const seen = new Set<string>();
+    const list: MentionCandidate[] = [];
+    const pushUser = (u: any, subtitle?: string) => {
+      if (!u?.id || u.id === user?.id || seen.has(u.id)) return;
+      seen.add(u.id);
+      list.push({
+        id: u.id,
+        name: u.name,
+        image: u.image,
+        username: u.username,
+        subtitle: subtitle || (u.username ? `@${u.username}` : "Chef"),
+      });
+    };
+
+    if (post?.author) pushUser(post.author, "Post author");
+    comments.forEach((c: any) => {
+      pushUser(c.user || c.author, "Commenter");
+      (c.replies || []).forEach((r: any) => pushUser(r.user || r.author, "Replied"));
+    });
+    (post?.group?.members || []).forEach((m: any) =>
+      pushUser(m.user || m, "Group member")
+    );
+    friendCandidates.forEach((f) => pushUser(f, f.subtitle));
+
+    return list;
+  }, [post?.author, post?.group?.members, comments, friendCandidates, user?.id]);
 
   if (!isOpen || !post) return null;
 
@@ -233,10 +343,16 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
     }
 
     const parentId = replyingTo?.parentId || null;
+    const lowerContent = content.toLowerCase();
+    const activeMentionedUsers = Object.values(mentionedMap).filter((u) =>
+      lowerContent.includes(`@${u.name.toLowerCase()}`)
+    );
+    const mentionedUserIds = activeMentionedUsers.map((u) => u.id);
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
     // Immediately clear input and reset reply state so field doesn't freeze or spin
     setCommentInput("");
+    setMentionedMap({});
     setReplyingTo(null);
 
     // Create optimistic comment
@@ -246,6 +362,8 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
       userId: user.id,
       parentId,
       content,
+      mentionedUserIds,
+      mentionedUsers: activeMentionedUsers,
       likeCount: 0,
       hasLiked: false,
       isPosting: true,
@@ -283,6 +401,7 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
         parentId,
         session?.session?.token,
         user,
+        mentionedUserIds,
       );
 
       if (res?.data) {
@@ -723,7 +842,7 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
                                 {authorName}
                               </Link>
                               <div className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 mt-0.5 leading-relaxed break-words">
-                                {renderCommentContent(comment.content)}
+                                {renderCommentContent(comment.content, comment.mentionedUsers)}
                               </div>
                             </div>
 
@@ -903,7 +1022,7 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
                                         {replyAuthorName}
                                       </Link>
                                       <div className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 mt-0.5 leading-relaxed break-words">
-                                        {renderCommentContent(reply.content)}
+                                        {renderCommentContent(reply.content, reply.mentionedUsers)}
                                       </div>
                                     </div>
 
@@ -1049,24 +1168,26 @@ const PostDetailsModal: React.FC<PostDetailsModalProps> = ({
               >
                 <Avatar src={user?.image} alt={user?.name} size="sm" />
                 <div className="flex-1 relative flex items-center">
-                  <input
-                    ref={commentRef}
-                    aria-label="Write a comment"
-                    type="text"
+                  <CommentMentionInput
+                    inputRef={commentRef}
                     value={commentInput}
-                    onChange={(e) => setCommentInput(e.target.value)}
+                    onChange={setCommentInput}
+                    candidates={mentionCandidates}
+                    currentUserId={user?.id}
+                    onSelectMention={(person) =>
+                      setMentionedMap((prev) => ({ ...prev, [person.id]: person }))
+                    }
                     placeholder={
                       replyingTo
-                        ? `Reply to @${replyingTo.authorName}...`
-                        : "Write a comment..."
+                        ? `Reply to @${replyingTo.authorName}... (type @ to mention)`
+                        : "Write a comment... (type @ to mention)"
                     }
-                    className="w-full pl-4 pr-11 py-2.5 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-full text-sm dark:text-white focus:outline-none focus:border-[#e02f21]"
                   />
                   <button
                     type="submit"
                     disabled={!commentInput.trim()}
                     aria-label="Send comment"
-                    className={`absolute right-1.5 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                    className={`absolute right-1.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                       commentInput.trim()
                         ? "bg-[#e02f21] text-white hover:bg-[#c22417] shadow-xs active:scale-95 opacity-100"
                         : "opacity-0 pointer-events-none"

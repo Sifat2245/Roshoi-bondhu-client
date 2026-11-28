@@ -6,8 +6,10 @@ import { ThemeProvider } from "../../context/ThemeContext";
 import { LanguageProvider } from "../../context/LanguageContext";
 import { ToastProvider } from "../../context/ToastContext";
 import { SocketProvider } from "../../context/SocketContext";
+import { NotificationProvider } from "../../context/NotificationContext";
 import { ChatDockProvider } from "../../context/ChatDockContext";
 import { UploadProvider } from "../../context/UploadContext";
+import NotificationPopupDock from "../../features/notifications/components/NotificationPopupDock";
 
 export interface AppProvidersProps {
   children: React.ReactNode;
@@ -22,9 +24,14 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
             <ThemeProvider>
               <ToastProvider>
                 <SocketProvider>
-                  <ChatDockProvider>
-                    <UploadProvider>{children}</UploadProvider>
-                  </ChatDockProvider>
+                  <NotificationProvider>
+                    <ChatDockProvider>
+                      <UploadProvider>
+                        {children}
+                        <NotificationPopupDock />
+                      </UploadProvider>
+                    </ChatDockProvider>
+                  </NotificationProvider>
                 </SocketProvider>
               </ToastProvider>
             </ThemeProvider>

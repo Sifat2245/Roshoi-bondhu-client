@@ -16,6 +16,9 @@ export const PostApprovalPolicyCard: React.FC<PostApprovalPolicyCardProps> = ({
   onUpdated,
 }) => {
   const { notify } = useToast();
+  const [joinMode, setJoinMode] = useState<"DIRECT" | "ADMIN_APPROVAL">(
+    group.joinMode === "ADMIN_APPROVAL" ? "ADMIN_APPROVAL" : "DIRECT"
+  );
   const [requiresPostApproval, setRequiresPostApproval] = useState(
     Boolean(group.requiresPostApproval)
   );
@@ -25,11 +28,12 @@ export const PostApprovalPolicyCard: React.FC<PostApprovalPolicyCardProps> = ({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    setJoinMode(group.joinMode === "ADMIN_APPROVAL" ? "ADMIN_APPROVAL" : "DIRECT");
     setRequiresPostApproval(Boolean(group.requiresPostApproval));
     setChallengeCreatorPolicy(
       group.challengeCreatorPolicy === "MEMBERS" ? "MEMBERS" : "STAFF"
     );
-  }, [group.id, group.requiresPostApproval, group.challengeCreatorPolicy]);
+  }, [group.id, group.joinMode, group.requiresPostApproval, group.challengeCreatorPolicy]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,12 +42,13 @@ export const PostApprovalPolicyCard: React.FC<PostApprovalPolicyCardProps> = ({
       await groupsApi.updateGroupSettings(
         group.id,
         {
+          joinMode,
           requiresPostApproval,
           challengeCreatorPolicy,
         },
         token || null
       );
-      notify.success("Posting and challenge policies updated.");
+      notify.success("Membership and posting policies updated.", "Saved", true);
       onUpdated?.();
     } catch (err: any) {
       notify.error(err?.message || "Failed to update policies.");
@@ -60,8 +65,32 @@ export const PostApprovalPolicyCard: React.FC<PostApprovalPolicyCardProps> = ({
       <div className="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
         <ShieldCheck size={18} className="text-[#e02f21]" />
         <h2 className="font-bold text-lg text-gray-900 dark:text-white">
-          Posting & community policies
+          Membership & posting policies
         </h2>
+      </div>
+
+      <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#3a3b3c] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-bold text-gray-900 dark:text-white">
+            How people join this group
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {joinMode === "ADMIN_APPROVAL"
+              ? "Join requests and regular member invites need admin/moderator approval. Staff invites join directly."
+              : "Anyone can join directly or via an invitation link without approval."}
+          </p>
+        </div>
+        <select
+          aria-label="Member join mode"
+          value={joinMode}
+          onChange={(e) =>
+            setJoinMode(e.target.value as "DIRECT" | "ADMIN_APPROVAL")
+          }
+          className="px-3 py-2 rounded-lg bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 text-sm font-semibold dark:text-white shrink-0"
+        >
+          <option value="DIRECT">Direct join (instant)</option>
+          <option value="ADMIN_APPROVAL">Admin approval required</option>
+        </select>
       </div>
 
       <div className="flex items-start gap-3 p-4 rounded-xl bg-gray-50 dark:bg-[#3a3b3c]">
@@ -119,4 +148,3 @@ export const PostApprovalPolicyCard: React.FC<PostApprovalPolicyCardProps> = ({
 };
 
 export default PostApprovalPolicyCard;
-

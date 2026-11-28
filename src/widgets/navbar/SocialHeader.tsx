@@ -8,7 +8,7 @@ import Avatar from "../../components/ui/Avatar";
 import NotificationDropdown from "../../features/notifications/components/NotificationDropdown";
 import MessengerDropdown from "../../features/messenger/components/MessengerDropdown";
 import FloatingChatDock from "../../features/messenger/components/FloatingChatDock";
-import notificationsApi from "../../features/notifications/api/notifications.api";
+import { useNotifications } from "../../context/NotificationContext";
 import LeftSidebar from "../left-sidebar/LeftSidebar";
 import { isDemoMode } from "../../lib/demo/demo-store";
 import { useChatDock } from "../../context/ChatDockContext";
@@ -72,8 +72,14 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isMessengerOpen, setIsMessengerOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
   const [globalMenuOpen, setGlobalMenuOpen] = useState(false);
+  const {
+    notifications,
+    unreadCount,
+    markRead,
+    markAllRead,
+    respond: respondToNotification,
+  } = useNotifications();
   const accountRef = useRef<HTMLDivElement>(null);
   const { conversations } = useChatDock();
   const unreadMessages = conversations.reduce(
@@ -105,48 +111,16 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({
   const messengerContainerRef = useRef<HTMLDivElement>(null);
   const user = session?.user || authUser;
 
-  // Fetch notifications for badge and dropdown
-  useEffect(() => {
-    if (!user) return;
-    const fetchNotifs = async () => {
-      try {
-        const notifs = await notificationsApi.getNotifications(
-          session?.session?.token,
-        );
-        setNotifications(notifs);
-      } catch (err) {
-        console.error("Failed to load notifications in header:", err);
-      }
-    };
-    fetchNotifs();
-    window.addEventListener("heshel:notifications-updated", fetchNotifs);
-    window.addEventListener("heshel:notification-preferences", fetchNotifs);
-    return () => {
-      window.removeEventListener("heshel:notifications-updated", fetchNotifs);
-      window.removeEventListener(
-        "heshel:notification-preferences",
-        fetchNotifs,
-      );
-    };
-  }, [user, session]);
-
-  const unreadCount = notifications.filter((n) => n.isUnread).length;
-
   const handleMarkAllRead = () => {
-    notificationsApi.markRead(notifications.map((item) => item.id));
-    setNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })));
+    markAllRead();
   };
 
   const handleMarkRead = (id: string) => {
-    notificationsApi.markRead([id]);
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isUnread: false } : n)),
-    );
+    markRead([id]);
   };
 
   const handleNotificationAction = async (id: string, action: string) => {
-    await notificationsApi.respond(id, action);
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    await respondToNotification(id, action);
   };
 
   // Load recent searches from backend DB

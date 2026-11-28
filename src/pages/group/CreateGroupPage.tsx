@@ -36,6 +36,7 @@ const CreateGroupPage: React.FC = () => {
   // Form states
   const [groupName, setGroupName] = useState('');
   const [privacy, setPrivacy] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
+  const [joinMode, setJoinMode] = useState<'DIRECT' | 'ADMIN_APPROVAL'>('DIRECT');
   const [description, setDescription] = useState('');
   const [invitedFriends, setInvitedFriends] = useState<Friend[]>([]);
   const [friendInput, setFriendInput] = useState('');
@@ -130,6 +131,7 @@ const CreateGroupPage: React.FC = () => {
           name: groupName.trim(),
           description: description.trim() || `Welcome to ${groupName.trim()}! A community for passionate cooks and food lovers on Heshel.`,
           privacy,
+          joinMode,
           invitedUserIds: invitedFriends.map((f) => f.id),
         },
         session?.session?.token
@@ -234,6 +236,32 @@ const CreateGroupPage: React.FC = () => {
               {privacy === 'PUBLIC'
                 ? 'Anyone can see who is in the group and what they post.'
                 : 'Only members can see who is in the group and what they post.'}
+            </p>
+          </div>
+
+          {/* Field 2b: Join Approval Mode */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-bold text-gray-800 dark:text-gray-200">
+              How people join
+            </label>
+            <div className="relative">
+              <select
+                value={joinMode}
+                onChange={(e) => setJoinMode(e.target.value as 'DIRECT' | 'ADMIN_APPROVAL')}
+                className="w-full appearance-none px-4 py-3.5 bg-white dark:bg-[#18191a] border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base font-semibold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e02f21] pr-10 cursor-pointer transition"
+              >
+                <option value="DIRECT">Direct join (no approval needed)</option>
+                <option value="ADMIN_APPROVAL">Admin approval required</option>
+              </select>
+              <ChevronDown
+                size={20}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              />
+            </div>
+            <p className="text-xs sm:text-sm text-gray-500 pt-1 leading-normal">
+              {joinMode === 'ADMIN_APPROVAL'
+                ? 'Join requests and regular member invites await admin approval. Admin/moderator invites join directly.'
+                : 'People can join immediately via Join button or invite link.'}
             </p>
           </div>
 

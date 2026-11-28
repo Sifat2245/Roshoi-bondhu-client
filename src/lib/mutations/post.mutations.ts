@@ -56,13 +56,19 @@ export const TOGGLE_COMMENTS_DISABLED_MUTATION = gql`
 `;
 
 export const CREATE_COMMENT_MUTATION = gql`
-  mutation CreateComment($postId: ID!, $content: String!, $parentId: ID) {
-    createComment(postId: $postId, content: $content, parentId: $parentId) {
+  mutation CreateComment($postId: ID!, $content: String!, $parentId: ID, $mentionedUserIds: [ID!]) {
+    createComment(postId: $postId, content: $content, parentId: $parentId, mentionedUserIds: $mentionedUserIds) {
       id
       postId
       userId
       parentId
       content
+      mentionedUserIds
+      mentionedUsers {
+        id
+        name
+        image
+      }
       likeCount
       hasLiked
       createdAt
@@ -77,6 +83,12 @@ export const CREATE_COMMENT_MUTATION = gql`
         postId
         userId
         content
+        mentionedUserIds
+        mentionedUsers {
+          id
+          name
+          image
+        }
         likeCount
         hasLiked
         createdAt

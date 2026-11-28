@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const CREATE_GROUP_MUTATION = gql`
-  mutation CreateGroup($name: String!, $description: String, $privacy: String, $coverImage: String, $avatar: String, $invitedUserIds: [ID!]) {
-    createGroup(name: $name, description: $description, privacy: $privacy, coverImage: $coverImage, avatar: $avatar, invitedUserIds: $invitedUserIds) {
+  mutation CreateGroup($name: String!, $description: String, $privacy: String, $joinMode: String, $coverImage: String, $avatar: String, $invitedUserIds: [ID!]) {
+    createGroup(name: $name, description: $description, privacy: $privacy, joinMode: $joinMode, coverImage: $coverImage, avatar: $avatar, invitedUserIds: $invitedUserIds) {
       id
       name
       slug
@@ -10,6 +10,7 @@ export const CREATE_GROUP_MUTATION = gql`
       coverImage
       avatar
       privacy
+      joinMode
       createdById
       createdBy {
         id
@@ -18,6 +19,7 @@ export const CREATE_GROUP_MUTATION = gql`
       }
       membersCount
       isMember
+      myMembershipStatus
       currentUserRole
       canModerate
     }
@@ -26,7 +28,12 @@ export const CREATE_GROUP_MUTATION = gql`
 
 export const JOIN_GROUP_MUTATION = gql`
   mutation JoinGroup($groupId: ID!) {
-    joinGroup(groupId: $groupId)
+    joinGroup(groupId: $groupId) {
+      success
+      isApproved
+      status
+      groupSlug
+    }
   }
 `;
 
@@ -74,6 +81,72 @@ export const ADD_GROUP_MEMBER_MUTATION = gql`
   }
 `;
 
+export const INVITE_GROUP_MEMBER_MUTATION = gql`
+  mutation InviteGroupMember($groupId: ID!, $userId: ID!, $role: String) {
+    inviteGroupMember(groupId: $groupId, userId: $userId, role: $role) {
+      id
+      groupId
+      inviteeId
+      role
+      status
+    }
+  }
+`;
+
+export const RESPOND_GROUP_INVITATION_MUTATION = gql`
+  mutation RespondGroupInvitation($invitationId: ID!, $action: String!) {
+    respondGroupInvitation(invitationId: $invitationId, action: $action) {
+      success
+      isApproved
+      status
+      groupSlug
+    }
+  }
+`;
+
+export const HANDLE_GROUP_JOIN_REQUEST_MUTATION = gql`
+  mutation HandleGroupJoinRequest($groupId: ID!, $memberId: ID!, $action: String!) {
+    handleGroupJoinRequest(groupId: $groupId, memberId: $memberId, action: $action)
+  }
+`;
+
+export const CANCEL_GROUP_INVITATION_MUTATION = gql`
+  mutation CancelGroupInvitation($groupId: ID!, $invitationId: ID!) {
+    cancelGroupInvitation(groupId: $groupId, invitationId: $invitationId)
+  }
+`;
+
+export const REGENERATE_GROUP_INVITE_LINK_MUTATION = gql`
+  mutation RegenerateGroupInviteLink($groupId: ID!) {
+    regenerateGroupInviteLink(groupId: $groupId) {
+      id
+      groupId
+      token
+      isStaffLink
+      useCount
+      createdAt
+      expiresAt
+    }
+  }
+`;
+
+export const REVOKE_GROUP_INVITE_LINK_MUTATION = gql`
+  mutation RevokeGroupInviteLink($groupId: ID!, $linkId: ID) {
+    revokeGroupInviteLink(groupId: $groupId, linkId: $linkId)
+  }
+`;
+
+export const ACCEPT_GROUP_INVITE_LINK_MUTATION = gql`
+  mutation AcceptGroupInviteLink($token: String!) {
+    acceptGroupInviteLink(token: $token) {
+      success
+      isApproved
+      status
+      groupSlug
+    }
+  }
+`;
+
 export const UPDATE_GROUP_COVER_MUTATION = gql`
   mutation UpdateGroupCover($groupId: ID!, $coverImage: String!) {
     updateGroupCover(groupId: $groupId, coverImage: $coverImage) {
@@ -95,6 +168,7 @@ export const UPDATE_GROUP_SETTINGS_MUTATION = gql`
       avatar
       privacy
       discoverability
+      joinMode
       status
       requiresPostApproval
       challengeCreatorPolicy

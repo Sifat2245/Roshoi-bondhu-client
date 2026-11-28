@@ -6,28 +6,10 @@ import {
   writeDemo,
   demoRequest,
 } from "../../../lib/demo/demo-store";
-import { getNotificationPreferences } from "../../../lib/notification-preferences";
-
-const readIds = () => {
-  try {
-    return JSON.parse(
-      localStorage.getItem("heshel:read-notifications") || "[]",
-    ) as string[];
-  } catch {
-    return [];
-  }
-};
-const dismissedIds = () => {
-  try {
-    return JSON.parse(
-      localStorage.getItem("heshel:dismissed-notifications") || "[]",
-    ) as string[];
-  } catch {
-    return [];
-  }
-};
-const changed = () =>
-  window.dispatchEvent(new Event("heshel:notifications-updated"));
+import {
+  getNotificationPreferences,
+  isNotificationTypeEnabled,
+} from "../../../lib/notification-preferences";
 
 export const notificationsApi = {
   getNotifications: async (
@@ -37,53 +19,71 @@ export const notificationsApi = {
       "/api/user/notifications",
       { token },
     );
-    const read = readIds();
-    const dismissed = dismissedIds();
     const preferences = getNotificationPreferences();
-    return (res.data || [])
-      .filter(
-        (item) =>
-          !dismissed.includes(item.id) && preferences[item.type] !== false,
-      )
-      .map((item) => ({
-        ...item,
-        isUnread: item.isUnread && !read.includes(item.id),
-      }));
-  },
-  markRead: (ids: string[]) => {
-    localStorage.setItem(
-      "heshel:read-notifications",
-      JSON.stringify([...new Set([...readIds(), ...ids])]),
+    return (res.data || []).filter((item) =>
+      isNotificationTypeEnabled(item.type, preferences),
     );
+  },
+
+  markRead: async (
+    ids: string[],
+    token: string | null = null,
+    all = false,
+  ): Promise<void> => {
     if (isDemoMode()) {
       const state = readDemo();
       state.notifications = state.notifications.map((item) =>
-        ids.includes(item.id) ? { ...item, isUnread: false } : item,
+        all || ids.includes(item.id) ? { ...item, isUnread: false } : item,
       );
       writeDemo(state);
+      return;
     }
-    changed();
-  },
-  respond: async (id: string, action: string) => {
-    if (isDemoMode() && action === "ACCEPT") {
-      const notification = readDemo().notifications.find(
-        (item) => item.id === id,
-      );
-      if (
-        notification?.type === "GROUP_INVITE" &&
-        notification.link?.startsWith("/group/")
-      )
-        await demoRequest(
-          `/api/group/${notification.link.split("/").pop()}/join`,
-          "POST",
-          {},
-        );
-    }
-    localStorage.setItem(
-      "heshel:dismissed-notifications",
-      JSON.stringify([...new Set([...dismissedIds(), id])]),
+
+    if (!all && ids.length === 0) return;
+    await apiClient.post(
+      "/api/user/notifications/read",
+      all ? { all: true } : { ids },
+      { token },
     );
-    changed();
+  },
+
+  respond: async (
+    id: string,
+    action: "ACCEPT" | "DECLINE" | string,
+    token: string | null = null,
+  ): Promise<void> => {
+    if (isDemoMode()) {
+      if (action === "ACCEPT") {
+        const notification = readDemo().notifications.find(
+          (item) => item.id === id,
+        );
+        if (
+          notification?.type === "GROUP_INVITE" &&
+          notification.link?.startsWith("/group/")
+        ) {
+          await demoRequest(
+            `/api/group/${notification.link.split("/").pop()}/join`,
+            "POST",
+            {},
+          );
+        }
+      }
+      return;
+    }
+
+    await apiClient.post(
+      `/api/user/notifications/${id}/respond`,
+      { action },
+      { token },
+    );
+  },
+
+  dismiss: async (
+    id: string,
+    token: string | null = null,
+  ): Promise<void> => {
+    if (isDemoMode()) return;
+    await apiClient.delete(`/api/user/notifications/${id}`, { token });
   },
 };
 

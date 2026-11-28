@@ -213,6 +213,12 @@ export const POST_QUERY = gql`
         userId
         parentId
         content
+        mentionedUserIds
+        mentionedUsers {
+          id
+          name
+          image
+        }
         likeCount
         hasLiked
         createdAt
@@ -227,6 +233,12 @@ export const POST_QUERY = gql`
           postId
           userId
           content
+          mentionedUserIds
+          mentionedUsers {
+            id
+            name
+            image
+          }
           likeCount
           hasLiked
           createdAt
@@ -414,6 +426,7 @@ export const GROUPS_QUERY = gql`
       avatar
       privacy
       discoverability
+      joinMode
       status
       requiresPostApproval
       challengeCreatorPolicy
@@ -427,6 +440,7 @@ export const GROUPS_QUERY = gql`
       membersCount
       postsCount
       isMember
+      myMembershipStatus
       currentUserRole
       canModerate
       pendingRequestsCount
@@ -447,6 +461,7 @@ export const GROUP_QUERY = gql`
       avatar
       privacy
       discoverability
+      joinMode
       status
       requiresPostApproval
       challengeCreatorPolicy
@@ -467,6 +482,17 @@ export const GROUP_QUERY = gql`
       membersCount
       postsCount
       isMember
+      myMembershipStatus
+      myPendingInvite {
+        id
+        role
+        createdAt
+        inviter {
+          id
+          name
+          image
+        }
+      }
       currentUserRole
       canModerate
       pendingRequestsCount
@@ -482,6 +508,90 @@ export const GROUP_QUERY = gql`
           name
           image
         }
+      }
+    }
+  }
+`;
+
+export const GROUP_JOIN_REQUESTS_QUERY = gql`
+  query GetGroupJoinRequests($groupId: ID!) {
+    groupJoinRequests(groupId: $groupId) {
+      id
+      groupId
+      userId
+      role
+      isApproved
+      createdAt
+      user {
+        id
+        name
+        image
+        bio
+      }
+    }
+  }
+`;
+
+export const GROUP_PENDING_INVITATIONS_QUERY = gql`
+  query GetGroupPendingInvitations($groupId: ID!) {
+    groupPendingInvitations(groupId: $groupId) {
+      id
+      groupId
+      inviterId
+      inviteeId
+      role
+      status
+      createdAt
+      inviter {
+        id
+        name
+        image
+      }
+      invitee {
+        id
+        name
+        image
+      }
+    }
+  }
+`;
+
+export const GROUP_INVITE_LINK_QUERY = gql`
+  query GetGroupInviteLink($groupId: ID!) {
+    groupInviteLink(groupId: $groupId) {
+      id
+      groupId
+      token
+      isStaffLink
+      useCount
+      createdAt
+      expiresAt
+    }
+  }
+`;
+
+export const GROUP_INVITE_PREVIEW_QUERY = gql`
+  query GetGroupInvitePreview($slug: String!, $token: String!) {
+    groupInvitePreview(slug: $slug, token: $token) {
+      valid
+      reason
+      isStaffInvite
+      requiresAdminApproval
+      membershipStatus
+      joinMode
+      inviter {
+        id
+        name
+        image
+      }
+      group {
+        id
+        name
+        slug
+        privacy
+        avatar
+        coverImage
+        membersCount
       }
     }
   }

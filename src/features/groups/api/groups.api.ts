@@ -1,5 +1,12 @@
 import { apolloClient } from "../../../lib/graphql/client";
-import { GROUPS_QUERY, GROUP_QUERY } from "../../../lib/graphql/queries";
+import {
+  GROUPS_QUERY,
+  GROUP_QUERY,
+  GROUP_JOIN_REQUESTS_QUERY,
+  GROUP_PENDING_INVITATIONS_QUERY,
+  GROUP_INVITE_LINK_QUERY,
+  GROUP_INVITE_PREVIEW_QUERY,
+} from "../../../lib/graphql/queries";
 import {
   CREATE_GROUP_MUTATION,
   JOIN_GROUP_MUTATION,
@@ -7,6 +14,13 @@ import {
   UPDATE_GROUP_MEMBER_ROLE_MUTATION,
   REMOVE_GROUP_MEMBER_MUTATION,
   ADD_GROUP_MEMBER_MUTATION,
+  INVITE_GROUP_MEMBER_MUTATION,
+  RESPOND_GROUP_INVITATION_MUTATION,
+  HANDLE_GROUP_JOIN_REQUEST_MUTATION,
+  CANCEL_GROUP_INVITATION_MUTATION,
+  REGENERATE_GROUP_INVITE_LINK_MUTATION,
+  REVOKE_GROUP_INVITE_LINK_MUTATION,
+  ACCEPT_GROUP_INVITE_LINK_MUTATION,
   UPDATE_GROUP_COVER_MUTATION,
   UPDATE_GROUP_SETTINGS_MUTATION,
   TRANSFER_GROUP_OWNERSHIP_MUTATION,
@@ -74,6 +88,7 @@ export const groupsApi = {
         name: groupData.name,
         description: groupData.description,
         privacy: groupData.privacy,
+        joinMode: groupData.joinMode,
         coverImage: groupData.coverImage,
         avatar: groupData.avatar,
         invitedUserIds: groupData.invitedUserIds,
@@ -108,7 +123,7 @@ export const groupsApi = {
     });
     apolloClient.cache.evict({ fieldName: "groups" });
     apolloClient.cache.gc();
-    return { success: data?.joinGroup };
+    return data?.joinGroup || { success: true, isApproved: true, status: "JOINED" };
   },
 
   leaveGroup: async (groupId: string, token: string | null = null) => {
@@ -188,6 +203,168 @@ export const groupsApi = {
     return data?.addGroupMember;
   },
 
+  inviteMember: async (
+    groupId: string,
+    userId: string,
+    role: string = "MEMBER",
+    token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: INVITE_GROUP_MEMBER_MUTATION,
+      variables: { groupId, userId, role },
+      context: token
+        ? {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        : undefined,
+    });
+    return data?.inviteGroupMember;
+  },
+
+  respondToInvitation: async (
+    invitationId: string,
+    action: "ACCEPT" | "DECLINE",
+    token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: RESPOND_GROUP_INVITATION_MUTATION,
+      variables: { invitationId, action },
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    apolloClient.cache.evict({ fieldName: "groups" });
+    apolloClient.cache.gc();
+    return data?.respondGroupInvitation;
+  },
+
+  getJoinRequests: async (groupId: string, token: string | null = null) => {
+    const { data } = await apolloClient.query({
+      query: GROUP_JOIN_REQUESTS_QUERY,
+      variables: { groupId },
+      fetchPolicy: "network-only",
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    return data?.groupJoinRequests || [];
+  },
+
+  handleJoinRequest: async (
+    groupId: string,
+    memberId: string,
+    action: "APPROVE" | "REJECT",
+    token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: HANDLE_GROUP_JOIN_REQUEST_MUTATION,
+      variables: { groupId, memberId, action },
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    return Boolean(data?.handleGroupJoinRequest);
+  },
+
+  getPendingInvitations: async (groupId: string, token: string | null = null) => {
+    const { data } = await apolloClient.query({
+      query: GROUP_PENDING_INVITATIONS_QUERY,
+      variables: { groupId },
+      fetchPolicy: "network-only",
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    return data?.groupPendingInvitations || [];
+  },
+
+  cancelInvitation: async (
+    groupId: string,
+    invitationId: string,
+    token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: CANCEL_GROUP_INVITATION_MUTATION,
+      variables: { groupId, invitationId },
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    return Boolean(data?.cancelGroupInvitation);
+  },
+
+  getInviteLink: async (groupId: string, token: string | null = null) => {
+    const { data } = await apolloClient.query({
+      query: GROUP_INVITE_LINK_QUERY,
+      variables: { groupId },
+      fetchPolicy: "network-only",
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    return data?.groupInviteLink || null;
+  },
+
+  regenerateInviteLink: async (groupId: string, token: string | null = null) => {
+    const { data } = await apolloClient.mutate({
+      mutation: REGENERATE_GROUP_INVITE_LINK_MUTATION,
+      variables: { groupId },
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    return data?.regenerateGroupInviteLink;
+  },
+
+  revokeInviteLink: async (
+    groupId: string,
+    linkId?: string,
+    token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: REVOKE_GROUP_INVITE_LINK_MUTATION,
+      variables: { groupId, linkId: linkId || undefined },
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    return Boolean(data?.revokeGroupInviteLink);
+  },
+
+  getInvitePreview: async (
+    slug: string,
+    inviteToken: string,
+    token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.query({
+      query: GROUP_INVITE_PREVIEW_QUERY,
+      variables: { slug, token: inviteToken },
+      fetchPolicy: "network-only",
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    return data?.groupInvitePreview;
+  },
+
+  acceptInviteLink: async (
+    inviteToken: string,
+    token: string | null = null,
+  ) => {
+    const { data } = await apolloClient.mutate({
+      mutation: ACCEPT_GROUP_INVITE_LINK_MUTATION,
+      variables: { token: inviteToken },
+      context: token
+        ? { headers: { authorization: `Bearer ${token}` } }
+        : undefined,
+    });
+    apolloClient.cache.evict({ fieldName: "groups" });
+    apolloClient.cache.gc();
+    return data?.acceptGroupInviteLink;
+  },
+
   updateGroupCover: async (
     groupId: string,
     coverImage: string,
@@ -216,6 +393,7 @@ export const groupsApi = {
       avatar?: string;
       privacy?: "PUBLIC" | "PRIVATE";
       discoverability?: "VISIBLE" | "HIDDEN";
+      joinMode?: "DIRECT" | "ADMIN_APPROVAL";
       requiresPostApproval?: boolean;
       challengeCreatorPolicy?: "STAFF" | "MEMBERS";
     },

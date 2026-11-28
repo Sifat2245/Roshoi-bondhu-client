@@ -1,62 +1,32 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useSession } from '../../lib/auth-client';
+import React, { useState } from 'react';
 import SocialHeader from '../../widgets/navbar/SocialHeader';
 import NotificationItem from '../../features/notifications/components/NotificationItem';
-import { Bell, CheckCheck, Settings, Filter, CheckCircle2 } from 'lucide-react';
+import { Bell, CheckCheck, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { notificationsApi } from '../../features/notifications/api/notifications.api';
+import { useNotifications } from '../../context/NotificationContext';
 
 const NotificationsPage = () => {
-  const { data: session } = useSession();
   const { notify } = useToast();
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    notifications,
+    loading,
+    markRead,
+    markAllRead,
+    respond,
+  } = useNotifications();
   const [filter, setFilter] = useState('ALL'); // 'ALL', 'UNREAD', 'INVITES'
 
-  const token = session?.session?.token;
-
-  const fetchNotifications = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await notificationsApi.getNotifications(token);
-      if (data) {
-        setNotifications(data);
-      }
-    } catch (err) {
-      console.error('Failed to load notifications:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    fetchNotifications();
-    const sync = () => { notificationsApi.getNotifications(token).then(setNotifications).catch(() => {}); };
-    window.addEventListener('heshel:notifications-updated', sync); window.addEventListener('heshel:notification-preferences', sync);
-    return () => { window.removeEventListener('heshel:notifications-updated', sync); window.removeEventListener('heshel:notification-preferences', sync); };
-  }, [fetchNotifications, token]);
-
-  const handleMarkRead = (id) => {
-    notificationsApi.markRead([id]);
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isUnread: false } : n))
-    );
+  const handleMarkRead = (id: string) => {
+    markRead([id]);
   };
 
   const handleMarkAllRead = () => {
-    notificationsApi.markRead(notifications.map((item) => item.id));
-    setNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })));
-    notify.success('All notifications marked as read');
+    markAllRead();
+    notify.success('All notifications marked as read', 'Success', true);
   };
 
-  const handleAction = async (id, actionType) => {
-    try { await notificationsApi.respond(id, actionType); } catch (error: any) { notify.error(error.message || 'Could not respond to the invitation.'); return; }
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    if (actionType === 'ACCEPT') {
-      notify.success('Invitation accepted');
-    } else {
-      notify.info('Invitation declined');
-    }
+  const handleAction = async (id: string, actionType: string) => {
+    await respond(id, actionType);
   };
 
   const filteredNotifications = notifications.filter((n) => {

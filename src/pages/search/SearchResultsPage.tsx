@@ -123,18 +123,27 @@ export const SearchResultsPage: React.FC = () => {
   const handleToggleGroupJoin = async (group: GroupSearchResult) => {
     setPendingGroupIds((prev) => new Set(prev).add(group.id));
     const wasMember = group.isMember;
+    const isPending = group.membershipStatus === "PENDING";
 
     updateGroupInSearch(group.id, (g) => ({
       ...g,
-      isMember: !wasMember,
+      isMember: !(wasMember || isPending),
       membersCount: wasMember ? Math.max(0, g.membersCount - 1) : g.membersCount + 1,
     }));
 
     try {
-      if (wasMember) {
+      if (wasMember || isPending) {
         await groupsApi.leaveGroup(group.id, token);
       } else {
-        await groupsApi.joinGroup(group.id, token);
+        const res = await groupsApi.joinGroup(group.id, token);
+        if (res?.isApproved === false) {
+          updateGroupInSearch(group.id, (g) => ({
+            ...g,
+            isMember: false,
+            membershipStatus: "PENDING",
+            membersCount: group.membersCount,
+          }));
+        }
       }
     } catch (err) {
       console.warn("Failed to toggle group membership:", err);

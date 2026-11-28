@@ -349,6 +349,7 @@ export const postsApi = {
     parentId?: string | null,
     token: string | null = null,
     actor?: Person,
+    mentionedUserIds: string[] = [],
   ) => {
     if (postId.startsWith("local-post-")) {
       if (!actor?.id) throw new Error("Sign in to comment.");
@@ -358,6 +359,7 @@ export const postsApi = {
         postId,
         content,
         parentId: parentId || null,
+        mentionedUserIds,
         authorId: actor.id,
         author: actor,
         createdAt: new Date().toISOString(),
@@ -373,7 +375,12 @@ export const postsApi = {
 
     const { data } = await apolloClient.mutate({
       mutation: CREATE_COMMENT_MUTATION,
-      variables: { postId, content, parentId: parentId || undefined },
+      variables: {
+        postId,
+        content,
+        parentId: parentId || undefined,
+        mentionedUserIds: mentionedUserIds.length > 0 ? mentionedUserIds : undefined,
+      },
     });
 
     return { success: true, data: data?.createComment };

@@ -100,22 +100,41 @@ const GroupsPage: React.FC = () => {
       return;
     }
 
-    const nextIsMember = !group.isMember;
-    updateGroupMembershipInCache(group.id, nextIsMember);
+    const isPending = group.myMembershipStatus === 'PENDING';
+    const wasMember = Boolean(group.isMember);
+
+    if (wasMember || isPending) {
+      updateGroupMembershipInCache(group.id, false, false);
+      try {
+        await groupsApi.leaveGroup(group.id || group.slug, token);
+        notify.info(isPending ? `Cancelled request to join ${group.name}` : `Left ${group.name}`);
+        invalidateAllGroups();
+        invalidateGroupFeed();
+        invalidateFeed();
+      } catch (err: any) {
+        updateGroupMembershipInCache(group.id, wasMember, isPending);
+        notify.error(err.message || 'Action failed');
+      }
+      return;
+    }
+
+    const willAwaitApproval = group.joinMode === 'ADMIN_APPROVAL';
+    updateGroupMembershipInCache(group.id, !willAwaitApproval, willAwaitApproval);
 
     try {
-      if (group.isMember) {
-        await groupsApi.leaveGroup(group.id || group.slug, token);
-        notify.info(`Left ${group.name}`);
+      const res = await groupsApi.joinGroup(group.id || group.slug, token);
+      if (res?.isApproved === false) {
+        updateGroupMembershipInCache(group.id, false, true);
+        notify.info(`Join request sent for ${group.name}. Waiting for admin approval.`);
       } else {
-        await groupsApi.joinGroup(group.id || group.slug, token);
-        notify.success(`Joined ${group.name}!`);
+        updateGroupMembershipInCache(group.id, true, false);
+        notify.success(`Joined ${group.name}!`, 'Joined', true);
       }
       invalidateAllGroups();
       invalidateGroupFeed();
       invalidateFeed();
     } catch (err: any) {
-      updateGroupMembershipInCache(group.id, group.isMember);
+      updateGroupMembershipInCache(group.id, false, false);
       notify.error(err.message || 'Action failed');
     }
   };
@@ -559,7 +578,13 @@ const GroupsPage: React.FC = () => {
                               : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40 text-[#e02f21]'
                           }`}
                         >
-                          <span>{group.isMember ? 'Joined' : 'Join group'}</span>
+                          <span>
+                            {group.isMember
+                              ? 'Joined'
+                              : group.myMembershipStatus === 'PENDING'
+                                ? 'Pending approval'
+                                : 'Join group'}
+                          </span>
                         </button>
                       </div>
                     </div>

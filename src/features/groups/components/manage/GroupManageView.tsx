@@ -93,6 +93,8 @@ export const GroupManageView: React.FC<GroupManageViewProps> = ({
         <MemberRequestsPanel
           group={group}
           pendingCount={counts.memberRequests}
+          token={token}
+          onUpdated={onGroupUpdated}
         />
       )}
       {section === "PENDING_POSTS" && (
