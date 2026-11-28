@@ -6,10 +6,15 @@ export const PROFILE_QUERY_KEY = 'userProfile';
 export const TWO_FACTOR_QUERY_KEY = 'twoFactorStatus';
 export const PASSKEYS_QUERY_KEY = 'userPasskeys';
 
-export function useUserProfileQuery(userId: string = 'me', token?: string | null) {
+export function useUserProfileQuery(
+  userId: string = 'me',
+  token?: string | null,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: [PROFILE_QUERY_KEY, userId],
     queryFn: () => profileApi.getUserProfile(userId, token),
+    enabled: options?.enabled ?? Boolean(userId),
     staleTime: 10 * 60 * 1000, // 10 minutes fresh
     gcTime: 15 * 60 * 1000,    // 15 minutes in memory
   });

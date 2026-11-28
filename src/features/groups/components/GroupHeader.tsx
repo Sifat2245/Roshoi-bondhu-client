@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router";
 import {
   Users,
   Lock,
@@ -13,12 +14,15 @@ import {
   ChevronDown,
   Camera,
   Loader2,
+  ShieldCheck,
 } from "lucide-react";
+import type { GroupManageSection } from "./manage/types";
 import Button from "../../../components/ui/Button";
 import { useToast } from "../../../context/ToastContext";
 import { useAuth } from "../../../context/AuthContext";
 import { useSession } from "../../../lib/auth-client";
 import Modal from "../../../components/ui/Modal";
+import ProfileHoverCard from "../../profile/components/ProfileHoverCard";
 import ReportModal from "../../reports/components/ReportModal";
 import InviteMemberModal from "./InviteMemberModal";
 import profileApi from "../../profile/api/profile.api";
@@ -34,8 +38,23 @@ const GroupHeader = ({
   onJoinToggle,
   isMember,
   isAdmin,
+  canModerate = false,
+  pendingManageCount = 0,
+  onOpenManage,
   search = "",
   onSearch = (_value: string) => {},
+}: {
+  group: any;
+  activeTab: string;
+  onSelectTab: (tab: string) => void;
+  onJoinToggle: () => void | Promise<void>;
+  isMember: boolean;
+  isAdmin: boolean;
+  canModerate?: boolean;
+  pendingManageCount?: number;
+  onOpenManage?: (section?: GroupManageSection) => void;
+  search?: string;
+  onSearch?: (value: string) => void;
 }) => {
   const [loading, setLoading] = useState(false);
   const { notify } = useToast();
@@ -218,22 +237,34 @@ const GroupHeader = ({
               </span>
             </div>
 
-            {/* Member Avatars Cluster (Matching Facebook reference in media_1795155165011_cd309caa.jpg) */}
+            {/* Member Avatars Cluster */}
             {memberList.length > 0 && (
               <div
                 className="flex items-center gap-2 pt-1 cursor-pointer group/members"
                 onClick={() => onSelectTab("MEMBERS")}
                 title="View all group members"
               >
-                <div className="flex -space-x-1.5 sm:-space-x-2 overflow-hidden py-1 items-center">
+                <div className="flex -space-x-1.5 sm:-space-x-2 py-1 items-center">
                   {memberList.slice(0, 18).map((m: any, i: number) => (
-                    <img
+                    <ProfileHoverCard
                       key={m.id || i}
-                      src={m.image}
-                      alt={m.name}
-                      title={`${m.name}${m.role && m.role !== 'MEMBER' ? ` (${m.role})` : ''}`}
-                      className="inline-block h-8 w-8 sm:h-9 sm:w-9 rounded-full ring-2 ring-white dark:ring-[#242526] object-cover bg-gray-200 dark:bg-gray-700 shrink-0 hover:z-10 transition-transform hover:scale-105"
-                    />
+                      userId={m.id}
+                      initialUser={{ id: m.id, name: m.name, image: m.image }}
+                      className="inline-block shrink-0"
+                    >
+                      <Link
+                        to={`/profile/${m.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={`View ${m.name}'s profile`}
+                        className="block rounded-full"
+                      >
+                        <img
+                          src={m.image}
+                          alt={m.name}
+                          className="inline-block h-8 w-8 sm:h-9 sm:w-9 rounded-full ring-2 ring-white dark:ring-[#242526] object-cover bg-gray-200 dark:bg-gray-700 shrink-0 hover:z-10 transition-transform hover:scale-105"
+                        />
+                      </Link>
+                    </ProfileHoverCard>
                   ))}
                 </div>
               </div>
@@ -241,37 +272,56 @@ const GroupHeader = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            {canModerate && onOpenManage && (
+              <Button
+                size="none"
+                onClick={() => onOpenManage("MOBILE_HUB")}
+                className="lg:hidden bg-[#e02f21] hover:bg-[#c92518] text-white px-3.5 py-1.5 text-sm font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <ShieldCheck size={15} />
+                <span>Manage</span>
+                {pendingManageCount > 0 && (
+                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-white text-[#e02f21] text-[11px] font-extrabold leading-tight">
+                    {pendingManageCount}
+                  </span>
+                )}
+              </Button>
+            )}
+
             {isMember && (
               <Button
+                size="none"
                 onClick={handleInvite}
-                className="bg-[#e02f21] hover:bg-[#c92518] text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-xs flex items-center gap-2 cursor-pointer"
+                className="bg-[#e02f21] hover:bg-[#c92518] text-white px-3.5 py-1.5 text-sm font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
-                <Plus size={16} />
+                <Plus size={15} />
                 <span>Invite</span>
               </Button>
             )}
 
             <Button
+              size="none"
               onClick={handleShare}
               variant="secondary"
-              className="px-4 py-2.5 text-sm font-bold rounded-xl flex items-center gap-2 cursor-pointer"
+              className="px-3.5 py-1.5 text-sm font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
             >
-              <Share2 size={16} />
+              <Share2 size={15} />
               <span>Share</span>
             </Button>
 
             <Button
+              size="none"
               onClick={() =>
                 isMember ? setConfirmLeave(true) : handleAction()
               }
               loading={loading}
               variant={isMember ? "secondary" : "primary"}
-              className="px-4 py-2.5 text-sm font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 text-sm font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
             >
               {isMember ? (
                 <>
-                  <Check size={16} className="text-emerald-500" />
+                  <Check size={15} className="text-emerald-500" />
                   <span>Joined</span>
                   <ChevronDown size={14} className="text-gray-500 ml-0.5" />
                 </>
@@ -284,9 +334,9 @@ const GroupHeader = ({
               type="button"
               aria-label="Group options"
               onClick={() => setShowOptions(true)}
-              className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition cursor-pointer"
+              className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-[#3a3b3c] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition cursor-pointer"
             >
-              <MoreHorizontal size={18} />
+              <MoreHorizontal size={17} />
             </button>
           </div>
         </div>
@@ -299,7 +349,9 @@ const GroupHeader = ({
             { id: "COMMUNITY", label: "Community" },
             { id: "ABOUT", label: "About" },
             { id: "MEMBERS", label: "Members" },
-            ...(isAdmin ? [{ id: "SETTINGS", label: "Settings" }] : []),
+            ...(!onOpenManage && isAdmin
+              ? [{ id: "SETTINGS", label: "Settings" }]
+              : []),
           ];
 
           let visibleCount = allGroupTabs.length;
@@ -432,14 +484,11 @@ const GroupHeader = ({
           {[
             { tab: "ABOUT", label: "About this group" },
             { tab: "MEMBERS", label: "See group members" },
-            ...(isAdmin
-              ? [{ tab: "SETTINGS", label: "Manage group settings" }]
-              : []),
           ].map((item) => (
             <button
               key={item.tab}
               type="button"
-              className="w-full rounded-xl p-3 text-left text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="w-full rounded-xl p-3 text-left text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
               onClick={() => {
                 onSelectTab(item.tab);
                 setShowOptions(false);
@@ -448,6 +497,18 @@ const GroupHeader = ({
               {item.label}
             </button>
           ))}
+          {canModerate && onOpenManage && (
+            <button
+              type="button"
+              className="w-full rounded-xl p-3 text-left text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+              onClick={() => {
+                setShowOptions(false);
+                onOpenManage(isAdmin ? "SETTINGS" : "OVERVIEW");
+              }}
+            >
+              {isAdmin ? "Manage group settings" : "Open admin tools"}
+            </button>
+          )}
           {!isAdmin && (
             <button
               type="button"

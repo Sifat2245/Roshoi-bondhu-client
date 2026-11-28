@@ -49,6 +49,7 @@ export interface Post {
   originalPost: Post;
   id: string;
   authorId: string;
+  authorGroupRole?: string | null;
   author?: User;
   audience?: PostAudience;
   groupId?: string | null;

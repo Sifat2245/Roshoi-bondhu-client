@@ -42,6 +42,13 @@ export default function GroupCommunityTab({
   posts,
   isMember,
   onCreatePost,
+  onCreatePoll,
+}: {
+  group: any;
+  posts: any[];
+  isMember: boolean;
+  onCreatePost: () => void;
+  onCreatePoll?: () => void;
 }) {
   const { state, update, user } = useSocial();
   const { state: kitchen, update: updateKitchen } = useKitchen();
@@ -484,24 +491,41 @@ export default function GroupCommunityTab({
                 size="sm"
                 icon={Plus}
                 onClick={() => {
-                  setPoll(emptyPoll());
-                  setPollOpen(true);
+                  if (onCreatePoll) {
+                    onCreatePoll();
+                  } else {
+                    setPoll(emptyPoll());
+                    setPollOpen(true);
+                  }
                 }}
               >
                 Create a poll
               </Button>
             )}
           </div>
+          {posts
+            .filter((p) => p.postType === "POLL" && p.poll)
+            .map((pollPost) => (
+              <div className="kitchen-panel p-4" key={pollPost.id}>
+                <PostPoll
+                  post={{
+                    ...pollPost,
+                    group: { ...group, ...(pollPost.group || {}), isMember },
+                  }}
+                />
+              </div>
+            ))}
           {(state.groupPolls[group.id] || []).map((id) => (
             <div className="kitchen-panel p-4" key={id}>
               <PostPoll post={{ id, poll: state.polls[id], group }} />
             </div>
           ))}
-          {!state.groupPolls[group.id]?.length && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              No polls yet. Start with a question for your group.
-            </p>
-          )}
+          {!posts.some((p) => p.postType === "POLL" && p.poll) &&
+            !state.groupPolls[group.id]?.length && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No polls yet. Start with a question for your group.
+              </p>
+            )}
         </section>
       </div>
       <aside className="kitchen-panel p-5 self-start space-y-4">

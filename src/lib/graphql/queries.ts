@@ -42,6 +42,8 @@ export const POST_FRAGMENT = gql`
   fragment PostFields on Post {
     id
     authorId
+    authorGroupRole
+    groupId
     postType
     status
     audience
@@ -104,7 +106,9 @@ export const POST_FRAGMENT = gql`
       name
       slug
       avatar
+      coverImage
       privacy
+      isMember
     }
     originalPost {
       id
@@ -409,7 +413,11 @@ export const GROUPS_QUERY = gql`
       coverImage
       avatar
       privacy
+      discoverability
+      status
       requiresPostApproval
+      challengeCreatorPolicy
+      ownerId
       createdById
       createdBy {
         id
@@ -421,6 +429,8 @@ export const GROUPS_QUERY = gql`
       isMember
       currentUserRole
       canModerate
+      pendingRequestsCount
+      pendingPostsCount
       createdAt
     }
   }
@@ -436,7 +446,18 @@ export const GROUP_QUERY = gql`
       coverImage
       avatar
       privacy
+      discoverability
+      status
       requiresPostApproval
+      challengeCreatorPolicy
+      version
+      archivedAt
+      ownerId
+      owner {
+        id
+        name
+        image
+      }
       createdById
       createdBy {
         id
@@ -448,6 +469,8 @@ export const GROUP_QUERY = gql`
       isMember
       currentUserRole
       canModerate
+      pendingRequestsCount
+      pendingPostsCount
       createdAt
       members {
         id

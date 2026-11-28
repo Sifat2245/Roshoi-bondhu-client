@@ -6,7 +6,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   loading?: boolean;
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'dark' | 'outline';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'none';
   icon?: LucideIcon;
   className?: string;
 }
@@ -36,9 +36,11 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const sizes = {
+    xs: 'text-xs px-3 py-1.5 gap-1.5',
     sm: 'text-sm px-3.5 py-2 gap-1.5',
     md: 'text-sm sm:text-base px-5 py-2.5 gap-2',
     lg: 'text-base sm:text-lg px-6 py-3.5 gap-2.5',
+    none: '',
   };
 
   return (
@@ -46,21 +48,26 @@ export const Button: React.FC<ButtonProps> = ({
       type={type}
       disabled={disabled || loading}
       onClick={onClick}
-      className={`${baseClasses} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}
+      className={`${baseClasses} ${variants[variant] || variants.primary} ${sizes[size] ?? sizes.md} ${className}`}
       {...props}
     >
       {loading ? (
         <>
           <Loader2
             className={`${
-              size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'
+              size === 'xs' || size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'
             } animate-spin flex-shrink-0`}
           />
           {children && <span>{children}</span>}
         </>
       ) : (
         <>
-          {Icon && <Icon size={size === 'sm' ? 16 : size === 'lg' ? 20 : 18} className="flex-shrink-0" />}
+          {Icon && (
+            <Icon
+              size={size === 'xs' ? 14 : size === 'sm' ? 16 : size === 'lg' ? 20 : 18}
+              className="flex-shrink-0"
+            />
+          )}
           {children}
         </>
       )}

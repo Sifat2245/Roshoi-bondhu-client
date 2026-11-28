@@ -7,6 +7,7 @@ import { ChatCategory, ChatConversation } from '../../features/messenger/model/m
 import { INITIAL_CONVERSATIONS } from '../../features/messenger/model/messenger.mock';
 import { useChatDock } from '../../context/ChatDockContext';
 import { useToast } from '../../context/ToastContext';
+import ResponsiveTabs from '../../components/ui/ResponsiveTabs';
 import {
   MoreHorizontal,
   Edit3,
@@ -107,30 +108,22 @@ const MessagesPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Filter Pills (All / Unread / Groups / Communities) */}
-          <div className="px-4 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
-            {(
-              [
-                { id: 'ALL', label: 'All' },
-                { id: 'UNREAD', label: 'Unread' },
-                { id: 'GROUPS', label: 'Groups' },
-                { id: 'COMMUNITIES', label: 'Communities' },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setCategory(tab.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer ${
-                  category === tab.id
-                    ? 'bg-red-50 text-[#e02f21] dark:bg-red-950/60'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {/* Filter Pills (All / Unread / More ▾) */}
+          <ResponsiveTabs
+            items={[
+              { id: 'ALL', label: 'All' },
+              { id: 'UNREAD', label: 'Unread' },
+              { id: 'GROUPS', label: 'Groups' },
+              { id: 'COMMUNITIES', label: 'Communities' },
+            ]}
+            activeId={category}
+            onSelect={(id) => setCategory(id as ChatCategory)}
+            visibleCount={2}
+            variant="soft"
+            size="sm"
+            dropdownAlign="left"
+            className="px-4 py-2"
+          />
 
           {/* Conversations List */}
           <div className="flex-1 overflow-y-auto no-scrollbar px-2 py-1 space-y-1">

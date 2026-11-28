@@ -84,3 +84,78 @@ export const UPDATE_GROUP_COVER_MUTATION = gql`
   }
 `;
 
+export const UPDATE_GROUP_SETTINGS_MUTATION = gql`
+  mutation UpdateGroupSettings($groupId: ID!, $input: UpdateGroupSettingsInput!) {
+    updateGroupSettings(groupId: $groupId, input: $input) {
+      id
+      name
+      slug
+      description
+      coverImage
+      avatar
+      privacy
+      discoverability
+      status
+      requiresPostApproval
+      challengeCreatorPolicy
+      version
+      archivedAt
+      ownerId
+      owner {
+        id
+        name
+        image
+      }
+      createdById
+      membersCount
+      postsCount
+      isMember
+      currentUserRole
+      canModerate
+      pendingRequestsCount
+      pendingPostsCount
+    }
+  }
+`;
+
+export const TRANSFER_GROUP_OWNERSHIP_MUTATION = gql`
+  mutation TransferGroupOwnership($groupId: ID!, $newOwnerUserId: ID!) {
+    transferGroupOwnership(groupId: $groupId, newOwnerUserId: $newOwnerUserId) {
+      id
+      slug
+      ownerId
+      owner {
+        id
+        name
+        image
+      }
+      currentUserRole
+      canModerate
+      version
+      members {
+        id
+        userId
+        role
+        isApproved
+        user {
+          id
+          name
+          image
+        }
+      }
+    }
+  }
+`;
+
+export const UPDATE_GROUP_LIFECYCLE_MUTATION = gql`
+  mutation UpdateGroupLifecycle($groupId: ID!, $action: String!) {
+    updateGroupLifecycle(groupId: $groupId, action: $action) {
+      id
+      slug
+      status
+      archivedAt
+      version
+    }
+  }
+`;
+

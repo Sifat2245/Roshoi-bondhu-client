@@ -18,6 +18,7 @@ import { useAuth } from "../../../context/AuthContext";
 import groupsApi from "../api/groups.api";
 import { useInvalidateGroupQueries } from "../hooks/useGroupQueries";
 import InviteMemberModal from "./InviteMemberModal";
+import ProfileHoverCard from "../../profile/components/ProfileHoverCard";
 import defaultUserAvatar from "../../../assets/user-image.png";
 
 export type GroupMemberAction = "ADMIN" | "MODERATOR" | "MEMBER" | "REMOVE";
@@ -178,8 +179,9 @@ export default function GroupMembersTab({
 
         {group.isMember && (
           <Button
+            size="xs"
             onClick={() => setIsInviteOpen(true)}
-            className="bg-[#e02f21] hover:bg-[#c92518] text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+            className="bg-[#e02f21] hover:bg-[#c92518] text-white font-bold px-3.5 rounded-xl shadow-xs cursor-pointer"
           >
             <UserPlus size={15} />
             <span>Add member</span>
@@ -252,10 +254,15 @@ export default function GroupMembersTab({
               key={member.id || memberUserId}
               className="flex items-center justify-between gap-3 py-3"
             >
-              <Link
-                to={`/profile/${memberUserId}`}
-                className="flex items-center gap-3 flex-1 min-w-0 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 p-1.5 transition"
+              <ProfileHoverCard
+                userId={memberUserId}
+                initialUser={member.user}
+                className="flex-1 min-w-0"
               >
+                <Link
+                  to={`/profile/${memberUserId}`}
+                  className="flex items-center gap-3 w-full min-w-0 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 p-1.5 transition"
+                >
                 <Avatar
                   src={member.user?.image || defaultUserAvatar}
                   alt={member.user?.name || "Member"}
@@ -295,7 +302,8 @@ export default function GroupMembersTab({
                     )}
                   </div>
                 </div>
-              </Link>
+                </Link>
+              </ProfileHoverCard>
 
               {/* Options Menu Button */}
               <button

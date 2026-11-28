@@ -5,7 +5,13 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useSession } from '../../lib/auth-client';
 import SocialHeader from '../../widgets/navbar/SocialHeader';
 import PostCard from '../../features/posts/components/PostCard';
-import { PostSkeleton, GroupCardSkeleton } from '../../components/ui/Skeleton';
+import {
+  PostSkeleton,
+  GroupCardSkeleton,
+  GroupSidebarItemSkeleton,
+  GroupCompactCardSkeleton,
+} from '../../components/ui/Skeleton';
+import ResponsiveTabs from '../../components/ui/ResponsiveTabs';
 import groupsApi from '../../features/groups/api/groups.api';
 import postsApi from '../../features/posts/api/posts.api';
 import {
@@ -14,6 +20,7 @@ import {
   useInvalidateGroupQueries,
   MOCK_FALLBACK_GROUPS,
 } from '../../features/groups/hooks/useGroupQueries';
+import { useInvalidateFeedQueries } from '../../features/posts/hooks/useFeedQueries';
 import { useToast } from '../../context/ToastContext';
 import defaultGroupCover from '../../assets/group/group-default.png';
 import {
@@ -55,11 +62,13 @@ const GroupsPage: React.FC = () => {
   const [groupSearch, setGroupSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // TanStack Query 10-min caching
+  const currentUserId = user?.id || session?.user?.id;
+
+  // TanStack Query + localStorage SWR 10-min caching
   const {
-    data: rawGroups = MOCK_FALLBACK_GROUPS,
+    data: rawGroups = [],
     isLoading: loadingGroups,
-  } = useGroupsListQuery({}, token);
+  } = useGroupsListQuery({}, token, currentUserId);
 
   const {
     data: groupPosts = [],
@@ -69,9 +78,12 @@ const GroupsPage: React.FC = () => {
   const {
     updateGroupMembershipInCache,
     invalidateAllGroups,
+    invalidateGroupFeed,
     deletePostFromGroup,
     updatePostInGroup,
   } = useInvalidateGroupQueries();
+  const { invalidateFeed, updatePostInFeed, deletePostFromFeed } =
+    useInvalidateFeedQueries();
 
   const groups = rawGroups.map((group) =>
     resolveGroup(group, social.members[group.id], user?.id)
@@ -100,13 +112,13 @@ const GroupsPage: React.FC = () => {
         notify.success(`Joined ${group.name}!`);
       }
       invalidateAllGroups();
+      invalidateGroupFeed();
+      invalidateFeed();
     } catch (err: any) {
       updateGroupMembershipInCache(group.id, group.isMember);
       notify.error(err.message || 'Action failed');
     }
   };
-
-  const currentUserId = user?.id || session?.user?.id;
 
   const isGroupManaged = (g: any) => {
     // 1. Role-based: admin or moderator
@@ -286,7 +298,13 @@ const GroupsPage: React.FC = () => {
               <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2">
                 Groups you manage
               </h3>
-              {managedGroups.length > 0 ? (
+              {loadingGroups && managedGroups.length === 0 ? (
+                <div className="space-y-1">
+                  {[1, 2].map((i) => (
+                    <GroupSidebarItemSkeleton key={i} />
+                  ))}
+                </div>
+              ) : managedGroups.length > 0 ? (
                 <div className="space-y-1">
                   {managedGroups.map((group) => {
                     const roleLabel =
@@ -338,7 +356,13 @@ const GroupsPage: React.FC = () => {
                 </button>
               </div>
 
-              {joinedGroupsSidebar.length > 0 ? (
+              {loadingGroups && joinedGroupsSidebar.length === 0 ? (
+                <div className="space-y-1">
+                  {[1, 2, 3].map((i) => (
+                    <GroupSidebarItemSkeleton key={i} />
+                  ))}
+                </div>
+              ) : joinedGroupsSidebar.length > 0 ? (
                 <div className="space-y-1">
                   {joinedGroupsSidebar.map((group) => (
                     <Link
@@ -373,55 +397,25 @@ const GroupsPage: React.FC = () => {
 
         {/* CENTER / MAIN CONTENT (Feed, Discover, or Your Groups) */}
         <main className="flex-1 min-w-0 min-h-0 w-full h-full overflow-y-auto no-scrollbar py-4 sm:py-6 px-3.5 sm:px-6 lg:px-8">
-          {/* Mobile Horizontal Navigation Tabs (< lg screens) */}
-          <div className="lg:hidden mb-5 overflow-x-auto no-scrollbar flex items-center gap-2 pb-1">
-            <button
-              type="button"
-              onClick={() => handleSelectView('FEED')}
-              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-2 shrink-0 ${
-                activeView === 'FEED'
-                  ? 'bg-[#e02f21] text-white shadow-xs'
-                  : 'bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800'
-              }`}
-            >
-              <Rss size={16} />
-              <span>Your feed</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSelectView('DISCOVER')}
-              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-2 shrink-0 ${
-                activeView === 'DISCOVER'
-                  ? 'bg-[#e02f21] text-white shadow-xs'
-                  : 'bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800'
-              }`}
-            >
-              <Compass size={16} />
-              <span>Discover</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSelectView('YOUR_GROUPS')}
-              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-2 shrink-0 ${
-                activeView === 'YOUR_GROUPS'
-                  ? 'bg-[#e02f21] text-white shadow-xs'
-                  : 'bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800'
-              }`}
-            >
-              <Users size={16} />
-              <span>Your groups</span>
-            </button>
-
-            <Link
-              to="/groups/create"
-              className="px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap bg-red-50 text-[#e02f21] dark:bg-red-950/60 hover:bg-red-100 transition flex items-center gap-1.5 shrink-0"
-            >
-              <Plus size={16} />
-              <span>Create group</span>
-            </Link>
-          </div>
+          {/* Mobile Navigation Tabs (< lg screens) with More dropdown */}
+          <ResponsiveTabs
+            items={[
+              { id: 'FEED', label: 'Your feed', icon: <Rss size={15} /> },
+              { id: 'DISCOVER', label: 'Discover', icon: <Compass size={15} /> },
+              { id: 'YOUR_GROUPS', label: 'Your groups', icon: <Users size={15} /> },
+              { id: 'CREATE_GROUP', label: 'Create group', icon: <Plus size={15} />, accent: true },
+            ]}
+            activeId={activeView}
+            onSelect={(id) => {
+              if (id === 'CREATE_GROUP') {
+                navigate('/groups/create');
+              } else {
+                handleSelectView(id as GroupView);
+              }
+            }}
+            breakpoints={{ xs: 2, sm: 4, md: 4, lg: 4 }}
+            className="lg:hidden mb-5"
+          />
           {/* VIEW 1: All Posts from All Groups (Requirement 3 - Image 2) */}
           {activeView === 'FEED' && (
             <div className="max-w-[700px] xl:max-w-[740px] mx-auto space-y-4">
@@ -445,12 +439,14 @@ const GroupsPage: React.FC = () => {
                     post={post}
                     onOpenComments={(post) => navigate(`/post/${post.id}`)}
                     onRequireAuth={() => navigate('/login')}
-                    onDeletePost={(deletedId) =>
-                      deletePostFromGroup(post.groupId || '', deletedId)
-                    }
-                    onUpdatePost={(updated) =>
-                      updatePostInGroup(post.groupId || '', updated)
-                    }
+                    onDeletePost={(deletedId) => {
+                      deletePostFromGroup(post.groupId || '', deletedId);
+                      deletePostFromFeed(deletedId);
+                    }}
+                    onUpdatePost={(updated) => {
+                      updatePostInGroup(post.groupId || '', updated);
+                      updatePostInFeed(updated);
+                    }}
                   />
                 ))
               ) : (
@@ -502,26 +498,13 @@ const GroupsPage: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Category Pills */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-                {DISCOVER_CATEGORIES.map((cat) => {
-                  const isSelected = selectedCategory === cat;
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#e02f21] text-white shadow-sm'
-                          : 'bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Category Pills (Responsive with More dropdown) */}
+              <ResponsiveTabs
+                items={DISCOVER_CATEGORIES.map((cat) => ({ id: cat, label: cat }))}
+                activeId={selectedCategory}
+                onSelect={setSelectedCategory}
+                breakpoints={{ xs: 2, sm: 3, md: 4, lg: DISCOVER_CATEGORIES.length }}
+              />
 
               {/* Groups Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -598,7 +581,13 @@ const GroupsPage: React.FC = () => {
                 </p>
               </div>
 
-              {allYourGroups.length > 0 ? (
+              {loadingGroups && allYourGroups.length === 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {[1, 2, 3].map((i) => (
+                    <GroupCompactCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : allYourGroups.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {allYourGroups.map((group) => {
                     const isManaged = isGroupManaged(group);

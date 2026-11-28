@@ -8,6 +8,53 @@ export const GROUP_FEED_POSTS_QUERY_KEY = "groupFeedPosts";
 export const GROUP_DETAIL_QUERY_KEY = "groupDetail";
 export const GROUP_POSTS_QUERY_KEY = "groupPosts";
 
+const CACHE_PREFIX = "rb_group_cache_v1:";
+const CACHE_TTL_MS = 15 * 60 * 1000;
+
+function readGroupCache<T>(key: string): { data: T; updatedAt: number } | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const raw = window.localStorage.getItem(`${CACHE_PREFIX}${key}`);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.updatedAt !== "number") return undefined;
+    if (Date.now() - parsed.updatedAt > CACHE_TTL_MS) {
+      window.localStorage.removeItem(`${CACHE_PREFIX}${key}`);
+      return undefined;
+    }
+    return { data: parsed.data as T, updatedAt: parsed.updatedAt };
+  } catch {
+    return undefined;
+  }
+}
+
+function writeGroupCache<T>(key: string, data: T): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      `${CACHE_PREFIX}${key}`,
+      JSON.stringify({ data, updatedAt: Date.now() }),
+    );
+  } catch {
+    /* ignore storage quota errors */
+  }
+}
+
+function clearGroupCacheByPrefix(prefix: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const fullPrefix = `${CACHE_PREFIX}${prefix}`;
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
+      if (k && k.startsWith(fullPrefix)) keysToRemove.push(k);
+    }
+    keysToRemove.forEach((k) => window.localStorage.removeItem(k));
+  } catch {
+    /* ignore */
+  }
+}
+
 export const MOCK_FALLBACK_GROUPS = [
   {
     id: "g-grandma",
@@ -68,25 +115,25 @@ export interface GroupsListParams {
 export function useGroupsListQuery(
   params?: GroupsListParams,
   token?: string | null,
+  userId?: string,
 ) {
   const search = params?.search || "";
   const myGroups = Boolean(params?.myGroups);
+  const scope = userId || "anonymous";
+  const cacheKey = `list:${scope}:${search}:${myGroups}`;
+  const cached = !search ? readGroupCache<any[]>(cacheKey) : undefined;
 
   return useQuery({
-    queryKey: [GROUPS_LIST_QUERY_KEY, search, myGroups],
+    queryKey: [GROUPS_LIST_QUERY_KEY, scope, search, myGroups],
     queryFn: async () => {
-      try {
-        const data = await groupsApi.getGroups(params, token);
-        if (data && data.length > 0) {
-          return data;
-        }
-        return MOCK_FALLBACK_GROUPS as any[];
-      } catch (err) {
-        console.warn("Failed to fetch groups, using fallback:", err);
-        return MOCK_FALLBACK_GROUPS as any[];
-      }
+      const data = await groupsApi.getGroups(params, token);
+      const list = Array.isArray(data) ? data : [];
+      if (!search) writeGroupCache(cacheKey, list);
+      return list;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes fresh
+    initialData: cached?.data,
+    initialDataUpdatedAt: 0,
+    staleTime: 10 * 60 * 1000, // 10 minutes fresh in-memory after fetch
     gcTime: 15 * 60 * 1000,    // 15 minutes in memory
     placeholderData: (previousData) => previousData,
     refetchOnWindowFocus: false,
@@ -97,20 +144,24 @@ export function useGroupFeedPostsQuery(
   token?: string | null,
   userId?: string,
 ) {
+  const scope = userId || "anonymous";
+  const cacheKey = `feed:${scope}`;
+  const cached = readGroupCache<any[]>(cacheKey);
+
   return useQuery({
-    queryKey: [GROUP_FEED_POSTS_QUERY_KEY, userId || "anonymous"],
+    queryKey: [GROUP_FEED_POSTS_QUERY_KEY, scope],
     queryFn: async () => {
-      const data = await postsApi.getPosts({ limit: 50 }, token, userId);
-      if (!data) return [];
-      const groupTagged = data.filter((p: any) => p.group || p.groupId);
-      if (groupTagged.length > 0) {
-        return groupTagged;
-      }
-      return data.map((p: any, idx: number) => ({
-        ...p,
-        group: p.group || MOCK_FALLBACK_GROUPS[idx % MOCK_FALLBACK_GROUPS.length],
-      }));
+      const data = await postsApi.getPosts(
+        { filter: "GROUPS", limit: 50 },
+        token,
+        userId,
+      );
+      const filtered = (data || []).filter((p: any) => p.group || p.groupId);
+      writeGroupCache(cacheKey, filtered);
+      return filtered;
     },
+    initialData: cached?.data,
+    initialDataUpdatedAt: 0,
     staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
     placeholderData: (previousData) => previousData,
@@ -121,13 +172,22 @@ export function useGroupFeedPostsQuery(
 export function useGroupDetailQuery(
   slug?: string,
   token?: string | null,
+  userId?: string,
 ) {
+  const scope = userId || "anonymous";
+  const cacheKey = slug ? `detail:${scope}:${slug}` : "";
+  const cached = cacheKey ? readGroupCache<any>(cacheKey) : undefined;
+
   return useQuery({
-    queryKey: [GROUP_DETAIL_QUERY_KEY, slug],
+    queryKey: [GROUP_DETAIL_QUERY_KEY, scope, slug],
     queryFn: async () => {
       if (!slug) return null;
-      return await groupsApi.getGroupBySlug(slug, token);
+      const group = await groupsApi.getGroupBySlug(slug, token);
+      if (group && cacheKey) writeGroupCache(cacheKey, group);
+      return group;
     },
+    initialData: cached?.data,
+    initialDataUpdatedAt: 0,
     enabled: Boolean(slug),
     staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
@@ -141,12 +201,20 @@ export function useGroupPostsQuery(
   token?: string | null,
   userId?: string,
 ) {
+  const scope = userId || "anonymous";
+  const cacheKey = groupId ? `posts:${scope}:${groupId}` : "";
+  const cached = cacheKey ? readGroupCache<any[]>(cacheKey) : undefined;
+
   return useQuery({
-    queryKey: [GROUP_POSTS_QUERY_KEY, groupId, userId || "anonymous"],
+    queryKey: [GROUP_POSTS_QUERY_KEY, groupId, scope],
     queryFn: async () => {
       if (!groupId) return [];
-      return await postsApi.getPosts({ groupId }, token, userId);
+      const posts = await postsApi.getPosts({ groupId }, token, userId);
+      if (cacheKey) writeGroupCache(cacheKey, posts);
+      return posts;
     },
+    initialData: cached?.data,
+    initialDataUpdatedAt: 0,
     enabled: Boolean(groupId),
     staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
@@ -160,19 +228,26 @@ export function useInvalidateGroupQueries() {
 
   return {
     invalidateAllGroups: () => {
+      clearGroupCacheByPrefix("list:");
       queryClient.invalidateQueries({ queryKey: [GROUPS_LIST_QUERY_KEY] });
     },
     invalidateGroupFeed: () => {
+      clearGroupCacheByPrefix("feed:");
       queryClient.invalidateQueries({ queryKey: [GROUP_FEED_POSTS_QUERY_KEY] });
     },
     invalidateGroupDetail: (slug?: string) => {
+      clearGroupCacheByPrefix("detail:");
       if (slug) {
-        queryClient.invalidateQueries({ queryKey: [GROUP_DETAIL_QUERY_KEY, slug] });
+        queryClient.invalidateQueries({
+          predicate: (q) =>
+            q.queryKey[0] === GROUP_DETAIL_QUERY_KEY && q.queryKey[2] === slug,
+        });
       } else {
         queryClient.invalidateQueries({ queryKey: [GROUP_DETAIL_QUERY_KEY] });
       }
     },
     invalidateGroupPosts: (groupId?: string) => {
+      clearGroupCacheByPrefix("posts:");
       if (groupId) {
         queryClient.invalidateQueries({ queryKey: [GROUP_POSTS_QUERY_KEY, groupId] });
       } else {

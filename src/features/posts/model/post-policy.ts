@@ -119,7 +119,7 @@ export function matchesPost(post: any, params: any): boolean {
   const time = post.preparationTime ?? post.cookingTime;
   return (
     (!params.authorId || post.authorId === params.authorId) &&
-    (!params.groupId || post.groupId === params.groupId) &&
+    (!params.groupId || (post.groupId || post.group?.id) === params.groupId) &&
     (!params.type ||
       post.postType === params.type ||
       (params.type === "CASUAL" && post.postType === "POLL")) &&

@@ -7,6 +7,7 @@ import FriendRequestsView from "../../features/friends/components/FriendRequests
 import FriendSuggestionsView from "../../features/friends/components/FriendSuggestionsView";
 import AllFriendsSplitView from "../../features/friends/components/AllFriendsSplitView";
 import { useToast } from "../../context/ToastContext";
+import ResponsiveTabs from "../../components/ui/ResponsiveTabs";
 import { friendsApi } from "../../features/friends/api/friends.api";
 import {
   useFriendsQuery,
@@ -120,37 +121,17 @@ const FriendsPage: React.FC = () => {
       }
     >
       <div className="max-w-[1280px] mx-auto pb-12">
-        {/* Mobile Horizontal Navigation Tabs (< lg screens) */}
-        <div className="lg:hidden mb-5 overflow-x-auto no-scrollbar flex items-center gap-2 pb-1">
-          {mobileNavTabs.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                if (item.id === "all") navigate("/friends/list");
-                else handleSelectSection(item.id);
-              }}
-              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                activeSection === item.id
-                  ? "bg-[#e02f21] text-white shadow-xs"
-                  : "bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800"
-              }`}
-            >
-              <span>{item.label}</span>
-              {item.badge > 0 && (
-                <span
-                  className={`px-1.5 py-0.2 rounded-full text-xs font-bold ${
-                    activeSection === item.id
-                      ? "bg-white text-[#e02f21]"
-                      : "bg-[#e02f21] text-white"
-                  }`}
-                >
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        {/* Mobile Navigation Tabs (< lg screens) with More dropdown */}
+        <ResponsiveTabs
+          items={mobileNavTabs}
+          activeId={activeSection}
+          onSelect={(id) => {
+            if (id === "all") navigate("/friends/list");
+            else handleSelectSection(id);
+          }}
+          breakpoints={{ xs: 2, sm: 3, md: 4, lg: 4 }}
+          className="lg:hidden mb-5"
+        />
 
         {activeSection === "home" && (
           <div className="space-y-8">

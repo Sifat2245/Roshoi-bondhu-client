@@ -122,6 +122,31 @@ export const GroupCardSkeleton = () => (
   </div>
 );
 
+// Group Sidebar Row Skeleton (GroupsPage Left Sidebar)
+export const GroupSidebarItemSkeleton = () => (
+  <div className="flex items-center gap-3 p-2 rounded-xl">
+    <div className="w-12 h-12 rounded-xl bg-gray-200 dark:bg-[#3a3b3c] animate-pulse shrink-0" />
+    <div className="flex-1 min-w-0 space-y-2">
+      <SkeletonLine className="h-3.5 w-3/4" />
+      <SkeletonLine className="h-2.5 w-1/2" />
+    </div>
+  </div>
+);
+
+// Group Compact Card Skeleton (Your Groups Grid)
+export const GroupCompactCardSkeleton = () => (
+  <div className="bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-xs flex items-center justify-between gap-4">
+    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+      <div className="w-14 h-14 rounded-xl bg-gray-200 dark:bg-[#3a3b3c] animate-pulse shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <SkeletonLine className="h-4 w-3/4" />
+        <SkeletonLine className="h-3 w-1/2" />
+      </div>
+    </div>
+    <SkeletonLine className="h-9 w-16 rounded-xl shrink-0" />
+  </div>
+);
+
 export default {
   SkeletonLine,
   SkeletonCircle,
@@ -130,5 +155,7 @@ export default {
   ProfileIntroSkeleton,
   GroupHeaderSkeleton,
   GroupCardSkeleton,
+  GroupSidebarItemSkeleton,
+  GroupCompactCardSkeleton,
 };
 

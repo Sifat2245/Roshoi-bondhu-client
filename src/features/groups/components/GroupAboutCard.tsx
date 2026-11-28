@@ -1,5 +1,5 @@
 import React from "react";
-import { Lock, Globe, Eye, History, Shield, Users } from "lucide-react";
+import { Lock, Globe, Eye, EyeOff, History } from "lucide-react";
 
 const GroupAboutCard = ({ group }) => {
   return (
@@ -33,11 +33,19 @@ const GroupAboutCard = ({ group }) => {
         </div>
 
         <div className="flex items-start gap-3">
-          <Eye size={16} className="text-gray-500 mt-0.5 shrink-0" />
+          {group.discoverability === "HIDDEN" ? (
+            <EyeOff size={16} className="text-gray-500 mt-0.5 shrink-0" />
+          ) : (
+            <Eye size={16} className="text-gray-500 mt-0.5 shrink-0" />
+          )}
           <div>
-            <p className="font-bold text-gray-900 dark:text-white">Visible</p>
+            <p className="font-bold text-gray-900 dark:text-white">
+              {group.discoverability === "HIDDEN" ? "Hidden" : "Visible"}
+            </p>
             <p className="text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-              Anyone can find this group.
+              {group.discoverability === "HIDDEN"
+                ? "Only members can find this group."
+                : "Anyone can find this group."}
             </p>
           </div>
         </div>

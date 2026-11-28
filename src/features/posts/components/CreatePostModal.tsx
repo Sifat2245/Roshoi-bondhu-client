@@ -347,7 +347,7 @@ const CreatePostModal = ({
 
           const primaryImage = uploadedUrls[0] || null;
 
-          await postsApi.createPost(
+          const createdPost = await postsApi.createPost(
             {
               postType: postMode,
               ...(!postGroupId ? { audience: postAudience } : {}),
@@ -378,7 +378,13 @@ const CreatePostModal = ({
             /* local storage fallback */
           }
 
-          if (onPostCreated) onPostCreated();
+          if (createdPost?.status === "PENDING_APPROVAL") {
+            notify.info(
+              "Your post was submitted and is waiting for admin approval.",
+            );
+          }
+
+          if (onPostCreated) onPostCreated(createdPost);
         }
       ).catch((err) => {
         notify.error(err.message || "Post Failed", "Post Failed");

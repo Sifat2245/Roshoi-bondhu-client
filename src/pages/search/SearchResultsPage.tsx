@@ -21,6 +21,7 @@ import PostCard from "../../features/posts/components/PostCard";
 import PostDetailsModal from "../../features/posts/components/PostDetailsModal";
 import SharePostModal from "../../features/posts/components/SharePostModal";
 import { PostSkeleton } from "../../components/ui/Skeleton";
+import ResponsiveTabs from "../../components/ui/ResponsiveTabs";
 import searchApi, {
   type UserSearchResult,
   type GroupSearchResult,
@@ -353,41 +354,19 @@ export const SearchResultsPage: React.FC = () => {
         <main className="flex-1 h-full overflow-y-auto no-scrollbar p-3 sm:p-5 lg:px-8">
           <div className="max-w-2xl mx-auto space-y-4">
             {/* Mobile Filter Tabs (Visible on screens < md) */}
-            <div className="flex md:hidden items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-              <button
-                type="button"
-                onClick={() => handleTabChange("all")}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold shrink-0 transition ${
-                  activeTab === "all"
-                    ? "bg-[#e02f21] text-white"
-                    : "bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
-                }`}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTabChange("people")}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold shrink-0 transition ${
-                  activeTab === "people"
-                    ? "bg-[#e02f21] text-white"
-                    : "bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
-                }`}
-              >
-                People
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTabChange("groups")}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold shrink-0 transition ${
-                  activeTab === "groups"
-                    ? "bg-[#e02f21] text-white"
-                    : "bg-white dark:bg-[#242526] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
-                }`}
-              >
-                Groups
-              </button>
-            </div>
+            <ResponsiveTabs
+              items={[
+                { id: "all", label: "All" },
+                { id: "people", label: "People" },
+                { id: "groups", label: "Groups" },
+              ]}
+              activeId={activeTab}
+              onSelect={(id) => handleTabChange(id as SearchTab)}
+              breakpoints={{ xs: 2, sm: 3, md: 3, lg: 3 }}
+              size="sm"
+              dropdownAlign="left"
+              className="md:hidden pb-1"
+            />
 
             {loading ? (
               <div className="space-y-4">

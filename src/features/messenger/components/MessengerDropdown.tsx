@@ -10,6 +10,7 @@ import {
 import { ChatCategory, ChatConversation } from "../model/messenger.types";
 import { useChatDock } from "../../../context/ChatDockContext";
 import { useToast } from "../../../context/ToastContext";
+import ResponsiveTabs from "../../../components/ui/ResponsiveTabs";
 
 interface MessengerDropdownProps {
   onClose: () => void;
@@ -110,30 +111,22 @@ const MessengerDropdown: React.FC<MessengerDropdownProps> = ({
         </div>
       </div>
 
-      {/* 3. Filter Category Pills: All / Unread / Groups / Communities (matching Image 4) */}
-      <div className="flex items-center gap-1.5 px-1 pb-2 overflow-x-auto no-scrollbar">
-        {(
-          [
-            { id: "ALL", label: "All" },
-            { id: "UNREAD", label: "Unread" },
-            { id: "GROUPS", label: "Groups" },
-            { id: "COMMUNITIES", label: "Communities" },
-          ] as const
-        ).map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setCategory(tab.id)}
-            className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer ${
-              category === tab.id
-                ? "bg-red-50 text-[#e02f21] dark:bg-red-950/60"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* 3. Filter Category Pills: All / Unread / More ▾ */}
+      <ResponsiveTabs
+        items={[
+          { id: "ALL", label: "All" },
+          { id: "UNREAD", label: "Unread" },
+          { id: "GROUPS", label: "Groups" },
+          { id: "COMMUNITIES", label: "Communities" },
+        ]}
+        activeId={category}
+        onSelect={(id) => setCategory(id as ChatCategory)}
+        visibleCount={2}
+        variant="soft"
+        size="sm"
+        dropdownAlign="left"
+        className="px-1 pb-2"
+      />
 
       {/* 4. Conversations List */}
       <div className="flex-1 overflow-y-auto no-scrollbar space-y-0.5 max-h-[340px]">
